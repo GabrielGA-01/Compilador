@@ -1,6 +1,36 @@
 %{
 #include <stdio.h>
-#include "tokens.h"
+
+typedef enum {
+    ADD = 257,
+    SUB,
+    MUL,
+    DIV,
+    LT,
+    LET,
+    GET,
+    GT,
+    EQ,
+    DIF,
+    ASSIGN,
+    SEMICOLON,
+    COLON,
+    OPENPAR,
+    CLOSEPAR,
+    OPENCOL,
+    CLOSECOL,
+    OPENCHA,
+    CLOSECHA,
+    NUM,
+    ID,
+    ERROR,
+    IF,
+    ELSE,
+    INT,
+    RETURN,
+    VOID,
+    WHILE
+} TokenType;
 
 const char* getTokenName(TokenType token);
 
@@ -107,6 +137,13 @@ const char* getTokenName(TokenType token) {
         case NUM: return "NUM";
         case ID:  return "ID";
         case ERROR: return "ERROR";
+        case IF: return "IF";
+        case ELSE: return "ELSE";
+        case INT: return "INT";
+        case RETURN: return "RETURN";
+        case VOID: return "VOID";
+        case WHILE: return "WHILE";
         default: return "UNKNOWN_TOKEN";
     }
 }
+
