@@ -72,7 +72,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define YYDEBUG 1
+#define YYDEBUG 0
 
 void yyerror(char *);
 int yylex(void);
@@ -1369,8 +1369,6 @@ yyreturnlab:
 
 int main()
 {
-  yydebug = 0;
-
   printf("\nParser em execução...\n");
   abrirArq();
   return yyparse();

@@ -51,7 +51,7 @@ quebralinha   [\r\n]+
 {numero}      { yylval=atoi(yytext); return NUM; }
 {identificador} { return ID;  }
 {whitespace}  { }
-{quebralinha} { ECHO; }
+{quebralinha} { return FIMLIN; }
 .             { return ERRO; }
 
 %%

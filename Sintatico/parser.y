@@ -47,8 +47,6 @@ fator : OPENPAR exp CLOSEPAR   {$$ = $2;}
 
 int main()
 {
-  yydebug = 0;
-
   printf("\nParser em execução...\n");
   abrirArq();
   return yyparse();
