@@ -1,0 +1,300 @@
+Terminals unused in grammar
+
+    ERRO
+    DIV
+    LT
+    LET
+    GET
+    GT
+    EQ
+    DIF
+    ASSIGN
+    SEMICOLON
+    COLON
+    OPENPAR
+    CLOSEPAR
+    OPENCOL
+    CLOSECOL
+    OPENCHA
+    CLOSECHA
+    ID
+    ERROR
+    IF
+    ELSE
+    INT
+    RETURN
+    VOID
+    WHILE
+
+
+Grammar
+
+    0 $accept: entrada $end
+
+    1 entrada: ε
+    2        | entrada result
+
+    3 result: FIMLIN
+    4       | exp FIMLIN
+    5       | error FIMLIN
+
+    6 exp: exp ADD termo
+    7    | exp SUB termo
+    8    | termo
+
+    9 termo: termo MUL fator
+   10      | fator
+
+   11 fator: '(' exp ')'
+   12      | NUM
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '(' (40) 11
+    ')' (41) 11
+    error (256) 5
+    ERRO (258)
+    FIMLIN (259) 3 4 5
+    ADD (260) 6
+    SUB (261) 7
+    MUL (262) 9
+    DIV (263)
+    LT (264)
+    LET (265)
+    GET (266)
+    GT (267)
+    EQ (268)
+    DIF (269)
+    ASSIGN (270)
+    SEMICOLON (271)
+    COLON (272)
+    OPENPAR (273)
+    CLOSEPAR (274)
+    OPENCOL (275)
+    CLOSECOL (276)
+    OPENCHA (277)
+    CLOSECHA (278)
+    NUM (279) 12
+    ID (280)
+    ERROR (281)
+    IF (282)
+    ELSE (283)
+    INT (284)
+    RETURN (285)
+    VOID (286)
+    WHILE (287)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (35)
+        on left: 0
+    entrada (36)
+        on left: 1 2
+        on right: 0 2
+    result (37)
+        on left: 3 4 5
+        on right: 2
+    exp (38)
+        on left: 6 7 8
+        on right: 4 6 7 11
+    termo (39)
+        on left: 9 10
+        on right: 6 7 8 9
+    fator (40)
+        on left: 11 12
+        on right: 9 10
+
+
+State 0
+
+    0 $accept: • entrada $end
+
+    $default  reduce using rule 1 (entrada)
+
+    entrada  go to state 1
+
+
+State 1
+
+    0 $accept: entrada • $end
+    2 entrada: entrada • result
+
+    $end    shift, and go to state 2
+    error   shift, and go to state 3
+    FIMLIN  shift, and go to state 4
+    NUM     shift, and go to state 5
+    '('     shift, and go to state 6
+
+    result  go to state 7
+    exp     go to state 8
+    termo   go to state 9
+    fator   go to state 10
+
+
+State 2
+
+    0 $accept: entrada $end •
+
+    $default  accept
+
+
+State 3
+
+    5 result: error • FIMLIN
+
+    FIMLIN  shift, and go to state 11
+
+
+State 4
+
+    3 result: FIMLIN •
+
+    $default  reduce using rule 3 (result)
+
+
+State 5
+
+   12 fator: NUM •
+
+    $default  reduce using rule 12 (fator)
+
+
+State 6
+
+   11 fator: '(' • exp ')'
+
+    NUM  shift, and go to state 5
+    '('  shift, and go to state 6
+
+    exp    go to state 12
+    termo  go to state 9
+    fator  go to state 10
+
+
+State 7
+
+    2 entrada: entrada result •
+
+    $default  reduce using rule 2 (entrada)
+
+
+State 8
+
+    4 result: exp • FIMLIN
+    6 exp: exp • ADD termo
+    7    | exp • SUB termo
+
+    FIMLIN  shift, and go to state 13
+    ADD     shift, and go to state 14
+    SUB     shift, and go to state 15
+
+
+State 9
+
+    8 exp: termo •
+    9 termo: termo • MUL fator
+
+    MUL  shift, and go to state 16
+
+    $default  reduce using rule 8 (exp)
+
+
+State 10
+
+   10 termo: fator •
+
+    $default  reduce using rule 10 (termo)
+
+
+State 11
+
+    5 result: error FIMLIN •
+
+    $default  reduce using rule 5 (result)
+
+
+State 12
+
+    6 exp: exp • ADD termo
+    7    | exp • SUB termo
+   11 fator: '(' exp • ')'
+
+    ADD  shift, and go to state 14
+    SUB  shift, and go to state 15
+    ')'  shift, and go to state 17
+
+
+State 13
+
+    4 result: exp FIMLIN •
+
+    $default  reduce using rule 4 (result)
+
+
+State 14
+
+    6 exp: exp ADD • termo
+
+    NUM  shift, and go to state 5
+    '('  shift, and go to state 6
+
+    termo  go to state 18
+    fator  go to state 10
+
+
+State 15
+
+    7 exp: exp SUB • termo
+
+    NUM  shift, and go to state 5
+    '('  shift, and go to state 6
+
+    termo  go to state 19
+    fator  go to state 10
+
+
+State 16
+
+    9 termo: termo MUL • fator
+
+    NUM  shift, and go to state 5
+    '('  shift, and go to state 6
+
+    fator  go to state 20
+
+
+State 17
+
+   11 fator: '(' exp ')' •
+
+    $default  reduce using rule 11 (fator)
+
+
+State 18
+
+    6 exp: exp ADD termo •
+    9 termo: termo • MUL fator
+
+    MUL  shift, and go to state 16
+
+    $default  reduce using rule 6 (exp)
+
+
+State 19
+
+    7 exp: exp SUB termo •
+    9 termo: termo • MUL fator
+
+    MUL  shift, and go to state 16
+
+    $default  reduce using rule 7 (exp)
+
+
+State 20
+
+    9 termo: termo MUL fator •
+
+    $default  reduce using rule 9 (termo)
