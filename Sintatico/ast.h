@@ -13,9 +13,27 @@ typedef enum {
     NODE_BINARY_OP,
     NODE_NUM,
     NODE_VAR,
-    NODE_FUN_CALL
-    // ... other types of nodes you may need
+    NODE_FUN_CALL,
+    NODE_ARRAY_DECL,      // Novo: declaração de array
+    NODE_ARRAY_ACCESS,    // Novo: acesso a array
+    NODE_PARAM,           // Novo: parâmetro de função
+    NODE_PARAM_LIST       // Novo: lista de parâmetros
 } NodeType;
+
+// Tokens - sincronize com os valores do parser
+#define INT 281
+#define VOID 283
+#define ADD 260
+#define SUB 261
+#define MUL 262
+#define DIV 263
+#define LT 264
+#define LET 265
+#define GT 266
+#define GET 267
+#define EQ 268
+#define DIF 269
+#define ASSIGN 270
 
 // Generic structure for an AST node
 typedef struct ASTNode {
@@ -28,7 +46,6 @@ typedef struct ASTNode {
     union {
         int number;
         char* identifier;
-        // ... other information, such as variable type, operator, etc.
     } data;
 } ASTNode;
 
@@ -37,6 +54,7 @@ ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right);
 ASTNode* create_leaf_num(int value);
 ASTNode* create_leaf_id(char* name);
 void print_ast(ASTNode* node, int level);
-// ... other helper functions
+const char* token_to_string(int token);  // Nova função para tokens legíveis
+ASTNode* append_node(ASTNode* list, ASTNode* new_node);  // Nova função para listas
 
 #endif
