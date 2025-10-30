@@ -1,5 +1,6 @@
 %{
 #include "parser.tab.h"
+#include <string.h> // Para strdup
 void abrirArq();
 extern int yylineno;
 %}
@@ -49,8 +50,8 @@ quebralinha   [\r\n]+
 "void"        { return VOID; }
 "while"       { return WHILE; }
     
-{numero}      { yylval=atoi(yytext); return NUM; }
-{identificador} { return ID;  }
+{numero}      { yylval.number = atoi(yytext); return NUM; }
+{identificador} { yylval.string = strdup(yytext); return ID; }
 {whitespace}  { }
 {quebralinha} { yylineno += 1;}
 .             { return ERRO; }
