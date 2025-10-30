@@ -54,8 +54,20 @@ void print_ast(ASTNode* node, int level) {
         case NODE_ASSIGN_EXPR: printf("ASSIGN_EXPR\n"); break;
         case NODE_BINARY_OP: printf("BINARY_OP: %d\n", node->data.number); break;
         case NODE_NUM: printf("NUM: %d\n", node->data.number); break;
-        case NODE_VAR: printf("VAR: %s\n", node->data.identifier); break;
-        case NODE_FUN_CALL: printf("FUN_CALL: %s\n", node->data.identifier); break;
+        case NODE_VAR:
+            if (node->data.identifier != NULL) {
+                printf("VAR: %s\n", node->data.identifier);
+            } else {
+                printf("VAR (Array)\n");
+            }
+            break;
+        case NODE_FUN_CALL:
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                printf("FUN_CALL: %s\n", node->leftChild->data.identifier);
+            } else {
+                printf("FUN_CALL\n");
+            }
+            break;
         default: printf("UNKNOWN_NODE\n"); break;
     }
 
