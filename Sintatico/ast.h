@@ -1,6 +1,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include "parser.tab.h" // Inclui as definições de token do Bison
+
 // Enum to identify the type of node
 typedef enum {
     NODE_VAR_DECL,
@@ -19,21 +21,6 @@ typedef enum {
     NODE_PARAM,           // Novo: parâmetro de função
     NODE_PARAM_LIST       // Novo: lista de parâmetros
 } NodeType;
-
-// Tokens - sincronize com os valores do parser
-#define INT 281
-#define VOID 283
-#define ADD 260
-#define SUB 261
-#define MUL 262
-#define DIV 263
-#define LT 264
-#define LET 265
-#define GT 266
-#define GET 267
-#define EQ 268
-#define DIF 269
-#define ASSIGN 270
 
 // Generic structure for an AST node
 typedef struct ASTNode {

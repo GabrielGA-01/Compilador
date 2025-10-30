@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include "ast.h"
 
-#define YYDEBUG 1
-
 ASTNode *root = NULL;
 
 void yyerror(const char *);
@@ -346,18 +344,4 @@ void yyerror(const char *msg)
     extern int yylineno; 
     extern char *yytext; 
     fprintf(stderr, "Erro na linha %d no lexema '%s': %s\n", yylineno, yytext, msg);
-}
-
-// Implementação da função append_node
-ASTNode* append_node(ASTNode* list, ASTNode* new_node) {
-    if (list == NULL) {
-        return new_node;
-    }
-    
-    ASTNode* current = list;
-    while (current->next != NULL) {
-        current = current->next;
-    }
-    current->next = new_node;
-    return list;
 }
