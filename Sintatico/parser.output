@@ -121,99 +121,99 @@ Terminals, with rules where they appear
     CLOSECOL (276) 7 17 38
     OPENCHA (277) 18
     CLOSECHA (278) 18
-    NUM (279) 7 56
-    ID (280) 6 7 10 16 17 37 38 57
-    IF (281) 30 31
-    ELSE (282) 31
-    INT (283) 8
-    RETURN (284) 33 34
-    VOID (285) 9 12
-    WHILE (286) 32
+    IF (279) 30 31
+    ELSE (280) 31
+    INT (281) 8
+    RETURN (282) 33 34
+    VOID (283) 9 12
+    WHILE (284) 32
+    NUM <number> (285) 7 56
+    ID <string> (286) 6 7 10 16 17 37 38 57
 
 
 Nonterminals, with rules where they appear
 
     $accept (32)
         on left: 0
-    programa (33)
+    programa <node> (33)
         on left: 1
         on right: 0
-    declaracao_lista (34)
+    declaracao_lista <node> (34)
         on left: 2 3
         on right: 1 2
-    declaracao (35)
+    declaracao <node> (35)
         on left: 4 5
         on right: 2 3
-    var_declaracao (36)
+    var_declaracao <node> (36)
         on left: 6 7
         on right: 4 19
-    tipo_especificador (37)
+    tipo_especificador <node> (37)
         on left: 8 9
         on right: 6 7 10 16 17
-    fun_declaracao (38)
+    fun_declaracao <node> (38)
         on left: 10
         on right: 5
-    params (39)
+    params <node> (39)
         on left: 11 12 13
         on right: 10
-    param_lista (40)
+    param_lista <node> (40)
         on left: 14 15
         on right: 11 14
-    param (41)
+    param <node> (41)
         on left: 16 17
         on right: 14 15
-    composto_decl (42)
+    composto_decl <node> (42)
         on left: 18
         on right: 10 24
-    local_declaracoes (43)
+    local_declaracoes <node> (43)
         on left: 19 20
         on right: 18 19
-    statement_lista (44)
+    statement_lista <node> (44)
         on left: 21 22
         on right: 18 21
-    statement (45)
+    statement <node> (45)
         on left: 23 24 25 26 27
         on right: 21 30 31 32
-    expressao_decl (46)
+    expressao_decl <node> (46)
         on left: 28 29
         on right: 23
-    selecao_decl (47)
+    selecao_decl <node> (47)
         on left: 30 31
         on right: 25
-    iteracao_decl (48)
+    iteracao_decl <node> (48)
         on left: 32
         on right: 26
-    retorno_decl (49)
+    retorno_decl <node> (49)
         on left: 33 34
         on right: 27
-    expressao (50)
+    expressao <node> (50)
         on left: 35 36
         on right: 28 30 31 32 34 35 38 53 60 61
-    var (51)
+    var <node> (51)
         on left: 37 38
         on right: 35 54
-    simples_expressao (52)
+    simples_expressao <node> (52)
         on left: 39 40
         on right: 36
-    relacional (53)
+    relacional <node> (53)
         on left: 41 42 43 44 45 46
         on right: 39
-    soma_expressao (54)
+    soma_expressao <node> (54)
         on left: 47 48 49
         on right: 39 40 47 48
-    termo (55)
+    termo <node> (55)
         on left: 50 51 52
         on right: 47 48 49 50 51
-    fator (56)
+    fator <node> (56)
         on left: 53 54 55 56
         on right: 50 51 52
-    ativacao (57)
+    ativacao <node> (57)
         on left: 57
         on right: 55
-    args (58)
+    args <node> (58)
         on left: 58 59
         on right: 57
-    arg_lista (59)
+    arg_lista <node> (59)
         on left: 60 61
         on right: 58 60
 
@@ -522,11 +522,11 @@ State 34
     OPENPAR    shift, and go to state 37
     OPENCHA    shift, and go to state 26
     CLOSECHA   shift, and go to state 38
-    NUM        shift, and go to state 39
-    ID         shift, and go to state 40
-    IF         shift, and go to state 41
-    RETURN     shift, and go to state 42
-    WHILE      shift, and go to state 43
+    IF         shift, and go to state 39
+    RETURN     shift, and go to state 40
+    WHILE      shift, and go to state 41
+    NUM        shift, and go to state 42
+    ID         shift, and go to state 43
 
     composto_decl      go to state 44
     statement          go to state 45
@@ -564,8 +564,8 @@ State 37
    53 fator: OPENPAR • expressao CLOSEPAR
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     expressao          go to state 57
     var                go to state 51
@@ -585,42 +585,23 @@ State 38
 
 State 39
 
-   56 fator: NUM •
+   30 selecao_decl: IF • OPENPAR expressao CLOSEPAR statement
+   31             | IF • OPENPAR expressao CLOSEPAR statement ELSE statement
 
-    $default  reduce using rule 56 (fator)
+    OPENPAR  shift, and go to state 58
 
 
 State 40
 
-   37 var: ID •
-   38    | ID • OPENCOL expressao CLOSECOL
-   57 ativacao: ID • OPENPAR args CLOSEPAR
-
-    OPENPAR  shift, and go to state 58
-    OPENCOL  shift, and go to state 59
-
-    $default  reduce using rule 37 (var)
-
-
-State 41
-
-   30 selecao_decl: IF • OPENPAR expressao CLOSEPAR statement
-   31             | IF • OPENPAR expressao CLOSEPAR statement ELSE statement
-
-    OPENPAR  shift, and go to state 60
-
-
-State 42
-
    33 retorno_decl: RETURN • SEMICOLON
    34             | RETURN • expressao SEMICOLON
 
-    SEMICOLON  shift, and go to state 61
+    SEMICOLON  shift, and go to state 59
     OPENPAR    shift, and go to state 37
-    NUM        shift, and go to state 39
-    ID         shift, and go to state 40
+    NUM        shift, and go to state 42
+    ID         shift, and go to state 43
 
-    expressao          go to state 62
+    expressao          go to state 60
     var                go to state 51
     simples_expressao  go to state 52
     soma_expressao     go to state 53
@@ -629,11 +610,30 @@ State 42
     ativacao           go to state 56
 
 
-State 43
+State 41
 
    32 iteracao_decl: WHILE • OPENPAR expressao CLOSEPAR statement
 
-    OPENPAR  shift, and go to state 63
+    OPENPAR  shift, and go to state 61
+
+
+State 42
+
+   56 fator: NUM •
+
+    $default  reduce using rule 56 (fator)
+
+
+State 43
+
+   37 var: ID •
+   38    | ID • OPENCOL expressao CLOSECOL
+   57 ativacao: ID • OPENPAR args CLOSEPAR
+
+    OPENPAR  shift, and go to state 62
+    OPENCOL  shift, and go to state 63
+
+    $default  reduce using rule 37 (var)
 
 
 State 44
@@ -758,13 +758,12 @@ State 57
 
 State 58
 
-   57 ativacao: ID OPENPAR • args CLOSEPAR
+   30 selecao_decl: IF OPENPAR • expressao CLOSEPAR statement
+   31             | IF OPENPAR • expressao CLOSEPAR statement ELSE statement
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
-
-    $default  reduce using rule 59 (args)
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     expressao          go to state 78
     var                go to state 51
@@ -773,17 +772,48 @@ State 58
     termo              go to state 54
     fator              go to state 55
     ativacao           go to state 56
-    args               go to state 79
-    arg_lista          go to state 80
 
 
 State 59
 
-   38 var: ID OPENCOL • expressao CLOSECOL
+   33 retorno_decl: RETURN SEMICOLON •
+
+    $default  reduce using rule 33 (retorno_decl)
+
+
+State 60
+
+   34 retorno_decl: RETURN expressao • SEMICOLON
+
+    SEMICOLON  shift, and go to state 79
+
+
+State 61
+
+   32 iteracao_decl: WHILE OPENPAR • expressao CLOSEPAR statement
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
+
+    expressao          go to state 80
+    var                go to state 51
+    simples_expressao  go to state 52
+    soma_expressao     go to state 53
+    termo              go to state 54
+    fator              go to state 55
+    ativacao           go to state 56
+
+
+State 62
+
+   57 ativacao: ID OPENPAR • args CLOSEPAR
+
+    OPENPAR  shift, and go to state 37
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
+
+    $default  reduce using rule 59 (args)
 
     expressao          go to state 81
     var                go to state 51
@@ -792,47 +822,17 @@ State 59
     termo              go to state 54
     fator              go to state 55
     ativacao           go to state 56
-
-
-State 60
-
-   30 selecao_decl: IF OPENPAR • expressao CLOSEPAR statement
-   31             | IF OPENPAR • expressao CLOSEPAR statement ELSE statement
-
-    OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
-
-    expressao          go to state 82
-    var                go to state 51
-    simples_expressao  go to state 52
-    soma_expressao     go to state 53
-    termo              go to state 54
-    fator              go to state 55
-    ativacao           go to state 56
-
-
-State 61
-
-   33 retorno_decl: RETURN SEMICOLON •
-
-    $default  reduce using rule 33 (retorno_decl)
-
-
-State 62
-
-   34 retorno_decl: RETURN expressao • SEMICOLON
-
-    SEMICOLON  shift, and go to state 83
+    args               go to state 82
+    arg_lista          go to state 83
 
 
 State 63
 
-   32 iteracao_decl: WHILE OPENPAR • expressao CLOSEPAR statement
+   38 var: ID OPENCOL • expressao CLOSECOL
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     expressao          go to state 84
     var                go to state 51
@@ -855,8 +855,8 @@ State 65
    35 expressao: var ASSIGN • expressao
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     expressao          go to state 85
     var                go to state 51
@@ -872,8 +872,8 @@ State 66
    47 soma_expressao: soma_expressao ADD • termo
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     var       go to state 86
     termo     go to state 87
@@ -886,8 +886,8 @@ State 67
    48 soma_expressao: soma_expressao SUB • termo
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     var       go to state 86
     termo     go to state 88
@@ -942,8 +942,8 @@ State 74
    39 simples_expressao: soma_expressao relacional • soma_expressao
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     var             go to state 86
     soma_expressao  go to state 89
@@ -957,8 +957,8 @@ State 75
    50 termo: termo MUL • fator
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     var       go to state 86
     fator     go to state 90
@@ -970,8 +970,8 @@ State 76
    51 termo: termo DIV • fator
 
     OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
 
     var       go to state 86
     fator     go to state 91
@@ -987,55 +987,55 @@ State 77
 
 State 78
 
-   61 arg_lista: expressao •
-
-    $default  reduce using rule 61 (arg_lista)
-
-
-State 79
-
-   57 ativacao: ID OPENPAR args • CLOSEPAR
+   30 selecao_decl: IF OPENPAR expressao • CLOSEPAR statement
+   31             | IF OPENPAR expressao • CLOSEPAR statement ELSE statement
 
     CLOSEPAR  shift, and go to state 92
 
 
-State 80
-
-   58 args: arg_lista •
-   60 arg_lista: arg_lista • COMMA expressao
-
-    COMMA  shift, and go to state 93
-
-    $default  reduce using rule 58 (args)
-
-
-State 81
-
-   38 var: ID OPENCOL expressao • CLOSECOL
-
-    CLOSECOL  shift, and go to state 94
-
-
-State 82
-
-   30 selecao_decl: IF OPENPAR expressao • CLOSEPAR statement
-   31             | IF OPENPAR expressao • CLOSEPAR statement ELSE statement
-
-    CLOSEPAR  shift, and go to state 95
-
-
-State 83
+State 79
 
    34 retorno_decl: RETURN expressao SEMICOLON •
 
     $default  reduce using rule 34 (retorno_decl)
 
 
-State 84
+State 80
 
    32 iteracao_decl: WHILE OPENPAR expressao • CLOSEPAR statement
 
-    CLOSEPAR  shift, and go to state 96
+    CLOSEPAR  shift, and go to state 93
+
+
+State 81
+
+   61 arg_lista: expressao •
+
+    $default  reduce using rule 61 (arg_lista)
+
+
+State 82
+
+   57 ativacao: ID OPENPAR args • CLOSEPAR
+
+    CLOSEPAR  shift, and go to state 94
+
+
+State 83
+
+   58 args: arg_lista •
+   60 arg_lista: arg_lista • COMMA expressao
+
+    COMMA  shift, and go to state 95
+
+    $default  reduce using rule 58 (args)
+
+
+State 84
+
+   38 var: ID OPENCOL expressao • CLOSECOL
+
+    CLOSECOL  shift, and go to state 96
 
 
 State 85
@@ -1104,20 +1104,25 @@ State 91
 
 State 92
 
-   57 ativacao: ID OPENPAR args CLOSEPAR •
+   30 selecao_decl: IF OPENPAR expressao CLOSEPAR • statement
+   31             | IF OPENPAR expressao CLOSEPAR • statement ELSE statement
 
-    $default  reduce using rule 57 (ativacao)
+    SEMICOLON  shift, and go to state 36
+    OPENPAR    shift, and go to state 37
+    OPENCHA    shift, and go to state 26
+    IF         shift, and go to state 39
+    RETURN     shift, and go to state 40
+    WHILE      shift, and go to state 41
+    NUM        shift, and go to state 42
+    ID         shift, and go to state 43
 
-
-State 93
-
-   60 arg_lista: arg_lista COMMA • expressao
-
-    OPENPAR  shift, and go to state 37
-    NUM      shift, and go to state 39
-    ID       shift, and go to state 40
-
-    expressao          go to state 97
+    composto_decl      go to state 44
+    statement          go to state 97
+    expressao_decl     go to state 46
+    selecao_decl       go to state 47
+    iteracao_decl      go to state 48
+    retorno_decl       go to state 49
+    expressao          go to state 50
     var                go to state 51
     simples_expressao  go to state 52
     soma_expressao     go to state 53
@@ -1126,26 +1131,18 @@ State 93
     ativacao           go to state 56
 
 
-State 94
+State 93
 
-   38 var: ID OPENCOL expressao CLOSECOL •
-
-    $default  reduce using rule 38 (var)
-
-
-State 95
-
-   30 selecao_decl: IF OPENPAR expressao CLOSEPAR • statement
-   31             | IF OPENPAR expressao CLOSEPAR • statement ELSE statement
+   32 iteracao_decl: WHILE OPENPAR expressao CLOSEPAR • statement
 
     SEMICOLON  shift, and go to state 36
     OPENPAR    shift, and go to state 37
     OPENCHA    shift, and go to state 26
-    NUM        shift, and go to state 39
-    ID         shift, and go to state 40
-    IF         shift, and go to state 41
-    RETURN     shift, and go to state 42
-    WHILE      shift, and go to state 43
+    IF         shift, and go to state 39
+    RETURN     shift, and go to state 40
+    WHILE      shift, and go to state 41
+    NUM        shift, and go to state 42
+    ID         shift, and go to state 43
 
     composto_decl      go to state 44
     statement          go to state 98
@@ -1162,26 +1159,22 @@ State 95
     ativacao           go to state 56
 
 
-State 96
+State 94
 
-   32 iteracao_decl: WHILE OPENPAR expressao CLOSEPAR • statement
+   57 ativacao: ID OPENPAR args CLOSEPAR •
 
-    SEMICOLON  shift, and go to state 36
-    OPENPAR    shift, and go to state 37
-    OPENCHA    shift, and go to state 26
-    NUM        shift, and go to state 39
-    ID         shift, and go to state 40
-    IF         shift, and go to state 41
-    RETURN     shift, and go to state 42
-    WHILE      shift, and go to state 43
+    $default  reduce using rule 57 (ativacao)
 
-    composto_decl      go to state 44
-    statement          go to state 99
-    expressao_decl     go to state 46
-    selecao_decl       go to state 47
-    iteracao_decl      go to state 48
-    retorno_decl       go to state 49
-    expressao          go to state 50
+
+State 95
+
+   60 arg_lista: arg_lista COMMA • expressao
+
+    OPENPAR  shift, and go to state 37
+    NUM      shift, and go to state 42
+    ID       shift, and go to state 43
+
+    expressao          go to state 99
     var                go to state 51
     simples_expressao  go to state 52
     soma_expressao     go to state 53
@@ -1190,14 +1183,14 @@ State 96
     ativacao           go to state 56
 
 
+State 96
+
+   38 var: ID OPENCOL expressao CLOSECOL •
+
+    $default  reduce using rule 38 (var)
+
+
 State 97
-
-   60 arg_lista: arg_lista COMMA expressao •
-
-    $default  reduce using rule 60 (arg_lista)
-
-
-State 98
 
    30 selecao_decl: IF OPENPAR expressao CLOSEPAR statement •
    31             | IF OPENPAR expressao CLOSEPAR statement • ELSE statement
@@ -1207,11 +1200,18 @@ State 98
     $default  reduce using rule 30 (selecao_decl)
 
 
-State 99
+State 98
 
    32 iteracao_decl: WHILE OPENPAR expressao CLOSEPAR statement •
 
     $default  reduce using rule 32 (iteracao_decl)
+
+
+State 99
+
+   60 arg_lista: arg_lista COMMA expressao •
+
+    $default  reduce using rule 60 (arg_lista)
 
 
 State 100
@@ -1221,11 +1221,11 @@ State 100
     SEMICOLON  shift, and go to state 36
     OPENPAR    shift, and go to state 37
     OPENCHA    shift, and go to state 26
-    NUM        shift, and go to state 39
-    ID         shift, and go to state 40
-    IF         shift, and go to state 41
-    RETURN     shift, and go to state 42
-    WHILE      shift, and go to state 43
+    IF         shift, and go to state 39
+    RETURN     shift, and go to state 40
+    WHILE      shift, and go to state 41
+    NUM        shift, and go to state 42
+    ID         shift, and go to state 43
 
     composto_decl      go to state 44
     statement          go to state 101
