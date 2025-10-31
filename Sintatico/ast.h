@@ -3,7 +3,6 @@
 
 #include "parser.tab.h"
 
-// Enum atualizado com novos tipos de nós
 typedef enum {
     NODE_VAR_DECL,
     NODE_FUN_DECL,
@@ -20,9 +19,9 @@ typedef enum {
     NODE_ARRAY_ACCESS,
     NODE_PARAM,
     NODE_PARAM_LIST,
-    NODE_TYPE,           // NOVO: para tipos (INT, VOID)
-    NODE_OPERATOR,       // NOVO: para operadores relacionais
-    NODE_FUN_BODY        // NOVO: corpo de função
+    NODE_TYPE,          
+    NODE_OPERATOR,      
+    NODE_FUN_BODY 
 } NodeType;
 
 typedef struct ASTNode {
@@ -30,18 +29,16 @@ typedef struct ASTNode {
     struct ASTNode *leftChild;
     struct ASTNode *rightChild;
     struct ASTNode *next;
-    union {
-        int number;
-        char* identifier;
-    } data;
+    int number;
+    char* identifier;
 } ASTNode;
 
-// Protótipos atualizados
+// Funções para a árvore sintática
 ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right);
 ASTNode* create_leaf_num(int value);
 ASTNode* create_leaf_id(char* name);
-ASTNode* create_leaf_type(int type_token);     // NOVA
-ASTNode* create_leaf_operator(int operator);   // NOVA
+ASTNode* create_leaf_type(int type_token);
+ASTNode* create_leaf_operator(int operator);
 void print_ast(ASTNode* node, int level);
 const char* token_to_string(int token);
 ASTNode* append_node(ASTNode* list, ASTNode* new_node);

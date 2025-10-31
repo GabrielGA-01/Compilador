@@ -40,7 +40,7 @@ ASTNode* append_node(ASTNode* list, ASTNode* new_node);
 
 %%
 
-/* 1. Regra inicial - mantém igual */
+// 1 - Regra inicial 
 programa: declaracao_lista
         {
             root = $1;
@@ -48,19 +48,19 @@ programa: declaracao_lista
         }
         ;
 
-/* 2. Lista de declarações - mantém igual */
+// 2 - Lista de declarações
 declaracao_lista: declaracao_lista declaracao
                 { $$ = append_node($1, $2); }
                 | declaracao
                 { $$ = $1; }
                 ;
 
-/* 3. Uma única declaração - mantém igual */
+// 3 - Uma única declaração
 declaracao: var_declaracao
           | fun_declaracao
           ;
 
-/* 4. Declaração de variável - CORRIGIDA para usar create_leaf_type */
+// 4 - Declaração de variável
 var_declaracao: tipo_especificador ID SEMICOLON
               {
                   $$ = create_node(NODE_VAR_DECL, $1, create_leaf_id($2));
@@ -72,14 +72,14 @@ var_declaracao: tipo_especificador ID SEMICOLON
               }
               ;
 
-/* 5. Especificador de tipo - CORRIGIDA para usar create_leaf_type */
+// 5 - Especificador de tipo
 tipo_especificador: INT
                   { $$ = create_leaf_type(INT); }  // CORREÇÃO
                   | VOID
                   { $$ = create_leaf_type(VOID); } // CORREÇÃO
                   ;
 
-/* 6. Declaração de função - COMPLETAMENTE REFEITA */
+// 6 - Declaração de função
 fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
                   // Nova estrutura: FUN_DECL -> tipo, nome, FUN_BODY -> params, corpo
@@ -90,7 +90,7 @@ fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               }
               ;
 
-/* 7. Parâmetros - mantém igual */
+// 7 - Parâmetros 
 params: param_lista
       { $$ = $1; }
       | VOID
@@ -99,14 +99,14 @@ params: param_lista
       { $$ = NULL; }
       ;
 
-/* 8. Lista de parâmetros - mantém igual */
+// 8 - Lista de parâmetros  
 param_lista: param_lista COMMA param
            { $$ = append_node($1, $3); }
            | param
            { $$ = $1; }
            ;
 
-/* 9. Um único parâmetro - CORRIGIDA para usar create_leaf_type */
+// 9 - Um único parâmetro
 param: tipo_especificador ID
      {
          $$ = create_node(NODE_PARAM, $1, create_leaf_id($2));
@@ -118,26 +118,26 @@ param: tipo_especificador ID
      }
      ;
 
-/* 10. Bloco de código - mantém igual */
+// 10 - Bloco de código  
 composto_decl: OPENCHA local_declaracoes statement_lista CLOSECHA
              { $$ = create_node(NODE_COMPOUND_STMT, $2, $3); }
              ;
 
-/* 11. Declarações locais - mantém igual */
+// 11 - Declarações locais  
 local_declaracoes: local_declaracoes var_declaracao
                  { $$ = append_node($1, $2); }
                  | 
                  { $$ = NULL; }
                  ;
 
-/* 12. Lista de comandos - mantém igual */
+// 12 - Lista de comandos  
 statement_lista: statement_lista statement
                { $$ = append_node($1, $2); }
                | 
                { $$ = NULL; }
                ;
 
-/* 13. Um único comando - mantém igual */
+// 13 - Um único comando  
 statement: expressao_decl
          | composto_decl
          | selecao_decl
@@ -145,58 +145,56 @@ statement: expressao_decl
          | retorno_decl
          ;
 
-/* 14. Comando de expressão - mantém igual */
+// 14 - Comando de expressão  
 expressao_decl: expressao SEMICOLON
               { $$ = $1; }
               | SEMICOLON
               { $$ = NULL; }
               ;
 
-/* 15. Comando de seleção - CORRIGIDA para estrutura adequada */
+// 15 - Comando de seleção
 selecao_decl: IF OPENPAR expressao CLOSEPAR statement %prec IFX
             {
                 $$ = create_node(NODE_IF_STMT, $3, $5);
             }
             | IF OPENPAR expressao CLOSEPAR statement ELSE statement
             {
-                // CORREÇÃO: Criar nó if com else como próximo
                 ASTNode* if_node = create_node(NODE_IF_STMT, $3, $5);
                 if_node->next = $7;
                 $$ = if_node;
             }
             ;
 
-/* 16. Comando de iteração - mantém igual */
+// 16 - Comando de iteração  
 iteracao_decl: WHILE OPENPAR expressao CLOSEPAR statement
              { $$ = create_node(NODE_WHILE_STMT, $3, $5); }
              ;
 
-/* 17. Comando de retorno - mantém igual */
+// 17 - Comando de retorno  
 retorno_decl: RETURN SEMICOLON
             { $$ = create_node(NODE_RETURN_STMT, NULL, NULL); }
             | RETURN expressao SEMICOLON
             { $$ = create_node(NODE_RETURN_STMT, $2, NULL); }
             ;
 
-/* 18. Expressão - mantém igual */
+// 18 - Expressão  
 expressao: var ASSIGN expressao
          { $$ = create_node(NODE_ASSIGN_EXPR, $1, $3); }
          | simples_expressao
          { $$ = $1; }
          ;
 
-/* 19. Variável - mantém igual */
+// 19 - Variável  
 var: ID
    { $$ = create_leaf_id($1); }
    | ID OPENCOL expressao CLOSECOL
    { $$ = create_node(NODE_ARRAY_ACCESS, create_leaf_id($1), $3); }
    ;
 
-/* 20. Expressão simples - CORRIGIDA para usar create_leaf_operator */
+// 20 - Expressão simples
 simples_expressao: soma_expressao relacional soma_expressao
                  {
-                     // CORREÇÃO: Usar NODE_OPERATOR em vez de NUM para operadores
-                     ASTNode* op_node = create_leaf_operator($2->data.number);
+                     ASTNode* op_node = create_leaf_operator($2->number);
                      op_node->leftChild = $1;
                      op_node->rightChild = $3;
                      $$ = op_node;
@@ -205,7 +203,7 @@ simples_expressao: soma_expressao relacional soma_expressao
                  { $$ = $1; }
                  ;
 
-/* 21. Operador relacional - CORRIGIDA para usar create_leaf_operator */
+// 21 - Operador relacional
 relacional: LET { $$ = create_leaf_operator(LET); }
           | LT  { $$ = create_leaf_operator(LT); }
           | GT  { $$ = create_leaf_operator(GT); }
@@ -214,37 +212,37 @@ relacional: LET { $$ = create_leaf_operator(LET); }
           | DIF { $$ = create_leaf_operator(DIF); }
           ;
 
-/* 22. Expressão de soma/subtração - mantém igual */
+// 22 - Expressão de soma/subtração  
 soma_expressao: soma_expressao ADD termo
               {
                   $$ = create_node(NODE_BINARY_OP, $1, $3);
-                  $$->data.number = ADD;
+                  $$->number = ADD;
               }
               | soma_expressao SUB termo
               {
                   $$ = create_node(NODE_BINARY_OP, $1, $3);
-                  $$->data.number = SUB;
+                  $$->number = SUB;
               }
               | termo
               { $$ = $1; }
               ;
 
-/* 23. Termo - mantém igual */
+// 23 - Termo  
 termo: termo MUL fator
      {
          $$ = create_node(NODE_BINARY_OP, $1, $3);
-         $$->data.number = MUL;
+         $$->number = MUL;
      }
      | termo DIV fator
      {
          $$ = create_node(NODE_BINARY_OP, $1, $3);
-         $$->data.number = DIV;
+         $$->number = DIV;
      }
      | fator
      { $$ = $1; }
      ;
 
-/* 24. Fator - mantém igual */
+// 24 - Fator  
 fator: OPENPAR expressao CLOSEPAR
      { $$ = $2; }
      | var
@@ -255,19 +253,19 @@ fator: OPENPAR expressao CLOSEPAR
      { $$ = create_leaf_num($1); }
      ;
 
-/* 25. Ativação - mantém igual */
+// 25 - Ativação  
 ativacao: ID OPENPAR args CLOSEPAR
         { $$ = create_node(NODE_FUN_CALL, create_leaf_id($1), $3); }
         ;
 
-/* 26. Argumentos - mantém igual */
+// 26 - Argumentos  
 args: arg_lista
     { $$ = $1; }
     | 
     { $$ = NULL; }
     ;
 
-/* 27. Lista de argumentos - mantém igual */
+// 27 - Lista de argumentos  
 arg_lista: arg_lista COMMA expressao
          { $$ = append_node($1, $3); }
          | expressao
@@ -276,17 +274,14 @@ arg_lista: arg_lista COMMA expressao
 
 %%
 
-// main e yyerror mantêm iguais
 int main()
 {
-  printf("\nParser em execução...\n");
   abrirArq();
   int aux = yyparse();
   if(!aux) {
     printf("Sucesso demais\n");
-    printf("\n--- Árvore Sintática Abstrata ---\n");
+    printf("\n----- Árvore Sintática Abstrata -----\n");
     print_ast(root, 0);
-    printf("---------------------------------\n");
   }
   return aux;
 }

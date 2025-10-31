@@ -1,6 +1,6 @@
 %{
 #include "parser.tab.h"
-#include <string.h> // Para strdup
+#include <string.h>
 void abrirArq();
 extern int yylineno;
 %}

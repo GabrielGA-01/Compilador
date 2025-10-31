@@ -18,25 +18,25 @@ ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
 
 ASTNode* create_leaf_num(int value) {
     ASTNode* newNode = create_node(NODE_NUM, NULL, NULL);
-    newNode->data.number = value;
+    newNode->number = value;
     return newNode;
 }
 
 ASTNode* create_leaf_id(char* name) {
     ASTNode* newNode = create_node(NODE_VAR, NULL, NULL);
-    newNode->data.identifier = name;
+    newNode->identifier = name;
     return newNode;
 }
 
 ASTNode* create_leaf_type(int type_token) {
     ASTNode* newNode = create_node(NODE_TYPE, NULL, NULL);
-    newNode->data.number = type_token;
+    newNode->number = type_token;
     return newNode;
 }
 
 ASTNode* create_leaf_operator(int operator) {
     ASTNode* newNode = create_node(NODE_OPERATOR, NULL, NULL);
-    newNode->data.number = operator;
+    newNode->number = operator;
     return newNode;
 }
 
@@ -81,12 +81,10 @@ void print_ast(ASTNode* node, int level) {
         return;
     }
 
-    // Indentação mais compacta
     for (int i = 0; i < level; i++) {
         printf("  ");
     }
 
-    // Impressão compacta do nó atual
     switch (node->type) {
         case NODE_VAR_DECL: 
             printf("VAR_DECL\n");
@@ -110,25 +108,25 @@ void print_ast(ASTNode* node, int level) {
             printf("ASSIGN_EXPR\n");
             break;
         case NODE_BINARY_OP: 
-            printf("BINARY_OP: %s\n", token_to_string(node->data.number));
+            printf("BINARY_OP: %s\n", token_to_string(node->number));
             break;
         case NODE_NUM: 
-            printf("NUM: %d\n", node->data.number);
+            printf("NUM: %d\n", node->number);
             break;
         case NODE_VAR:
-            printf("VAR: %s\n", node->data.identifier);
+            printf("VAR: %s\n", node->identifier);
             break;
         case NODE_TYPE:
-            printf("TYPE: %s\n", token_to_string(node->data.number));
+            printf("TYPE: %s\n", token_to_string(node->number));
             break;
         case NODE_OPERATOR:
-            printf("OP: %s\n", token_to_string(node->data.number));
+            printf("OP: %s\n", token_to_string(node->number));
             break;
         case NODE_ARRAY_DECL:
             if (node->leftChild && node->leftChild->type == NODE_VAR) {
-                printf("ARRAY_DECL: %s", node->leftChild->data.identifier);
+                printf("ARRAY_DECL: %s", node->leftChild->identifier);
                 if (node->rightChild && node->rightChild->type == NODE_NUM) {
-                    printf("[%d]", node->rightChild->data.number);
+                    printf("[%d]", node->rightChild->number);
                 }
             } else {
                 printf("ARRAY_DECL");
@@ -137,7 +135,7 @@ void print_ast(ASTNode* node, int level) {
             break;
         case NODE_ARRAY_ACCESS:
             if (node->leftChild && node->leftChild->type == NODE_VAR) {
-                printf("ARRAY_ACCESS: %s\n", node->leftChild->data.identifier);
+                printf("ARRAY_ACCESS: %s\n", node->leftChild->identifier);
             } else {
                 printf("ARRAY_ACCESS\n");
             }
@@ -150,7 +148,7 @@ void print_ast(ASTNode* node, int level) {
             break;
         case NODE_FUN_CALL:
             if (node->leftChild && node->leftChild->type == NODE_VAR) {
-                printf("FUN_CALL: %s\n", node->leftChild->data.identifier);
+                printf("FUN_CALL: %s\n", node->leftChild->identifier);
             } else {
                 printf("FUN_CALL\n");
             }
@@ -163,7 +161,7 @@ void print_ast(ASTNode* node, int level) {
             break;
     }
 
-    // Recursão para filhos - mais compacta
+    // Recursão para filhos
     if (node->leftChild != NULL) {
         print_ast(node->leftChild, level + 1);
     }
