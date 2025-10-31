@@ -3,7 +3,6 @@
 #include <string.h>
 #include "ast.h"
 
-// Function to create a generic node
 ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
     ASTNode* newNode = (ASTNode*) malloc(sizeof(ASTNode));
     if (newNode == NULL) {
@@ -17,21 +16,30 @@ ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
     return newNode;
 }
 
-// Function to create a leaf node for a number
 ASTNode* create_leaf_num(int value) {
     ASTNode* newNode = create_node(NODE_NUM, NULL, NULL);
     newNode->data.number = value;
     return newNode;
 }
 
-// Function to create a leaf node for an identifier
 ASTNode* create_leaf_id(char* name) {
     ASTNode* newNode = create_node(NODE_VAR, NULL, NULL);
     newNode->data.identifier = name;
     return newNode;
 }
 
-// Função para anexar um nó a uma lista (SOLUÇÃO DEFINITIVA PARA LISTAS)
+ASTNode* create_leaf_type(int type_token) {
+    ASTNode* newNode = create_node(NODE_TYPE, NULL, NULL);
+    newNode->data.number = type_token;
+    return newNode;
+}
+
+ASTNode* create_leaf_operator(int operator) {
+    ASTNode* newNode = create_node(NODE_OPERATOR, NULL, NULL);
+    newNode->data.number = operator;
+    return newNode;
+}
+
 ASTNode* append_node(ASTNode* list, ASTNode* new_node) {
     if (list == NULL) {
         return new_node;
@@ -45,7 +53,6 @@ ASTNode* append_node(ASTNode* list, ASTNode* new_node) {
     return list;
 }
 
-// Função para traduzir tokens numéricos em strings legíveis
 const char* token_to_string(int token) {
     switch(token) {
         case INT: return "INT";
@@ -69,18 +76,17 @@ const char* token_to_string(int token) {
     }
 }
 
-// Function to print the AST (VERSÃO MELHORADA)
 void print_ast(ASTNode* node, int level) {
     if (node == NULL) {
         return;
     }
 
-    // Print indentation for the current level
+    // Indentação mais compacta
     for (int i = 0; i < level; i++) {
         printf("  ");
     }
 
-    // Print the node type with better representation
+    // Impressão compacta do nó atual
     switch (node->type) {
         case NODE_VAR_DECL: 
             printf("VAR_DECL\n");
@@ -107,40 +113,66 @@ void print_ast(ASTNode* node, int level) {
             printf("BINARY_OP: %s\n", token_to_string(node->data.number));
             break;
         case NODE_NUM: 
-            printf("NUM: %s\n", token_to_string(node->data.number));
+            printf("NUM: %d\n", node->data.number);
             break;
         case NODE_VAR:
             printf("VAR: %s\n", node->data.identifier);
             break;
+        case NODE_TYPE:
+            printf("TYPE: %s\n", token_to_string(node->data.number));
+            break;
+        case NODE_OPERATOR:
+            printf("OP: %s\n", token_to_string(node->data.number));
+            break;
         case NODE_ARRAY_DECL:
-            printf("ARRAY_DECL\n");
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                printf("ARRAY_DECL: %s", node->leftChild->data.identifier);
+                if (node->rightChild && node->rightChild->type == NODE_NUM) {
+                    printf("[%d]", node->rightChild->data.number);
+                }
+            } else {
+                printf("ARRAY_DECL");
+            }
+            printf("\n");
             break;
         case NODE_ARRAY_ACCESS:
-            printf("ARRAY_ACCESS\n");
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                printf("ARRAY_ACCESS: %s\n", node->leftChild->data.identifier);
+            } else {
+                printf("ARRAY_ACCESS\n");
+            }
             break;
-        case NODE_PARAM:
+        case NODE_PARAM: 
             printf("PARAM\n");
             break;
-        case NODE_PARAM_LIST:
+        case NODE_PARAM_LIST: 
             printf("PARAM_LIST\n");
             break;
         case NODE_FUN_CALL:
-            if (node->leftChild != NULL && node->leftChild->type == NODE_VAR) {
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
                 printf("FUN_CALL: %s\n", node->leftChild->data.identifier);
             } else {
                 printf("FUN_CALL\n");
             }
             break;
+        case NODE_FUN_BODY: 
+            printf("FUN_BODY\n");
+            break;
         default: 
-            printf("UNKNOWN_NODE: %d\n", node->type);
+            printf("UNKNOWN(%d)\n", node->type);
             break;
     }
 
-    // Recursively print children with better structure
-    print_ast(node->leftChild, level + 1);
-    print_ast(node->rightChild, level + 1);
+    // Recursão para filhos - mais compacta
+    if (node->leftChild != NULL) {
+        print_ast(node->leftChild, level + 1);
+    }
     
-    // Print next node (for lists)
+    if (node->rightChild != NULL) {
+        print_ast(node->rightChild, level + 1);
+    }
+    
+    // Próximo nó
     if (node->next != NULL) {
         print_ast(node->next, level);
     }

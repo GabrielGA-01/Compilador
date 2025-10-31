@@ -26,7 +26,7 @@ gcc -o compilador lex.yy.o parser.tab.c ast.o -lfl
 
 # Limpa os arquivos intermediários que não são mais necessários.
 echo "Limpando arquivos temporários..."
-rm lex.yy.c lex.yy.o parser.tab.c parser.tab.h ast.o
+# rm lex.yy.c lex.yy.o parser.tab.c parser.tab.h ast.o
 
 # Mensagem final de sucesso com instruções.
 echo "" # Linha em branco para espaçamento.
