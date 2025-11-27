@@ -1,0 +1,10 @@
+/* Teste 9: Tipo de parâmetro inválido */
+void fun1(int x, int y) { return; }
+
+void main(void) {
+  int a;
+  int b;
+  /* Assumindo que o compilador não suporta float, usaremos void para simular erro de tipo */
+  void v; 
+  fun1(a, v); /* Erro: tipo de parâmetro inválido */
+}
