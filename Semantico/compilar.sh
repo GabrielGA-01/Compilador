@@ -33,7 +33,7 @@ gcc -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o -lfl
 
 # Limpa os arquivos intermediários.
 echo "Limpando arquivos temporários..."
-rm lex.yy.c lex.yy.o parser.tab.c parser.tab.h ast.o symtab.o analyze.o
+rm lex.yy.c lex.yy.o parser.tab.c ast.o symtab.o analyze.o
 
 echo ""
 echo "Sucesso! O executável 'compilador' foi criado."
