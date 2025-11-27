@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "analyze.h"
 
 ASTNode *root = NULL;
 void yyerror(const char *);
@@ -22,6 +23,7 @@ ASTNode* append_node(ASTNode* list, ASTNode* new_node);
 %nonassoc IFX
 %nonassoc ELSE
 %define parse.error verbose
+%locations
 
 %token ERRO
 %token ADD SUB MUL DIV
@@ -64,6 +66,8 @@ declaracao: var_declaracao
 var_declaracao: tipo_especificador ID SEMICOLON
               {
                   $$ = create_node(NODE_VAR_DECL, $1, create_leaf_id($2));
+                  $$->rightChild->lineno = @2.first_line;
+                  $$->lineno = @2.first_line;
               }
               | tipo_especificador ID OPENCOL NUM CLOSECOL SEMICOLON
               {
@@ -84,6 +88,8 @@ fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
                   // Nova estrutura: FUN_DECL -> tipo, nome, FUN_BODY -> params, corpo
                   ASTNode* func_node = create_node(NODE_FUN_DECL, $1, create_leaf_id($2));
+                  func_node->rightChild->lineno = @2.first_line;
+                  func_node->lineno = @2.first_line;
                   ASTNode* body_node = create_node(NODE_FUN_BODY, $4, $6);
                   func_node->next = body_node;
                   $$ = func_node;
@@ -110,6 +116,8 @@ param_lista: param_lista COMMA param
 param: tipo_especificador ID
      {
          $$ = create_node(NODE_PARAM, $1, create_leaf_id($2));
+         $$->rightChild->lineno = @2.first_line;
+         $$->lineno = @2.first_line;
      }
      | tipo_especificador ID OPENCOL CLOSECOL
      {
@@ -186,7 +194,10 @@ expressao: var ASSIGN expressao
 
 // 19 - Variável  
 var: ID
-   { $$ = create_leaf_id($1); }
+   { 
+       $$ = create_leaf_id($1); 
+       $$->lineno = @1.first_line;
+   }
    | ID OPENCOL expressao CLOSECOL
    { $$ = create_node(NODE_ARRAY_ACCESS, create_leaf_id($1), $3); }
    ;
@@ -274,14 +285,28 @@ arg_lista: arg_lista COMMA expressao
 
 %%
 
-int main()
+extern FILE *yyin;
+
+int main(int argc, char *argv[])
 {
-  abrirArq();
+  if (argc > 1) {
+    yyin = fopen(argv[1], "r");
+    if (!yyin) {
+      fprintf(stderr, "Erro ao abrir arquivo: %s\n", argv[1]);
+      return 1;
+    }
+  }
+  
   int aux = yyparse();
   if(!aux) {
     printf("Sucesso demais\n");
     printf("\n----- Árvore Sintática Abstrata -----\n");
     print_ast(root, 0);
+    
+    printf("\n----- Tabela de Símbolos -----\n");
+    buildSymtab(root);
+    printf("\n----- Verificação de Tipos -----\n");
+    typeCheck(root);
   }
   return aux;
 }

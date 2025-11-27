@@ -1,0 +1,15 @@
+/* Teste da Tabela de Símbolos */
+
+int globalVar;
+
+void funcaoTeste(int parametro1, int parametro2) {
+    int variavelLocal;
+    variavelLocal = parametro1 + parametro2;
+    globalVar = variavelLocal;
+}
+
+void main(void) {
+    int x;
+    x = 10;
+    funcaoTeste(x, 20);
+}

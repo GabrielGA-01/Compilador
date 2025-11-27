@@ -10,9 +10,12 @@ ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
         exit(1);
     }
     newNode->type = type;
+    newNode->expType = Void;
     newNode->leftChild = left;
     newNode->rightChild = right;
     newNode->next = NULL;
+    extern int yylineno;
+    newNode->lineno = yylineno;
     return newNode;
 }
 

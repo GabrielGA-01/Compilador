@@ -24,13 +24,17 @@ typedef enum {
     NODE_FUN_BODY 
 } NodeType;
 
+typedef enum { Void, Integer, Boolean } ExpType;
+
 typedef struct ASTNode {
     NodeType type;
+    ExpType expType; /* Changed name to avoid conflict with NodeType type */
     struct ASTNode *leftChild;
     struct ASTNode *rightChild;
     struct ASTNode *next;
     int number;
     char* identifier;
+    int lineno;
 } ASTNode;
 
 // Funções para a árvore sintática

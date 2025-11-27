@@ -11,11 +11,16 @@
 /* Function buildSymtab constructs the symbol 
  * table by preorder traversal of the syntax tree
  */
-void buildSymtab(TreeNode *);
+#include "ast.h"
+
+/* Function buildSymtab constructs the symbol 
+ * table by preorder traversal of the syntax tree
+ */
+void buildSymtab(ASTNode *);
 
 /* Procedure typeCheck performs type checking 
  * by a postorder syntax tree traversal
  */
-void typeCheck(TreeNode *);
+void typeCheck(ASTNode *);
 
 #endif

@@ -6,9 +6,19 @@
 /* Kenneth C. Louden                                */
 /****************************************************/
 
-#include "globals.h"
+/* #include "globals.h" */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "symtab.h"
 #include "analyze.h"
+#include "ast.h"
+#include "parser.tab.h"
+
+/* Global variables that were likely in globals.h */
+FILE * listing = NULL;
+int Error = 0;
+int TraceAnalyze = 1; /* Enable trace by default for now */
 
 /* counter for variable memory locations */
 static int location = 0;
@@ -18,17 +28,27 @@ static int location = 0;
  * it applies preProc in preorder and postProc 
  * in postorder to tree pointed to by t
  */
-static void traverse( TreeNode * t,
-               void (* preProc) (TreeNode *),
-               void (* postProc) (TreeNode *) )
+static void traverse( ASTNode * t,
+               void (* preProc) (ASTNode *),
+               void (* postProc) (ASTNode *) )
 { if (t != NULL)
   { preProc(t);
-    { int i;
-      for (i=0; i < MAXCHILDREN; i++)
-        traverse(t->child[i],preProc,postProc);
+    
+    /* For declaration nodes, we manually handle the children in preProc (insertNode)
+       and we don't want to visit the child ID node again as it would count as a reference.
+       So we skip children traversal for these specific nodes. */
+    int skipChildren = 0;
+    if (t->type == NODE_VAR_DECL || t->type == NODE_FUN_DECL || t->type == NODE_PARAM) {
+        skipChildren = 1;
     }
+
+    if (!skipChildren) {
+        traverse(t->leftChild,preProc,postProc);
+        traverse(t->rightChild,preProc,postProc);
+    }
+    
     postProc(t);
-    traverse(t->sibling,preProc,postProc);
+    traverse(t->next,preProc,postProc);
   }
 }
 
@@ -36,48 +56,86 @@ static void traverse( TreeNode * t,
  * generate preorder-only or postorder-only
  * traversals from traverse
  */
-static void nullProc(TreeNode * t)
+static void nullProc(ASTNode * t)
 { if (t==NULL) return;
   else return;
+}
+
+static ExpType getExpType(ASTNode* typeNode) {
+    if (typeNode == NULL) return Void;
+    if (typeNode->number == INT) return Integer;
+    if (typeNode->number == VOID) return Void;
+    return Void;
 }
 
 /* Procedure insertNode inserts 
  * identifiers stored in t into 
  * the symbol table 
  */
-static void insertNode( TreeNode * t)
-{ switch (t->nodekind)
-  { case StmtK:
-      switch (t->kind.stmt)
-      { case AssignK:
-        case ReadK:
-          if (st_lookup(t->attr.name) == -1)
-          /* not yet in table, so treat as new definition */
-            st_insert(t->attr.name,t->lineno,location++);
-          else
-          /* already in table, so ignore location, 
-             add line number of use only */ 
-            st_insert(t->attr.name,t->lineno,0);
-          break;
-        default:
-          break;
+static void insertNode( ASTNode * t)
+{ 
+  switch (t->type)
+  { case NODE_VAR_DECL:
+      {
+        char *name = NULL;
+        if (t->rightChild != NULL && t->rightChild->type == NODE_VAR) {
+            name = t->rightChild->identifier;
+        }
+        
+        if (name != NULL) {
+            ExpType type = getExpType(t->leftChild);
+            if (st_lookup(name) == -1)
+                st_insert(name, t->lineno, location++, type);
+            else
+                st_insert(name, t->lineno, 0, type); /* Already in table, add ref */
+        }
       }
       break;
-    case ExpK:
-      switch (t->kind.exp)
-      { case IdK:
-          if (st_lookup(t->attr.name) == -1)
-          /* not yet in table, so treat as new definition */
-            st_insert(t->attr.name,t->lineno,location++);
-          else
-          /* already in table, so ignore location, 
-             add line number of use only */ 
-            st_insert(t->attr.name,t->lineno,0);
-          break;
-        default:
-          break;
+      
+    case NODE_FUN_DECL:
+      {
+        char *name = NULL;
+        if (t->rightChild != NULL && t->rightChild->type == NODE_VAR) {
+            name = t->rightChild->identifier;
+        }
+        
+        if (name != NULL) {
+            ExpType type = getExpType(t->leftChild);
+            if (st_lookup(name) == -1)
+                st_insert(name, t->lineno, location++, type);
+            else
+                st_insert(name, t->lineno, 0, type);
+        }
       }
       break;
+
+    case NODE_PARAM:
+      {
+        char *name = NULL;
+        if (t->rightChild != NULL && t->rightChild->type == NODE_VAR) {
+            name = t->rightChild->identifier;
+        }
+        
+        if (name != NULL) {
+            ExpType type = getExpType(t->leftChild);
+            if (st_lookup(name) == -1)
+                st_insert(name, t->lineno, location++, type);
+            else
+                st_insert(name, t->lineno, 0, type);
+        }
+      }
+      break;
+
+    case NODE_VAR:
+      {
+        if (st_lookup(t->identifier) != -1) {
+            st_insert(t->identifier, t->lineno, 0, Void); // Type ignored for reference
+        }
+      }
+      break;
+      
+
+      
     default:
       break;
   }
@@ -86,74 +144,58 @@ static void insertNode( TreeNode * t)
 /* Function buildSymtab constructs the symbol 
  * table by preorder traversal of the syntax tree
  */
-void buildSymtab(TreeNode * syntaxTree)
-{ traverse(syntaxTree,insertNode,nullProc);
+void buildSymtab(ASTNode * syntaxTree)
+{ 
+  if (listing == NULL) listing = stdout;
+  traverse(syntaxTree,insertNode,nullProc);
   if (TraceAnalyze)
   { fprintf(listing,"\nSymbol table:\n\n");
     printSymTab(listing);
   }
 }
 
-static void typeError(TreeNode * t, char * message)
+/* Procedure checkNode performs
+ * type checking at a single tree node
+ */
+static void typeError(ASTNode * t, char * message)
 { fprintf(listing,"Type error at line %d: %s\n",t->lineno,message);
-  Error = TRUE;
+  Error = 1;
 }
 
 /* Procedure checkNode performs
  * type checking at a single tree node
  */
-static void checkNode(TreeNode * t)
-{ switch (t->nodekind)
-  { case ExpK:
-      switch (t->kind.exp)
-      { case OpK:
-          if ((t->child[0]->type != Integer) ||
-              (t->child[1]->type != Integer))
-            typeError(t,"Op applied to non-integer");
-          if ((t->attr.op == EQ) || (t->attr.op == LT))
-            t->type = Boolean;
-          else
-            t->type = Integer;
-          break;
-        case ConstK:
-        case IdK:
-          t->type = Integer;
-          break;
-        default:
-          break;
-      }
+static void checkNode(ASTNode * t)
+{ switch (t->type)
+  { case NODE_BINARY_OP:
+    case NODE_ASSIGN_EXPR:
+      if (t->leftChild->expType != Integer || t->rightChild->expType != Integer)
+        typeError(t,"Op applied to non-integer");
+      if ((t->type == NODE_BINARY_OP) && (t->number == EQ || t->number == DIF || t->number == LT || t->number == GT || t->number == LET || t->number == GET))
+        t->expType = Boolean;
+      else
+        t->expType = Integer;
       break;
-    case StmtK:
-      switch (t->kind.stmt)
-      { case IfK:
-          if (t->child[0]->type == Integer)
-            typeError(t->child[0],"if test is not Boolean");
-          break;
-        case AssignK:
-          if (t->child[0]->type != Integer)
-            typeError(t->child[0],"assignment of non-integer value");
-          break;
-        case WriteK:
-          if (t->child[0]->type != Integer)
-            typeError(t->child[0],"write of non-integer value");
-          break;
-        case RepeatK:
-          if (t->child[1]->type == Integer)
-            typeError(t->child[1],"repeat test is not Boolean");
-          break;
-        default:
-          break;
+    case NODE_NUM:
+      t->expType = Integer;
+      break;
+    case NODE_VAR:
+      t->expType = st_lookup_type(t->identifier);
+      break;
+    case NODE_FUN_CALL:
+      if (t->leftChild != NULL && t->leftChild->type == NODE_VAR) {
+          t->expType = st_lookup_type(t->leftChild->identifier);
       }
       break;
     default:
       break;
-
   }
 }
 
 /* Procedure typeCheck performs type checking 
  * by a postorder syntax tree traversal
  */
-void typeCheck(TreeNode * syntaxTree)
-{ traverse(syntaxTree,nullProc,checkNode);
+void typeCheck(ASTNode * syntaxTree)
+{ 
+  traverse(syntaxTree,nullProc,checkNode);
 }

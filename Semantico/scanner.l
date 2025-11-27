@@ -1,8 +1,10 @@
 %{
 #include "parser.tab.h"
 #include <string.h>
-void abrirArq();
+
 extern int yylineno;
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
+
 %}
 
 digito        [0-9]
@@ -20,6 +22,7 @@ quebralinha   [\r\n]+
                 { c1 = c2;
                   c2 = input();
                   if (c2 == EOF) break;
+                  if (c2 == '\n') yylineno++;
                 } while (c1 != '*' || c2 != '/');
               }
 
@@ -53,16 +56,7 @@ quebralinha   [\r\n]+
 {numero}      { yylval.number = atoi(yytext); return NUM; }
 {identificador} { yylval.string = strdup(yytext); return ID; }
 {whitespace}  { }
-{quebralinha} { yylineno += 1;}
+\n            { yylineno++; }
 .             { return ERRO; }
 
 %%
-
-void abrirArq()
-{
-  yyin = fopen("sort.txt", "r");
-  if (!yyin) {
-    fprintf(stderr, "Erro ao abrir sort.txt\n");
-    exit(1);
-  }
-}

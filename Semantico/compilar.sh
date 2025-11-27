@@ -22,13 +22,18 @@ gcc -c -o lex.yy.o lex.yy.c
 echo "[4/5] Compilando o código da AST..."
 gcc -c -o ast.o ast.c
 
+# Compila a tabela de símbolos e o analisador semântico.
+echo "[4.5/5] Compilando tabela de símbolos e analisador..."
+gcc -c -o symtab.o symtab.c
+gcc -c -o analyze.o analyze.c
+
 # Linka tudo para criar o executável final.
 echo "[5/5] Linkando os arquivos para criar o executável 'compilador'..."
-gcc -o compilador lex.yy.o parser.tab.c ast.o -lfl
+gcc -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o -lfl
 
 # Limpa os arquivos intermediários.
 echo "Limpando arquivos temporários..."
-rm lex.yy.c lex.yy.o parser.tab.c parser.tab.h ast.o
+rm lex.yy.c lex.yy.o parser.tab.c parser.tab.h ast.o symtab.o analyze.o
 
 echo ""
 echo "Sucesso! O executável 'compilador' foi criado."
