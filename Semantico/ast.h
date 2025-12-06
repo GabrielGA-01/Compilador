@@ -28,7 +28,7 @@ typedef enum { Void, Integer, Boolean } ExpType;
 
 typedef struct ASTNode {
     NodeType type;
-    ExpType expType; /* Changed name to avoid conflict with NodeType type */
+    ExpType expType;
     struct ASTNode *leftChild;
     struct ASTNode *rightChild;
     struct ASTNode *next;

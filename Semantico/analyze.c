@@ -23,6 +23,9 @@ int TraceAnalyze = 1; /* Enable trace by default for now */
 /* counter for variable memory locations */
 static int location = 0;
 
+/* Current Function Name for Scope */
+static char * currentFuncName = "Global";
+
 static void typeError(ASTNode * t, char * message);
 static void checkNode(ASTNode * t);
 
@@ -47,7 +50,13 @@ static void traverse( ASTNode * t,
     
     /* Handle Scope Entry */
     if (t->type == NODE_FUN_DECL) {
-        st_enter_scope();
+        char *name = NULL;
+        if (t->rightChild != NULL && t->rightChild->type == NODE_VAR) {
+            name = t->rightChild->identifier;
+        }
+        if (name != NULL) currentFuncName = name;
+        
+        st_enter_scope(currentFuncName);
         enteredScope = 1;
     }
     
@@ -58,7 +67,7 @@ static void traverse( ASTNode * t,
     }
 
     if (!skipChildren) {
-        if (t->type == NODE_COMPOUND_STMT) st_enter_scope();
+        if (t->type == NODE_COMPOUND_STMT) st_enter_scope(currentFuncName);
         
         traverse(t->leftChild,preProc,postProc);
         traverse(t->rightChild,preProc,postProc);
@@ -85,12 +94,14 @@ static void traverse( ASTNode * t,
             
             /* Exit function scope */
             st_exit_scope();
+            currentFuncName = "Global";
             
             /* Now visit Next Function (body->next) */
             traverse(body->next, preProc, postProc);
         } else {
             /* No body? Just exit scope and continue */
             st_exit_scope();
+            currentFuncName = "Global";
             traverse(t->next, preProc, postProc);
         }
     } else {

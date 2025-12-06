@@ -56,60 +56,37 @@ typedef struct BucketListRec
      IdKind kind; /* kind of identifier */
      int numParams; /* number of parameters (for functions) */
      ExpType paramTypes[MAX_PARAMS]; /* types of parameters */
-     int scope; /* scope depth of this variable */
+     char * scopeName; /* scope name of this variable */
      struct BucketListRec * next;
    } * BucketList;
 
 /* the hash table */
 static BucketList hashTable[SIZE];
 
-/* Current scope depth */
-static int currentScope = 0;
+/* Scope Stack for Names */
+static char * scopeNameStack[MAX_SCOPE_DEPTH];
+static int scopeStackTop = 0;
 
-/* List of symbols added in each scope, to allow easy removal */
-typedef struct ScopeListRec {
-    char *name;
-    struct ScopeListRec *next;
-} *ScopeList;
+/* Initialize with Global scope */
+static void initScopeStack() {
+    if (scopeStackTop == 0) {
+        scopeNameStack[scopeStackTop++] = "Global";
+    }
+}
 
-static ScopeList scopeStack[MAX_SCOPE_DEPTH];
-
-void st_enter_scope(void) {
-    currentScope++;
-    if (currentScope >= MAX_SCOPE_DEPTH) {
+void st_enter_scope(char * scopeName) {
+    initScopeStack();
+    if (scopeStackTop >= MAX_SCOPE_DEPTH) {
         fprintf(stderr, "Error: Max scope depth exceeded\n");
         exit(1);
     }
-    scopeStack[currentScope] = NULL;
+    scopeNameStack[scopeStackTop++] = scopeName;
 }
 
 void st_exit_scope(void) {
-    ScopeList s = scopeStack[currentScope];
-    while (s != NULL) {
-        /* Remove from hash table */
-        int h = hash(s->name);
-        BucketList l = hashTable[h];
-        BucketList prev = NULL;
-        
-        while (l != NULL) {
-            if (strcmp(l->name, s->name) == 0 && l->scope == currentScope) {
-                break;
-            }
-            prev = l;
-            l = l->next;
-        }
-        
-        if (l != NULL) {
-            if (prev == NULL) {
-                hashTable[h] = l->next;
-            } else {
-                prev->next = l->next;
-            }
-        }
-        
-        s = s->next;
+    if (scopeStackTop > 1) { /* Don't pop Global */
+        scopeStackTop--;
     }
-    currentScope--;
 }
 
 /* Procedure st_insert inserts line numbers and
@@ -121,8 +98,11 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
 { int h = hash(name);
   BucketList l =  hashTable[h];
   
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
   /* Check if variable is already in the CURRENT scope */
-  while ((l != NULL) && ((strcmp(name,l->name) != 0) || (l->scope != currentScope)))
+  while ((l != NULL) && ((strcmp(name,l->name) != 0) || (strcmp(l->scopeName, currentScopeName) != 0)))
     l = l->next;
     
   if (l == NULL) /* variable not yet in table for this scope */
@@ -140,16 +120,10 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
             l->paramTypes[i] = paramTypes[i];
         }
     }
-    l->scope = currentScope;
+    l->scopeName = currentScopeName;
     l->lines->next = NULL;
     l->next = hashTable[h]; /* Add to head */
     hashTable[h] = l; 
-    
-    /* Add to scope stack for cleanup */
-    ScopeList s = (ScopeList) malloc(sizeof(struct ScopeListRec));
-    s->name = name;
-    s->next = scopeStack[currentScope];
-    scopeStack[currentScope] = s;
   }
   else /* found in table in current scope, so just add line number */
   { LineList t = l->lines;
@@ -166,12 +140,37 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
 void st_add_ref( char * name, int lineno )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  /* Search for the first match (most recent scope) */
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-    
-  if (l != NULL) {
-    LineList t = l->lines;
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* Search priority: Current Scope -> Global Scope */
+  BucketList found = NULL;
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          found = temp;
+          break;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope if not found */
+  if (found == NULL) {
+      temp = l;
+      while (temp != NULL) {
+          if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+              found = temp;
+              break;
+          }
+          temp = temp->next;
+      }
+  }
+  
+  if (found != NULL) {
+    LineList t = found->lines;
     while (t->next != NULL) t = t->next;
     t->next = (LineList) malloc(sizeof(struct LineListRec));
     t->next->lineno = lineno;
@@ -185,11 +184,31 @@ void st_add_ref( char * name, int lineno )
 int st_lookup ( char * name )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  /* Search for the first match (most recent scope because we insert at head) */
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return -1;
-  else return l->memloc;
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* Search priority: Current Scope -> Global Scope */
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          return temp->memloc;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+          return temp->memloc;
+      }
+      temp = temp->next;
+  }
+  
+  return -1;
 }
 
 /* Function st_lookup_top returns the memory
@@ -199,7 +218,11 @@ int st_lookup ( char * name )
 int st_lookup_top ( char * name )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && ((strcmp(name,l->name) != 0) || (l->scope != currentScope)))
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  while ((l != NULL) && ((strcmp(name,l->name) != 0) || (strcmp(l->scopeName, currentScopeName) != 0)))
     l = l->next;
   if (l == NULL) return -1;
   else return l->memloc;
@@ -212,37 +235,126 @@ ExpType st_lookup_type ( char * name )
 { 
   int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return Void;
-  else return l->type;
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* Search priority: Current Scope -> Global Scope */
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          return temp->type;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+          return temp->type;
+      }
+      temp = temp->next;
+  }
+  
+  return Void;
 }
 
 IdKind st_lookup_kind ( char * name )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return ID_VAR; /* Default */
-  else return l->kind;
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* Search priority: Current Scope -> Global Scope */
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          return temp->kind;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+          return temp->kind;
+      }
+      temp = temp->next;
+  }
+  
+  return ID_VAR; /* Default */
 }
 
 int st_lookup_num_params ( char * name )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL) return 0;
-  else return l->numParams;
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* Search priority: Current Scope -> Global Scope */
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          return temp->numParams;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+          return temp->numParams;
+      }
+      temp = temp->next;
+  }
+  
+  return 0;
 }
 
 ExpType st_lookup_param_type ( char * name, int paramIndex )
 { int h = hash(name);
   BucketList l =  hashTable[h];
-  while ((l != NULL) && (strcmp(name,l->name) != 0))
-    l = l->next;
-  if (l == NULL || paramIndex >= l->numParams) return Void;
-  else return l->paramTypes[paramIndex];
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  BucketList found = NULL;
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          found = temp;
+          break;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  if (found == NULL) {
+      temp = l;
+      while (temp != NULL) {
+          if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+              found = temp;
+              break;
+          }
+          temp = temp->next;
+      }
+  }
+  
+  if (found == NULL || paramIndex >= found->numParams) return Void;
+  else return found->paramTypes[paramIndex];
 }
 
 /* Procedure printSymTab prints a formatted 
@@ -251,8 +363,8 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"Variable Name  Location   Type       Kind       Scope      Line Numbers\n");
-  fprintf(listing,"-------------  --------   ----       ----       -----      ------------\n");
+  fprintf(listing,"Variable Name  Location   Type       Kind       Scope Name Line Numbers\n");
+  fprintf(listing,"-------------  --------   ----       ----       ---------- ------------\n");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
     { BucketList l = hashTable[i];
@@ -274,7 +386,7 @@ void printSymTab(FILE * listing)
             default:     fprintf(listing, "Unknown    "); break;
         }
         
-        fprintf(listing, "%-10d ", l->scope);
+        fprintf(listing, "%-10s ", l->scopeName);
         
         while (t != NULL)
         { fprintf(listing,"%4d ",t->lineno);

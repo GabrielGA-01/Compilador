@@ -56,7 +56,7 @@ ExpType st_lookup_param_type ( char * name, int paramIndex );
 void st_add_ref( char * name, int lineno );
 
 /* Scope management functions */
-void st_enter_scope(void);
+void st_enter_scope(char * scopeName);
 void st_exit_scope(void);
 
 /* Function st_lookup_top returns the memory
