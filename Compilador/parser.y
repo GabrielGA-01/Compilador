@@ -48,7 +48,11 @@ extern char *yytext;
 programa: declaracao_lista
         {
             root = $1;
-            printf("Árvore sintática construída com sucesso.\n");
+        }
+        | declaracao_lista error
+        {
+            root = $1;
+            yyerrok;
         }
         ;
 
@@ -77,6 +81,11 @@ var_declaracao: tipo_especificador ID SEMICOLON
                   /* $2 é nó ID, $4 é nó NUM */
                   ASTNode* array_decl = create_node(NODE_ARRAY_DECL, $2, $4);
                   $$ = create_node(NODE_VAR_DECL, $1, array_decl);
+              }
+              | error SEMICOLON
+              {
+                  yyerrok;
+                  $$ = NULL;
               }
               ;
 
@@ -155,6 +164,10 @@ statement: expressao_decl
          | selecao_decl
          | iteracao_decl
          | retorno_decl
+         | error
+         {
+             $$ = NULL;
+         }
          ;
 
 // 14 - Comando de expressão  
@@ -162,14 +175,6 @@ expressao_decl: expressao SEMICOLON
               { $$ = $1; }
               | SEMICOLON
               { $$ = NULL; }
-              | error SEMICOLON
-              {
-                fprintf(stderr, "[Syntax Error] Line %d: skipping to ';' near '%s'\n",
-                        @1.first_line, yytext);
-                yyerrok;
-                yyclearin;
-                $$ = NULL;
-              }
               ;
 
 // 15 - Comando de seleção
@@ -300,33 +305,54 @@ arg_lista: arg_lista COMMA expressao
 
 extern FILE *yyin;
 
+int error_count = 0;
+
+#include "symtab.h"
+
 int main(int argc, char *argv[])
 {
   if (argc > 1) {
     yyin = fopen(argv[1], "r");
     if (!yyin) {
-      fprintf(stderr, "Erro ao abrir arquivo: %s\n", argv[1]);
+      fprintf(stderr, "Error opening file: %s\n", argv[1]);
       return 1;
     }
   }
   
   int aux = yyparse();
-  if(!aux) {
-    printf("Sucesso demais\n");
-    printf("\n----- Árvore Sintática Abstrata -----\n");
+  
+  if(aux == 0 || root != NULL) {
+    /* Semantic analysis first to verify everything and print errors */
+    buildSymtab(root);
+    typeCheck(root);
+
+    if (aux != 0 || error_count > 0 || Error) {
+        printf("\nSyntax tree built partially.\n");
+    } else {
+        printf("\nSyntax tree built successfully.\n");
+    }
+    
+    printf("\n----- Abstract Syntax Tree -----\n");
     print_ast(root, 0);
     
-    printf("\n----- Tabela de Símbolos -----\n");
-    buildSymtab(root);
-    printf("\n----- Verificação de Tipos -----\n");
-    typeCheck(root);
+    printf("\n----- Symbol Table -----\n");
+    printSymTab(stdout);
   }
+  
   return aux;
 }
 
 void yyerror(const char *msg)
 {
     extern int yylineno; 
-    extern char *yytext; 
+    extern char *yytext;
+    error_count++;
+    
+    /* Remove redundant 'syntax error' prefix if present */
+    const char *prefix = "syntax error, ";
+    if (strncmp(msg, prefix, strlen(prefix)) == 0) {
+        msg += strlen(prefix);
+    }
+    
     fprintf(stderr, "[Syntax Error] Line %d: %s near '%s'\n", yylineno, msg, yytext);
 }

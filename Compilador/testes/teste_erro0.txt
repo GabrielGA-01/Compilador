@@ -1,0 +1,16 @@
+/* Teste 0: Multiplos erros sintáticos para validação */
+
+int x        /* Erro 1: Falta ponto e virgula na global (se global tiver recover) ou vai falhar na func */
+int y;
+
+void main(void) {
+    int a; 
+    int b    /* Erro 2: Falta ponto e vírgula na local */
+    a = 10;
+    int c;
+    a = + * ; /* Erro 3: Expressão totalmente inválida */
+    
+    if (a > ) { /* Erro 4: Expressão incompleta no if */
+       a = 0;
+    }
+}

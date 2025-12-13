@@ -363,27 +363,27 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"Hash       Name       Type       Kind       Scope      Line Numbers\n");
-  fprintf(listing,"----       ----       ----       ----       -----      ------------\n");
+  fprintf(listing,"%-10s %-10s %-10s %-10s %-10s %-10s\n", "Hash", "Name", "Type", "Kind", "Scope", "Line Numbers");
+  fprintf(listing,"%-10s %-10s %-10s %-10s %-10s %-10s\n", "----", "----", "----", "----", "-----", "------------");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
     { BucketList l = hashTable[i];
       while (l != NULL)
       { LineList t = l->lines;
         fprintf(listing,"%-10d ",i); /* Print Hash (Bucket Index) */
-        fprintf(listing,"%-14s ",l->name);
+        fprintf(listing,"%-10s ",l->name);
         
         switch(l->type) {
-            case Integer: fprintf(listing, "Integer    "); break;
-            case Void:    fprintf(listing, "Void       "); break;
-            case Boolean: fprintf(listing, "Boolean    "); break;
-            default:      fprintf(listing, "Unknown    "); break;
+            case Integer: fprintf(listing, "%-10s ", "Integer"); break;
+            case Void:    fprintf(listing, "%-10s ", "Void"); break;
+            case Boolean: fprintf(listing, "%-10s ", "Boolean"); break;
+            default:      fprintf(listing, "%-10s ", "Unknown"); break;
         }
         
         switch(l->kind) {
-            case ID_VAR: fprintf(listing, "Var        "); break;
-            case ID_FUN: fprintf(listing, "Func       "); break;
-            default:     fprintf(listing, "Unknown    "); break;
+            case ID_VAR: fprintf(listing, "%-10s ", "Var"); break;
+            case ID_FUN: fprintf(listing, "%-10s ", "Func"); break;
+            default:     fprintf(listing, "%-10s ", "Unknown"); break;
         }
         
         fprintf(listing, "%-10s ", l->scopeName);

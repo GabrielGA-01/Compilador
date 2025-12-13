@@ -1,0 +1,6 @@
+/* Teste de Sucesso */
+int x;
+
+void main(void) {
+    x = 10;
+}

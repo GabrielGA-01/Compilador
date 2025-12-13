@@ -3,7 +3,7 @@
 # Encerra o script imediatamente se qualquer comando falhar.
 set -e
 
-echo "Iniciando a compilação do seu compilador..."
+echo "Iniciando a compilação do compilador..."
 echo ""
 
 # Gera o parser C (parser.tab.c) e o header (parser.tab.h).
