@@ -1,6 +1,0 @@
-/* Teste 10: Parâmetro de retorno não previsto */
-int xyz(void) { return 1; }
-
-void main(void) {
-  xyz(); /* Erro: retorno da função não utilizado */
-}

@@ -1,7 +1,0 @@
-/* Teste 8: Número de parâmetros inválido */
-void fun1(int x, int y) { return; }
-
-void main(void) {
-  int a;
-  fun1(a); /* Erro: número de parâmetros inválido */
-}

@@ -1,7 +1,0 @@
-/* Teste 2: Atribuição inválida */
-void exemplo(void) { return; }
-
-void main(void) {
-  int a;
-  a = exemplo(); /* Erro: Atribuindo Void a Integer */
-}

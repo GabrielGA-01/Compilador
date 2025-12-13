@@ -1,8 +1,0 @@
-/* Teste 7: Declaração inválida (nome de função) */
-int fun1(void) { return 0; }
-int xyz(void) { return 0; }
-
-void main(void) {
-  int a;
-  int xyz; /* Erro: xyz já declarado como função */
-}

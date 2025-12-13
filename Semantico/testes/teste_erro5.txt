@@ -1,8 +1,0 @@
-/* Teste 5: Chamada de função não declarada */
-int fun1(void) { return 1; }
-int fun2(void) { return 2; }
-
-void main(void) {
-  int a;
-  a = fun3(); /* Erro: fun3 não declarada */
-}

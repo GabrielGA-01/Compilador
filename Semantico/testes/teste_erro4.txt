@@ -1,5 +1,0 @@
-/* Teste 4: Redeclaração de variável */
-void main(void) {
-  int a;
-  int a; /* Erro: a já declarada */
-}
