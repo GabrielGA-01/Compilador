@@ -62,7 +62,7 @@ static void traverse( ASTNode * t,
     
     /* Handle Children */
     int skipChildren = 0;
-    if (t->type == NODE_VAR_DECL || t->type == NODE_FUN_DECL || t->type == NODE_PARAM) {
+    if (t->type == NODE_VAR_DECL || t->type == NODE_FUN_DECL || t->type == NODE_PARAM || t->type == NODE_FUN_CALL) {
         skipChildren = 1;
     }
 
@@ -73,6 +73,12 @@ static void traverse( ASTNode * t,
         traverse(t->rightChild,preProc,postProc);
         
         if (t->type == NODE_COMPOUND_STMT) st_exit_scope();
+    }
+    
+    /* Handle FUN_CALL children manually */
+    if (t->type == NODE_FUN_CALL) {
+        /* Only traverse arguments (right child), skip function name (left child) */
+        traverse(t->rightChild, preProc, postProc);
     }
     
     postProc(t);
@@ -150,19 +156,22 @@ static void insertNode( ASTNode * t)
             
             /* Case 3: Error if variable declared as Void */
             if (type == Void) {
-                typeError(t, "Variable declared as Void");
+                char buf[256];
+                sprintf(buf, "Variable '%s' declared as Void", name);
+                typeError(t, buf);
             }
             
             /* Case 4: Error if already declared in CURRENT scope */
             if (st_lookup_top(name) != -1) {
-                typeError(t, "Variable already declared");
+                char buf[256];
+                sprintf(buf, "Variable '%s' already declared", name);
+                typeError(t, buf);
             } else {
                 /* Case 7: Check if name is already a FUNCTION (Shadowing check) */
-                if (strcmp(name, "xyz") == 0) {
-                    printf("DEBUG: Checking shadowing for xyz. Lookup: %d, Kind: %d\n", st_lookup(name), st_lookup_kind(name));
-                }
                 if (st_lookup(name) != -1 && st_lookup_kind(name) == ID_FUN) {
-                     typeError(t, "Variable name shadows a function");
+                     char buf[256];
+                     sprintf(buf, "Variable name '%s' shadows a function", name);
+                     typeError(t, buf);
                 }
                 
                 st_insert(name, t->lineno, location++, type, ID_VAR, 0, NULL);
@@ -181,7 +190,9 @@ static void insertNode( ASTNode * t)
         if (name != NULL) {
              ExpType type = getExpType(t->leftChild);
              if (st_lookup_top(name) != -1) {
-                  typeError(t, "Function already declared");
+                  char buf[256];
+                  sprintf(buf, "Function '%s' already declared", name);
+                  typeError(t, buf);
              } else {
                  int numParams = 0;
                  ExpType paramTypes[MAX_PARAMS];
@@ -216,12 +227,16 @@ static void insertNode( ASTNode * t)
         
         if (name != NULL) {
             ExpType type = getExpType(t->leftChild);
-             if (type == Void) {
-                typeError(t, "Parameter declared as Void");
+            if (type == Void) {
+                char buf[256];
+                sprintf(buf, "Parameter '%s' declared as Void", name);
+                typeError(t, buf);
             }
             
             if (st_lookup_top(name) != -1) {
-                 typeError(t, "Parameter already declared");
+                 char buf[256];
+                 sprintf(buf, "Parameter '%s' already declared", name);
+                 typeError(t, buf);
             } else {
                 st_insert(name, t->lineno, location++, type, ID_VAR, 0, NULL);
             }
@@ -233,7 +248,9 @@ static void insertNode( ASTNode * t)
       {
         /* Case 1: Error if variable not declared */
         if (st_lookup(t->identifier) == -1) {
-            typeError(t, "Variable not declared");
+            char buf[256];
+            sprintf(buf, "Variable '%s' not declared", t->identifier);
+            typeError(t, buf);
         } else {
             st_add_ref(t->identifier, t->lineno); // Add reference
         }
@@ -245,7 +262,9 @@ static void insertNode( ASTNode * t)
           /* Case 5: Error if function not declared */
           if (t->leftChild != NULL && t->leftChild->type == NODE_VAR) {
               if (st_lookup(t->leftChild->identifier) == -1) {
-                  typeError(t, "Function not declared");
+                  char buf[256];
+                  sprintf(buf, "Function '%s' not declared", t->leftChild->identifier);
+                  typeError(t, buf);
               } else {
                   st_add_ref(t->leftChild->identifier, t->lineno);
                   
@@ -264,7 +283,9 @@ static void insertNode( ASTNode * t)
                   printf("DEBUG: Calling function '%s'. Expected: %d, Actual: %d\n", t->leftChild->identifier, expectedParams, actualParams);
                   
                   if (actualParams != expectedParams) {
-                      typeError(t, "Invalid number of parameters");
+                      char buf[256];
+                      sprintf(buf, "Invalid number of parameters for function '%s'", t->leftChild->identifier);
+                      typeError(t, buf);
                   } else {
                       /* Check param types */
                       /* Note: We can only check types if we have computed expression types.
@@ -294,7 +315,7 @@ void buildSymtab(ASTNode * syntaxTree)
   
   /* Case 6: Check if main is declared */
   if (st_lookup("main") == -1) {
-      fprintf(listing, "Type error: Function main not declared\n");
+      fprintf(listing, "[Semantic Error] Function main not declared\n");
       Error = 1;
   }
   
@@ -306,7 +327,7 @@ void buildSymtab(ASTNode * syntaxTree)
 
 /* Procedure typeError reports a type error */
 static void typeError(ASTNode * t, char * message)
-{ fprintf(listing,"Type error at line %d: %s\n",t->lineno,message);
+{ fprintf(listing,"[Semantic Error] Line %d: %s\n",t->lineno,message);
   Error = 1;
 }
 
@@ -320,12 +341,19 @@ static void checkNode(ASTNode * t)
       if (t->type == NODE_ASSIGN_EXPR) {
           /* Case 2: Check for Void assignment */
           if (t->rightChild->expType == Void) {
-              typeError(t, "Invalid assignment (Void value)");
+              char buf[256];
+              char *name = "unknown";
+              if (t->leftChild->type == NODE_VAR) name = t->leftChild->identifier;
+              sprintf(buf, "Invalid assignment to '%s' (Void value)", name);
+              typeError(t, buf);
+          } else if (t->leftChild->expType != Integer || t->rightChild->expType != Integer) {
+             typeError(t,"Op applied to non-integer");
           }
+      } else {
+          if (t->leftChild->expType != Integer || t->rightChild->expType != Integer)
+            typeError(t,"Op applied to non-integer");
       }
       
-      if (t->leftChild->expType != Integer || t->rightChild->expType != Integer)
-        typeError(t,"Op applied to non-integer");
       if ((t->type == NODE_BINARY_OP) && (t->number == EQ || t->number == DIF || t->number == LT || t->number == GT || t->number == LET || t->number == GET))
         t->expType = Boolean;
       else
@@ -335,7 +363,10 @@ static void checkNode(ASTNode * t)
       t->expType = Integer;
       break;
     case NODE_VAR:
-      t->expType = st_lookup_type(t->identifier);
+      if (st_lookup(t->identifier) == -1)
+          t->expType = Integer;
+      else
+          t->expType = st_lookup_type(t->identifier);
       break;
     case NODE_FUN_CALL:
       if (t->leftChild != NULL && t->leftChild->type == NODE_VAR) {
@@ -348,7 +379,9 @@ static void checkNode(ASTNode * t)
           while (arg != NULL && i < expectedParams) {
               ExpType expectedType = st_lookup_param_type(t->leftChild->identifier, i);
               if (arg->expType != expectedType) {
-                  typeError(t, "Invalid parameter type");
+                  char buf[256];
+                  sprintf(buf, "Invalid parameter type in call to '%s'", t->leftChild->identifier);
+                  typeError(t, buf);
               }
               arg = arg->next;
               i++;

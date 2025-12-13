@@ -1,4 +1,5 @@
 %{
+#include "ast.h"
 #include "parser.tab.h"
 #include <string.h>
 
@@ -53,10 +54,10 @@ quebralinha   [\r\n]+
 "void"        { return VOID; }
 "while"       { return WHILE; }
     
-{numero}      { yylval.number = atoi(yytext); return NUM; }
-{identificador} { yylval.string = strdup(yytext); return ID; }
+{numero}      { yylval = create_leaf_num(atoi(yytext)); return NUM; }
+{identificador} { yylval = create_leaf_id(strdup(yytext)); return ID; }
 {whitespace}  { }
 \n            { yylineno++; }
-.             { return ERRO; }
+.             { printf("[Lexical Error] Line %d: Unrecognized character '%s'\n", yylineno, yytext); return ERRO; }
 
 %%

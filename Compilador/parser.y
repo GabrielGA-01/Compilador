@@ -9,12 +9,17 @@ void yyerror(const char *);
 int yylex(void);
 void abrirArq();
 ASTNode* append_node(ASTNode* list, ASTNode* new_node);
+
+/* Define YYSTYPE to be ASTNode pointer globally for the C file */
+#define YYSTYPE struct ASTNode*
+
+extern char *yytext;
 %}
 
-%union {
-    int number;
-    char* string;
-    struct ASTNode *node;
+%code requires {
+    /* Forward declaration to avoid include loop */
+    struct ASTNode;
+    #define YYSTYPE struct ASTNode*
 }
 
 %start programa
@@ -32,13 +37,10 @@ ASTNode* append_node(ASTNode* list, ASTNode* new_node);
 %token OPENPAR CLOSEPAR OPENCOL CLOSECOL OPENCHA CLOSECHA
 %token IF ELSE INT RETURN VOID WHILE
 
-%token <number> NUM
-%token <string> ID
+%token NUM
+%token ID
 
-%type <node> programa declaracao_lista declaracao var_declaracao fun_declaracao
-%type <node> composto_decl statement_lista statement expressao_decl selecao_decl
-%type <node> iteracao_decl retorno_decl expressao simples_expressao soma_expressao
-%type <node> termo fator var ativacao tipo_especificador params param_lista param args arg_lista relacional local_declaracoes
+/* No types needed as everything is YYSTYPE (ASTNode*) */
 
 %%
 
@@ -65,29 +67,31 @@ declaracao: var_declaracao
 // 4 - Declaração de variável
 var_declaracao: tipo_especificador ID SEMICOLON
               {
-                  $$ = create_node(NODE_VAR_DECL, $1, create_leaf_id($2));
+                  /* $2 agora é um nó ID vindo do scanner */
+                  $$ = create_node(NODE_VAR_DECL, $1, $2);
                   $$->rightChild->lineno = @2.first_line;
                   $$->lineno = @2.first_line;
               }
               | tipo_especificador ID OPENCOL NUM CLOSECOL SEMICOLON
               {
-                  ASTNode* array_decl = create_node(NODE_ARRAY_DECL, create_leaf_id($2), create_leaf_num($4));
+                  /* $2 é nó ID, $4 é nó NUM */
+                  ASTNode* array_decl = create_node(NODE_ARRAY_DECL, $2, $4);
                   $$ = create_node(NODE_VAR_DECL, $1, array_decl);
               }
               ;
 
 // 5 - Especificador de tipo
 tipo_especificador: INT
-                  { $$ = create_leaf_type(INT); }  // CORREÇÃO
+                  { $$ = create_leaf_type(INT); }
                   | VOID
-                  { $$ = create_leaf_type(VOID); } // CORREÇÃO
+                  { $$ = create_leaf_type(VOID); }
                   ;
 
 // 6 - Declaração de função
 fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
                   // Nova estrutura: FUN_DECL -> tipo, nome, FUN_BODY -> params, corpo
-                  ASTNode* func_node = create_node(NODE_FUN_DECL, $1, create_leaf_id($2));
+                  ASTNode* func_node = create_node(NODE_FUN_DECL, $1, $2);
                   func_node->rightChild->lineno = @2.first_line;
                   func_node->lineno = @2.first_line;
                   ASTNode* body_node = create_node(NODE_FUN_BODY, $4, $6);
@@ -115,13 +119,13 @@ param_lista: param_lista COMMA param
 // 9 - Um único parâmetro
 param: tipo_especificador ID
      {
-         $$ = create_node(NODE_PARAM, $1, create_leaf_id($2));
+         $$ = create_node(NODE_PARAM, $1, $2);
          $$->rightChild->lineno = @2.first_line;
          $$->lineno = @2.first_line;
      }
      | tipo_especificador ID OPENCOL CLOSECOL
      {
-         ASTNode* array_param = create_node(NODE_ARRAY_DECL, create_leaf_id($2), NULL);
+         ASTNode* array_param = create_node(NODE_ARRAY_DECL, $2, NULL);
          $$ = create_node(NODE_PARAM, $1, array_param);
      }
      ;
@@ -158,6 +162,14 @@ expressao_decl: expressao SEMICOLON
               { $$ = $1; }
               | SEMICOLON
               { $$ = NULL; }
+              | error SEMICOLON
+              {
+                fprintf(stderr, "[Syntax Error] Line %d: skipping to ';' near '%s'\n",
+                        @1.first_line, yytext);
+                yyerrok;
+                yyclearin;
+                $$ = NULL;
+              }
               ;
 
 // 15 - Comando de seleção
@@ -195,11 +207,12 @@ expressao: var ASSIGN expressao
 // 19 - Variável  
 var: ID
    { 
-       $$ = create_leaf_id($1); 
+       /* $1 já é um nó ID */
+       $$ = $1; 
        $$->lineno = @1.first_line;
    }
    | ID OPENCOL expressao CLOSECOL
-   { $$ = create_node(NODE_ARRAY_ACCESS, create_leaf_id($1), $3); }
+   { $$ = create_node(NODE_ARRAY_ACCESS, $1, $3); }
    ;
 
 // 20 - Expressão simples
@@ -261,12 +274,12 @@ fator: OPENPAR expressao CLOSEPAR
      | ativacao
      { $$ = $1; }
      | NUM
-     { $$ = create_leaf_num($1); }
+     { $$ = $1; }
      ;
 
 // 25 - Ativação  
 ativacao: ID OPENPAR args CLOSEPAR
-        { $$ = create_node(NODE_FUN_CALL, create_leaf_id($1), $3); }
+        { $$ = create_node(NODE_FUN_CALL, $1, $3); }
         ;
 
 // 26 - Argumentos  
@@ -315,5 +328,5 @@ void yyerror(const char *msg)
 {
     extern int yylineno; 
     extern char *yytext; 
-    fprintf(stderr, "Erro na linha %d no lexema '%s': %s\n", yylineno, yytext, msg);
+    fprintf(stderr, "[Syntax Error] Line %d: %s near '%s'\n", yylineno, msg, yytext);
 }

@@ -1,4 +1,5 @@
 /* Teste 1: Variável não declarada */
+
 void exemplo(void) {
   int a; 
   a = 0;

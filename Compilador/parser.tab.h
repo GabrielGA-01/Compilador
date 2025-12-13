@@ -44,6 +44,14 @@
 #if YYDEBUG
 extern int yydebug;
 #endif
+/* "%code requires" blocks.  */
+#line 19 "parser.y"
+
+    /* Forward declaration to avoid include loop */
+    struct ASTNode;
+    #define YYSTYPE struct ASTNode*
+
+#line 55 "parser.tab.h"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -89,18 +97,7 @@ extern int yydebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-union YYSTYPE
-{
-#line 14 "parser.y"
-
-    int number;
-    char* string;
-    struct ASTNode *node;
-
-#line 101 "parser.tab.h"
-
-};
-typedef union YYSTYPE YYSTYPE;
+typedef int YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif

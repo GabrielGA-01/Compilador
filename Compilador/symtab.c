@@ -363,15 +363,15 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"Variable Name  Location   Type       Kind       Scope Name Line Numbers\n");
-  fprintf(listing,"-------------  --------   ----       ----       ---------- ------------\n");
+  fprintf(listing,"Hash       Name       Type       Kind       Scope      Line Numbers\n");
+  fprintf(listing,"----       ----       ----       ----       -----      ------------\n");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
     { BucketList l = hashTable[i];
       while (l != NULL)
       { LineList t = l->lines;
+        fprintf(listing,"%-10d ",i); /* Print Hash (Bucket Index) */
         fprintf(listing,"%-14s ",l->name);
-        fprintf(listing,"%-8d  ",l->memloc);
         
         switch(l->type) {
             case Integer: fprintf(listing, "Integer    "); break;
