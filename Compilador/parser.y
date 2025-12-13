@@ -328,17 +328,28 @@ int main(int argc, char *argv[])
     buildSymtab(root);
     typeCheck(root);
 
-    if (aux != 0 || error_count > 0 || Error) {
-        printf("\nSyntax tree built partially.\n");
+    /* Create output directory if it doesn't exist */
+    system("mkdir -p output");
+
+    /* Write Abstract Syntax Tree to file */
+    FILE* ast_file = fopen("output/ast.txt", "w");
+    if (ast_file) {
+        fprint_ast(ast_file, root, 0);
+        fclose(ast_file);
+        printf("Abstract syntax tree generated in output/ast.txt\n");
     } else {
-        printf("\nSyntax tree built successfully.\n");
+        fprintf(stderr, "Error: Could not create output/ast.txt\n");
     }
-    
-    printf("\n----- Abstract Syntax Tree -----\n");
-    print_ast(root, 0);
-    
-    printf("\n----- Symbol Table -----\n");
-    printSymTab(stdout);
+
+    /* Write Symbol Table to file */
+    FILE* symtab_file = fopen("output/symbol_table.txt", "w");
+    if (symtab_file) {
+        printSymTab(symtab_file);
+        fclose(symtab_file);
+        printf("Symbol table generated in output/symbol_table.txt\n");
+    } else {
+        fprintf(stderr, "Error: Could not create output/symbol_table.txt\n");
+    }
   }
   
   return aux;

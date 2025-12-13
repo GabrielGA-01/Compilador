@@ -1,0 +1,9 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+24              main            Void            Func            Global            11 
+66              parametro1      Integer         Var             funcaoTeste        5    7 
+67              parametro2      Integer         Var             funcaoTeste        5    7 
+87              variavelLocal   Integer         Var             funcaoTeste        6    7    8 
+115             funcaoTeste     Void            Func            Global             5   14 
+120             x               Integer         Var             main              12   13   14 
+128             globalVar       Integer         Var             Global             3    8 

@@ -44,6 +44,7 @@ ASTNode* create_leaf_id(char* name);
 ASTNode* create_leaf_type(int type_token);
 ASTNode* create_leaf_operator(int operator);
 void print_ast(ASTNode* node, int level);
+void fprint_ast(FILE* out, ASTNode* node, int level);
 const char* token_to_string(int token);
 ASTNode* append_node(ASTNode* list, ASTNode* new_node);
 

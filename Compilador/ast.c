@@ -178,3 +178,103 @@ void print_ast(ASTNode* node, int level) {
         print_ast(node->next, level);
     }
 }
+
+void fprint_ast(FILE* out, ASTNode* node, int level) {
+    if (node == NULL) {
+        return;
+    }
+
+    for (int i = 0; i < level; i++) {
+        fprintf(out, "  ");
+    }
+
+    switch (node->type) {
+        case NODE_VAR_DECL: 
+            fprintf(out, "VAR_DECL\n");
+            break;
+        case NODE_FUN_DECL: 
+            fprintf(out, "FUN_DECL\n");
+            break;
+        case NODE_COMPOUND_STMT: 
+            fprintf(out, "COMPOUND_STMT\n");
+            break;
+        case NODE_IF_STMT: 
+            fprintf(out, "IF_STMT\n");
+            break;
+        case NODE_WHILE_STMT: 
+            fprintf(out, "WHILE_STMT\n");
+            break;
+        case NODE_RETURN_STMT: 
+            fprintf(out, "RETURN_STMT\n");
+            break;
+        case NODE_ASSIGN_EXPR: 
+            fprintf(out, "ASSIGN_EXPR\n");
+            break;
+        case NODE_BINARY_OP: 
+            fprintf(out, "BINARY_OP: %s\n", token_to_string(node->number));
+            break;
+        case NODE_NUM: 
+            fprintf(out, "NUM: %d\n", node->number);
+            break;
+        case NODE_VAR:
+            fprintf(out, "VAR: %s\n", node->identifier);
+            break;
+        case NODE_TYPE:
+            fprintf(out, "TYPE: %s\n", token_to_string(node->number));
+            break;
+        case NODE_OPERATOR:
+            fprintf(out, "OP: %s\n", token_to_string(node->number));
+            break;
+        case NODE_ARRAY_DECL:
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                fprintf(out, "ARRAY_DECL: %s", node->leftChild->identifier);
+                if (node->rightChild && node->rightChild->type == NODE_NUM) {
+                    fprintf(out, "[%d]", node->rightChild->number);
+                }
+            } else {
+                fprintf(out, "ARRAY_DECL");
+            }
+            fprintf(out, "\n");
+            break;
+        case NODE_ARRAY_ACCESS:
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                fprintf(out, "ARRAY_ACCESS: %s\n", node->leftChild->identifier);
+            } else {
+                fprintf(out, "ARRAY_ACCESS\n");
+            }
+            break;
+        case NODE_PARAM: 
+            fprintf(out, "PARAM\n");
+            break;
+        case NODE_PARAM_LIST: 
+            fprintf(out, "PARAM_LIST\n");
+            break;
+        case NODE_FUN_CALL:
+            if (node->leftChild && node->leftChild->type == NODE_VAR) {
+                fprintf(out, "FUN_CALL: %s\n", node->leftChild->identifier);
+            } else {
+                fprintf(out, "FUN_CALL\n");
+            }
+            break;
+        case NODE_FUN_BODY: 
+            fprintf(out, "FUN_BODY\n");
+            break;
+        default: 
+            fprintf(out, "UNKNOWN(%d)\n", node->type);
+            break;
+    }
+
+    // Recursion for children
+    if (node->leftChild != NULL) {
+        fprint_ast(out, node->leftChild, level + 1);
+    }
+    
+    if (node->rightChild != NULL) {
+        fprint_ast(out, node->rightChild, level + 1);
+    }
+    
+    // Next node
+    if (node->next != NULL) {
+        fprint_ast(out, node->next, level);
+    }
+}

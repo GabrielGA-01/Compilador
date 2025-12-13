@@ -1,4 +1,5 @@
 /* Teste de Vazamento de Escopo */
+
 void funcA(void) {
   int x;
   x = 10;

@@ -1,0 +1,40 @@
+VAR_DECL
+  TYPE: INT
+  VAR: globalVar
+FUN_DECL
+  TYPE: VOID
+  VAR: funcaoTeste
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: parametro1
+  PARAM
+    TYPE: INT
+    VAR: parametro2
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: variavelLocal
+    ASSIGN_EXPR
+      VAR: variavelLocal
+      BINARY_OP: ADD
+        VAR: parametro1
+        VAR: parametro2
+    ASSIGN_EXPR
+      VAR: globalVar
+      VAR: variavelLocal
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: x
+    ASSIGN_EXPR
+      VAR: x
+      NUM: 10
+    FUN_CALL: funcaoTeste
+      VAR: funcaoTeste
+      VAR: x
+      NUM: 20

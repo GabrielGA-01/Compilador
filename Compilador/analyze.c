@@ -340,14 +340,24 @@ static void checkNode(ASTNode * t)
     case NODE_ASSIGN_EXPR:
       if (t->type == NODE_ASSIGN_EXPR) {
           /* Case 2: Check for Void assignment */
-          if (t->rightChild->expType == Void) {
+          /* Skip this error if the right side is an undeclared function (already reported) */
+          int skipVoidError = 0;
+          if (t->rightChild->type == NODE_FUN_CALL && 
+              t->rightChild->leftChild != NULL &&
+              t->rightChild->leftChild->type == NODE_VAR) {
+              if (st_lookup(t->rightChild->leftChild->identifier) == -1) {
+                  skipVoidError = 1;
+              }
+          }
+          
+          if (!skipVoidError && t->rightChild->expType == Void) {
               char buf[256];
               char *name = "unknown";
               if (t->leftChild->type == NODE_VAR) name = t->leftChild->identifier;
               sprintf(buf, "Invalid assignment to '%s' (Void value)", name);
               typeError(t, buf);
           } else if (t->leftChild->expType != Integer || t->rightChild->expType != Integer) {
-             typeError(t,"Op applied to non-integer");
+             if (!skipVoidError) typeError(t,"Op applied to non-integer");
           }
       } else {
           if (t->leftChild->expType != Integer || t->rightChild->expType != Integer)

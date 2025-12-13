@@ -1,9 +1,8 @@
-/* Teste 0: Multiplos erros sintáticos para validação */
+/* Teste 11: Multiplos erros sintáticos para validação */
 
 
 
 int x        /* Erro 1: Falta ponto e virgula na global (se global tiver recover) ou vai falhar na func */
-
 int y;
 
 void main(void) {

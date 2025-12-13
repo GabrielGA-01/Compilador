@@ -363,30 +363,30 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
  */
 void printSymTab(FILE * listing)
 { int i;
-  fprintf(listing,"%-10s %-10s %-10s %-10s %-10s %-10s\n", "Hash", "Name", "Type", "Kind", "Scope", "Line Numbers");
-  fprintf(listing,"%-10s %-10s %-10s %-10s %-10s %-10s\n", "----", "----", "----", "----", "-----", "------------");
+  fprintf(listing,"%-15s %-15s %-15s %-15s %-15s %-15s\n", "Hash", "Name", "Type", "Kind", "Scope", "Line Numbers");
+  fprintf(listing,"%-15s %-15s %-15s %-15s %-15s %-15s\n", "----", "----", "----", "----", "-----", "------------");
   for (i=0;i<SIZE;++i)
   { if (hashTable[i] != NULL)
     { BucketList l = hashTable[i];
       while (l != NULL)
       { LineList t = l->lines;
-        fprintf(listing,"%-10d ",i); /* Print Hash (Bucket Index) */
-        fprintf(listing,"%-10s ",l->name);
+        fprintf(listing,"%-15d ",i); /* Print Hash (Bucket Index) */
+        fprintf(listing,"%-15s ",l->name);
         
         switch(l->type) {
-            case Integer: fprintf(listing, "%-10s ", "Integer"); break;
-            case Void:    fprintf(listing, "%-10s ", "Void"); break;
-            case Boolean: fprintf(listing, "%-10s ", "Boolean"); break;
-            default:      fprintf(listing, "%-10s ", "Unknown"); break;
+            case Integer: fprintf(listing, "%-15s ", "Integer"); break;
+            case Void:    fprintf(listing, "%-15s ", "Void"); break;
+            case Boolean: fprintf(listing, "%-15s ", "Boolean"); break;
+            default:      fprintf(listing, "%-15s ", "Unknown"); break;
         }
         
         switch(l->kind) {
-            case ID_VAR: fprintf(listing, "%-10s ", "Var"); break;
-            case ID_FUN: fprintf(listing, "%-10s ", "Func"); break;
-            default:     fprintf(listing, "%-10s ", "Unknown"); break;
+            case ID_VAR: fprintf(listing, "%-15s ", "Var"); break;
+            case ID_FUN: fprintf(listing, "%-15s ", "Func"); break;
+            default:     fprintf(listing, "%-15s ", "Unknown"); break;
         }
         
-        fprintf(listing, "%-10s ", l->scopeName);
+        fprintf(listing, "%-15s ", l->scopeName);
         
         while (t != NULL)
         { fprintf(listing,"%4d ",t->lineno);
