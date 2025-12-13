@@ -280,7 +280,7 @@ static void insertNode( ASTNode * t)
                       tempArg = tempArg->next;
                   }
                   
-                  printf("DEBUG: Calling function '%s'. Expected: %d, Actual: %d\n", t->leftChild->identifier, expectedParams, actualParams);
+                  /* Debug print removed */
                   
                   if (actualParams != expectedParams) {
                       char buf[256];
@@ -320,8 +320,8 @@ void buildSymtab(ASTNode * syntaxTree)
   }
   
   if (TraceAnalyze)
-  { fprintf(listing,"\nSymbol table:\n\n");
-    printSymTab(listing);
+  { 
+      // Printing moved to main
   }
 }
 

@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 19 "parser.y"
+#line 20 "parser.y"
 
     /* Forward declaration to avoid include loop */
     struct ASTNode;

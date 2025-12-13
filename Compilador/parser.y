@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "ast.h"
 #include "analyze.h"
 
@@ -308,6 +309,7 @@ extern FILE *yyin;
 int error_count = 0;
 
 #include "symtab.h"
+extern int Error;
 
 int main(int argc, char *argv[])
 {
