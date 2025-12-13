@@ -1,0 +1,14 @@
+/* Teste de Vazamento de Escopo */
+void funcA(void) {
+  int x;
+  x = 10;
+}
+
+void funcB(void) {
+  x = 20; /* Erro esperado: x nao declarado. Se passar, houve vazamento. */
+}
+
+void main(void) {
+  funcA();
+  funcB();
+}

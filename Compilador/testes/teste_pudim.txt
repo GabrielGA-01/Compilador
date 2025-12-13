@@ -1,0 +1,10 @@
+/* Teste Pudim (Reproduction) */
+void exemplo(void) {
+  int a;
+  return;
+}
+
+void main(void) {
+  int a;
+  a = 2;
+}

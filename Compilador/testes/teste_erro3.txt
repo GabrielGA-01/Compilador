@@ -1,0 +1,4 @@
+/* Teste 3: Declaração inválida de variável (Void) */
+void main(void) {
+  void a; /* Erro: Variável void */
+}

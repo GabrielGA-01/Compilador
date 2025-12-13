@@ -1,0 +1,9 @@
+/* Teste de Verificação de Tipos */
+
+int x;
+void f(void) { return; }
+
+void main(void) {
+  x = f(); /* Erro: Atribuindo Void a Integer */
+  x = x + f(); /* Erro: Operação com Void */
+}
