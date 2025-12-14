@@ -7,6 +7,7 @@
 #define SHIFT 4
 #define MAX_SCOPE_DEPTH 100
 
+// funcao hash simples
 static int hash ( char * key )
 { 
   int temp = 0;
@@ -50,23 +51,24 @@ static void initScopeStack() {
     }
 }
 
+// entra num novo escopo
 void st_enter_scope(char * scopeName) {
     initScopeStack();
-    
     if (scopeStackTop >= MAX_SCOPE_DEPTH) {
         fprintf(stderr, "Error: Max scope depth exceeded\n");
         exit(1);
     }
-    
     scopeNameStack[scopeStackTop++] = scopeName;
 }
 
+// sai do escopo atual
 void st_exit_scope(void) {
     if (scopeStackTop > 1) {
         scopeStackTop--;
     }
 }
 
+// insere simbolo ou adiciona referencia se ja existe
 void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int isArray, int numParams, ExpType *paramTypes )
 { 
   int h = hash(name);
@@ -82,11 +84,9 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
   { 
     l = (BucketList) malloc(sizeof(struct BucketListRec));
     l->name = name;
-    
     l->lines = (LineList) malloc(sizeof(struct LineListRec));
     l->lines->lineno = lineno;
     l->lines->next = NULL;
-    
     l->memloc = loc;
     l->type = type;
     l->kind = kind;
@@ -100,7 +100,6 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
     }
     
     l->scopeName = currentScopeName;
-    
     l->next = hashTable[h];
     hashTable[h] = l; 
   }
@@ -108,13 +107,13 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
   { 
     LineList t = l->lines;
     while (t->next != NULL) t = t->next;
-    
     t->next = (LineList) malloc(sizeof(struct LineListRec));
     t->next->lineno = lineno;
     t->next->next = NULL;
   }
 }
 
+// adiciona referencia a simbolo existente
 void st_add_ref( char * name, int lineno )
 { 
   int h = hash(name);
@@ -154,6 +153,7 @@ void st_add_ref( char * name, int lineno )
   }
 }
 
+// busca simbolo no escopo atual e depois no global
 int st_lookup ( char * name )
 { 
   int h = hash(name);
@@ -181,6 +181,7 @@ int st_lookup ( char * name )
   return -1;
 }
 
+// busca so no escopo atual (pra detectar redeclaracao)
 int st_lookup_top ( char * name )
 { 
   int h = hash(name);
@@ -196,6 +197,7 @@ int st_lookup_top ( char * name )
   else return l->memloc;
 }
 
+// retorna tipo do simbolo
 ExpType st_lookup_type ( char * name )
 { 
   int h = hash(name);
@@ -223,6 +225,7 @@ ExpType st_lookup_type ( char * name )
   return Void;
 }
 
+// retorna categoria (var ou func)
 IdKind st_lookup_kind ( char * name )
 { 
   int h = hash(name);
@@ -250,6 +253,7 @@ IdKind st_lookup_kind ( char * name )
   return ID_VAR;
 }
 
+// retorna numero de parametros da funcao
 int st_lookup_num_params ( char * name )
 { 
   int h = hash(name);
@@ -277,6 +281,7 @@ int st_lookup_num_params ( char * name )
   return 0;
 }
 
+// retorna tipo de um parametro especifico
 ExpType st_lookup_param_type ( char * name, int paramIndex )
 { 
   int h = hash(name);
@@ -311,6 +316,7 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
   else return found->paramTypes[paramIndex];
 }
 
+// verifica se simbolo eh array
 int st_lookup_is_array ( char * name )
 { 
   int h = hash(name);
@@ -338,6 +344,7 @@ int st_lookup_is_array ( char * name )
   return 0;
 }
 
+// imprime tabela formatada
 void printSymTab(FILE * listing)
 { 
   int i;
@@ -358,7 +365,6 @@ void printSymTab(FILE * listing)
         LineList t = l->lines;
         
         fprintf(listing,"%-15d ",i);
-        
         fprintf(listing,"%-15s ",l->name);
         
         switch(l->type) {

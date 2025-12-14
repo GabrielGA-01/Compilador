@@ -1,135 +1,142 @@
 VAR_DECL
   TYPE: INT
-  ARRAY_DECL: vet[10]
-    VAR: vet
+  VAR: variavelGlobal
+VAR_DECL
+  TYPE: INT
+  ARRAY_DECL: vetorGlobal[10]
+    VAR: vetorGlobal
     NUM: 10
 FUN_DECL
   TYPE: INT
-  VAR: minloc
+  VAR: gcd
 FUN_BODY
   PARAM
     TYPE: INT
-    ARRAY_DECL: a
-      VAR: a
+    VAR: u
   PARAM
     TYPE: INT
-    VAR: low
-  PARAM
-    TYPE: INT
-    VAR: high
+    VAR: v
   COMPOUND_STMT
-    VAR_DECL
-      TYPE: INT
-      VAR: i
-    VAR_DECL
-      TYPE: INT
-      VAR: x
-    VAR_DECL
-      TYPE: INT
-      VAR: k
-    ASSIGN_EXPR
-      VAR: k
-      VAR: low
-    ASSIGN_EXPR
-      VAR: x
-      ARRAY_ACCESS: a
-        VAR: a
-        VAR: low
-    ASSIGN_EXPR
-      VAR: i
-      BINARY_OP: ADD
-        VAR: low
-        NUM: 1
-    WHILE_STMT
-      OP: LT
-        VAR: i
-        VAR: high
-      COMPOUND_STMT
-        IF_STMT
-          OP: LT
-            ARRAY_ACCESS: a
-              VAR: a
-              VAR: i
-            VAR: x
-          COMPOUND_STMT
-            ASSIGN_EXPR
-              VAR: x
-              ARRAY_ACCESS: a
-                VAR: a
-                VAR: i
-            ASSIGN_EXPR
-              VAR: k
-              VAR: i
-        ASSIGN_EXPR
-          VAR: i
-          BINARY_OP: ADD
-            VAR: i
-            NUM: 1
+    IF_STMT
+      OP: EQ
+        VAR: v
+        NUM: 0
+      RETURN_STMT
+        VAR: u
     RETURN_STMT
-      VAR: k
+      FUN_CALL: gcd
+        VAR: gcd
+        VAR: v
+        BINARY_OP: SUB
+          VAR: u
+          BINARY_OP: MUL
+            BINARY_OP: DIV
+              VAR: u
+              VAR: v
+            VAR: v
 FUN_DECL
   TYPE: VOID
-  VAR: sort
+  VAR: preencheVetor
 FUN_BODY
   PARAM
     TYPE: INT
-    ARRAY_DECL: a
-      VAR: a
+    ARRAY_DECL: arr
+      VAR: arr
   PARAM
     TYPE: INT
-    VAR: low
-  PARAM
-    TYPE: INT
-    VAR: high
+    VAR: tamanho
   COMPOUND_STMT
     VAR_DECL
       TYPE: INT
       VAR: i
-    VAR_DECL
-      TYPE: INT
-      VAR: k
     ASSIGN_EXPR
       VAR: i
-      VAR: low
+      NUM: 0
     WHILE_STMT
       OP: LT
         VAR: i
-        BINARY_OP: SUB
-          VAR: high
-          NUM: 1
+        VAR: tamanho
       COMPOUND_STMT
-        VAR_DECL
-          TYPE: INT
-          VAR: t
         ASSIGN_EXPR
-          VAR: k
-          FUN_CALL: minloc
-            VAR: minloc
-            VAR: a
+          ARRAY_ACCESS: arr
+            VAR: arr
             VAR: i
-            VAR: high
-        ASSIGN_EXPR
-          VAR: t
-          ARRAY_ACCESS: a
-            VAR: a
-            VAR: k
-        ASSIGN_EXPR
-          ARRAY_ACCESS: a
-            VAR: a
-            VAR: k
-          ARRAY_ACCESS: a
-            VAR: a
+          BINARY_OP: MUL
             VAR: i
-        ASSIGN_EXPR
-          ARRAY_ACCESS: a
-            VAR: a
             VAR: i
-          VAR: t
         ASSIGN_EXPR
           VAR: i
           BINARY_OP: ADD
             VAR: i
             NUM: 1
+FUN_DECL
+  TYPE: INT
+  VAR: logicaComplexa
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: a
+  PARAM
+    TYPE: INT
+    VAR: b
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: resultado
+    ASSIGN_EXPR
+      VAR: resultado
+      NUM: 0
+    WHILE_STMT
+      OP: GT
+        VAR: a
+        NUM: 0
+      COMPOUND_STMT
+        IF_STMT
+          OP: GT
+            VAR: a
+            VAR: b
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: resultado
+              BINARY_OP: ADD
+                VAR: resultado
+                BINARY_OP: SUB
+                  VAR: a
+                  VAR: b
+            ASSIGN_EXPR
+              VAR: a
+              BINARY_OP: SUB
+                VAR: a
+                NUM: 1
+        COMPOUND_STMT
+          IF_STMT
+            OP: EQ
+              VAR: a
+              VAR: b
+            COMPOUND_STMT
+              ASSIGN_EXPR
+                VAR: resultado
+                BINARY_OP: ADD
+                  VAR: resultado
+                  NUM: 1000
+              ASSIGN_EXPR
+                VAR: a
+                NUM: 0
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: resultado
+              BINARY_OP: SUB
+                VAR: resultado
+                BINARY_OP: MUL
+                  VAR: a
+                  NUM: 2
+            ASSIGN_EXPR
+              VAR: a
+              BINARY_OP: ADD
+                VAR: a
+                NUM: 1
+    RETURN_STMT
+      VAR: resultado
 FUN_DECL
   TYPE: VOID
   VAR: main
@@ -137,46 +144,76 @@ FUN_BODY
   COMPOUND_STMT
     VAR_DECL
       TYPE: INT
+      VAR: x
+    VAR_DECL
+      TYPE: INT
+      VAR: y
+    VAR_DECL
+      TYPE: INT
       VAR: i
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: y
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      FUN_CALL: gcd
+        VAR: gcd
+        VAR: x
+        VAR: y
+    FUN_CALL: preencheVetor
+      VAR: preencheVetor
+      VAR: vetorGlobal
+      NUM: 5
     ASSIGN_EXPR
       VAR: i
       NUM: 0
     WHILE_STMT
       OP: LT
         VAR: i
-        NUM: 10
+        NUM: 5
       COMPOUND_STMT
-        ASSIGN_EXPR
-          ARRAY_ACCESS: vet
-            VAR: vet
-            VAR: i
-          FUN_CALL: input
-            VAR: input
+        IF_STMT
+          OP: DIF
+            ARRAY_ACCESS: vetorGlobal
+              VAR: vetorGlobal
+              VAR: i
+            NUM: 0
+          COMPOUND_STMT
+            FUN_CALL: output
+              VAR: output
+              ARRAY_ACCESS: vetorGlobal
+                VAR: vetorGlobal
+                VAR: i
         ASSIGN_EXPR
           VAR: i
           BINARY_OP: ADD
             VAR: i
             NUM: 1
-    FUN_CALL: sort
-      VAR: sort
-      VAR: vet
-      NUM: 0
-      NUM: 10
+    IF_STMT
+      OP: LET
+        VAR: x
+        VAR: y
+      COMPOUND_STMT
+        IF_STMT
+          OP: GET
+            VAR: x
+            NUM: 0
+          FUN_CALL: output
+            VAR: output
+            NUM: 1
     ASSIGN_EXPR
-      VAR: i
-      NUM: 0
-    WHILE_STMT
-      OP: LT
-        VAR: i
-        NUM: 10
-      COMPOUND_STMT
-        FUN_CALL: output
-          VAR: output
-          ARRAY_ACCESS: vet
-            VAR: vet
-            VAR: i
-        ASSIGN_EXPR
-          VAR: i
-          BINARY_OP: ADD
-            VAR: i
-            NUM: 1
+      VAR: variavelGlobal
+      BINARY_OP: DIV
+        FUN_CALL: logicaComplexa
+          VAR: logicaComplexa
+          VAR: x
+          VAR: y
+        NUM: 2
+    FUN_CALL: output
+      VAR: output
+      VAR: variavelGlobal

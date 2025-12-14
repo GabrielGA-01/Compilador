@@ -11,12 +11,12 @@ int Error = 0;
 int TraceAnalyze = 1;
 
 static int location = 0;
-
 static char * currentFuncName = "Global";
 
 static void typeError(ASTNode * t, char * message);
 static void checkNode(ASTNode * t);
 
+// percorre a ast aplicando funcoes em pre-order e post-order
 static void traverse( ASTNode * t,
                void (* preProc) (ASTNode *),
                void (* postProc) (ASTNode *) )
@@ -33,7 +33,6 @@ static void traverse( ASTNode * t,
             name = t->rightChild->identifier;
         }
         if (name != NULL) currentFuncName = name;
-        
         st_enter_scope(currentFuncName);
         enteredScope = 1;
     }
@@ -46,10 +45,8 @@ static void traverse( ASTNode * t,
 
     if (!skipChildren) {
         if (t->type == NODE_COMPOUND_STMT) st_enter_scope(currentFuncName);
-        
         traverse(t->leftChild, preProc, postProc);
         traverse(t->rightChild, preProc, postProc);
-        
         if (t->type == NODE_COMPOUND_STMT) st_exit_scope();
     }
     
@@ -62,17 +59,12 @@ static void traverse( ASTNode * t,
     if (t->type == NODE_FUN_DECL && enteredScope) {
         if (t->next != NULL && t->next->type == NODE_FUN_BODY) {
             ASTNode *body = t->next;
-            
             preProc(body);
-            
             traverse(body->leftChild, preProc, postProc);
             traverse(body->rightChild, preProc, postProc);
-            
             postProc(body);
-            
             st_exit_scope();
             currentFuncName = "Global";
-            
             traverse(body->next, preProc, postProc);
         } else {
             st_exit_scope();
@@ -98,6 +90,7 @@ static ExpType getExpType(ASTNode* typeNode) {
     return Void;
 }
 
+// insere identificadores na tabela de simbolos
 static void insertNode( ASTNode * t)
 { 
   switch (t->type)
@@ -131,7 +124,6 @@ static void insertNode( ASTNode * t)
                      sprintf(buf, "Variable name '%s' shadows a function", name);
                      typeError(t, buf);
                 }
-                
                 int isArray = (t->rightChild != NULL && t->rightChild->type == NODE_ARRAY_DECL) ? 1 : 0;
                 st_insert(name, t->lineno, location++, type, ID_VAR, isArray, 0, NULL);
             }
@@ -168,7 +160,6 @@ static void insertNode( ASTNode * t)
                          params = params->next;
                      }
                  }
-                 
                  st_insert(name, t->lineno, location++, type, ID_FUN, 0, numParams, paramTypes);
              }
          }
@@ -253,6 +244,7 @@ static void insertNode( ASTNode * t)
   }
 }
 
+// constroi tabela de simbolos
 void buildSymtab(ASTNode * syntaxTree)
 { 
   if (listing == NULL) listing = stdout;
@@ -268,9 +260,7 @@ void buildSymtab(ASTNode * syntaxTree)
       Error = 1;
   }
   
-  if (TraceAnalyze)
-  { 
-  }
+  if (TraceAnalyze) { }
 }
 
 static void typeError(ASTNode * t, char * message)
@@ -279,6 +269,7 @@ static void typeError(ASTNode * t, char * message)
   Error = 1;
 }
 
+// verifica tipos nas expressoes
 static void checkNode(ASTNode * t)
 { 
   switch (t->type)
@@ -396,6 +387,7 @@ static void checkNode(ASTNode * t)
   }
 }
 
+// verifica chamadas de funcao com retorno nao usado
 static void checkUnusedReturn(ASTNode *t) {
     if (t == NULL) return;
     

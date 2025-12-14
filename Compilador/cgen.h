@@ -55,6 +55,7 @@ Address createVal(int val);
 Address createVar(char *name);
 Address createTemp();
 Address createLabel();
+
 void emit(QuadOp op, Address a1, Address a2, Address a3);
 Address generateCode(ASTNode* node);
 void generateProgram(ASTNode* tree);

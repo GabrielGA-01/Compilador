@@ -32,6 +32,7 @@ Address createVar(char *name) {
     return a;
 }
 
+// cria novo temporario (t1, t2...)
 Address createTemp() {
     Address a;
     char buffer[20];
@@ -41,6 +42,7 @@ Address createTemp() {
     return a;
 }
 
+// cria novo label (L1, L2...)
 Address createLabel() {
     Address a;
     char buffer[20];
@@ -50,6 +52,7 @@ Address createLabel() {
     return a;
 }
 
+// emite quadrupla e adiciona na lista
 void emit(QuadOp op, Address a1, Address a2, Address a3) {
     Quad *q = (Quad *)malloc(sizeof(Quad));
     q->op = op;
@@ -142,6 +145,7 @@ void fprintCode(FILE* out) {
     }
 }
 
+// gera codigo pra um no da ast
 Address generateCode(ASTNode* node) {
     if (node == NULL) return emptyAddr();
     
@@ -189,7 +193,6 @@ Address generateCode(ASTNode* node) {
             Address labelElse = createLabel();
             
             emit(OP_IF_F, cond, labelElse, emptyAddr());
-            
             generateCode(node->rightChild);
             
             if (node->number == 1 && node->next != NULL) {
@@ -210,14 +213,10 @@ Address generateCode(ASTNode* node) {
             Address labelEnd = createLabel();
             
             emit(OP_LAB, labelStart, emptyAddr(), emptyAddr());
-            
             Address cond = generateCode(node->leftChild);
             emit(OP_IF_F, cond, labelEnd, emptyAddr());
-            
             generateCode(node->rightChild);
-            
             emit(OP_GOTO, labelStart, emptyAddr(), emptyAddr());
-            
             emit(OP_LAB, labelEnd, emptyAddr(), emptyAddr());
             break;
         }
@@ -333,6 +332,7 @@ Address generateCode(ASTNode* node) {
     return emptyAddr();
 }
 
+// gera codigo pro programa todo
 void generateProgram(ASTNode* tree) {
     tempCount = 0;
     labelCount = 0;

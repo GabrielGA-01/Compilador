@@ -1,5 +1,4 @@
 %{
-
 #include "ast.h"
 #include "parser.tab.h"
 #include <string.h>
@@ -60,7 +59,6 @@ quebralinha   [\r\n]+
 "while"       { return WHILE; }
 
 {numero}      { yylval.ival = atoi(yytext); return NUM; }
-
 {identificador} { yylval.sval = strdup(yytext); return ID; }
 
 {whitespace}  { }

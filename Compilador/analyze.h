@@ -4,7 +4,6 @@
 #include "ast.h"
 
 void buildSymtab(ASTNode *);
-
 void typeCheck(ASTNode *);
 
 #endif

@@ -1,5 +1,4 @@
 %{
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,14 +58,9 @@ extern char *yytext;
 %%
 
 programa: declaracao_lista
-        {
-            root = $1;
-        }
+        { root = $1; }
         | declaracao_lista error
-        {
-            root = $1;
-            yyerrok;
-        }
+        { root = $1; yyerrok; }
         ;
 
 declaracao_lista: declaracao_lista declaracao
@@ -83,7 +77,6 @@ var_declaracao: tipo_especificador ID SEMICOLON
               {
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
-                  
                   $$ = create_node(NODE_VAR_DECL, $1, id_node);
                   $$->lineno = @2.first_line;
               }
@@ -91,18 +84,13 @@ var_declaracao: tipo_especificador ID SEMICOLON
               {
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
-                  
                   ASTNode* num_node = create_leaf_num($4);
                   num_node->lineno = @4.first_line;
-
                   ASTNode* array_decl = create_node(NODE_ARRAY_DECL, id_node, num_node);
                   $$ = create_node(NODE_VAR_DECL, $1, array_decl);
               }
               | error SEMICOLON
-              {
-                  yyerrok;
-                  $$ = NULL;
-              }
+              { yyerrok; $$ = NULL; }
               ;
 
 tipo_especificador: INT
@@ -115,12 +103,9 @@ fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
-
                   ASTNode* func_node = create_node(NODE_FUN_DECL, $1, id_node);
                   func_node->lineno = @2.first_line;
-                  
                   ASTNode* body_node = create_node(NODE_FUN_BODY, $4, $6);
-                  
                   func_node->next = body_node;
                   $$ = func_node;
               }
@@ -144,7 +129,6 @@ param: tipo_especificador ID
      {
          ASTNode* id_node = create_leaf_id($2);
          id_node->lineno = @2.first_line;
-
          $$ = create_node(NODE_PARAM, $1, id_node);
          $$->lineno = @2.first_line;
      }
@@ -152,7 +136,6 @@ param: tipo_especificador ID
      {
          ASTNode* id_node = create_leaf_id($2);
          id_node->lineno = @2.first_line;
-
          ASTNode* array_param = create_node(NODE_ARRAY_DECL, id_node, NULL);
          $$ = create_node(NODE_PARAM, $1, array_param);
      }
@@ -180,9 +163,7 @@ statement: expressao_decl
          | iteracao_decl
          | retorno_decl
          | error
-         {
-             $$ = NULL;
-         }
+         { $$ = NULL; }
          ;
 
 expressao_decl: expressao SEMICOLON
@@ -230,7 +211,6 @@ var: ID
    { 
        ASTNode* id_node = create_leaf_id($1);
        id_node->lineno = @1.first_line;
-       
        $$ = create_node(NODE_ARRAY_ACCESS, id_node, $3); 
    }
    ;
@@ -298,7 +278,6 @@ ativacao: ID OPENPAR args CLOSEPAR
         { 
             ASTNode* id_node = create_leaf_id($1);
             id_node->lineno = @1.first_line;
-
             $$ = create_node(NODE_FUN_CALL, id_node, $3); 
         }
         ;
