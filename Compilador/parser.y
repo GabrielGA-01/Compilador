@@ -42,29 +42,28 @@ int yylex(void);                      /* Função do scanner que retorna tokens 
 void abrirArq();                      /* Função para abrir arquivo fonte */
 ASTNode* append_node(ASTNode* list, ASTNode* new_node);  /* Anexar nó à lista */
 
-/*
- * YYSTYPE: Define o tipo de dados para os valores semânticos.
- * Em nosso compilador, todos os valores são ponteiros para nós da AST.
- * Isso significa que cada símbolo da gramática (terminal ou não-terminal)
- * carrega um nó da árvore como seu valor.
- */
-#define YYSTYPE struct ASTNode*
-
-extern char *yytext;  /* Texto do token atual vindo do scanner */
+extern char *yytext;
 %}
 
 /*-----------------------------------------------------------------------------
  * DIRETIVA %code requires
  * 
- * Este bloco é incluído no arquivo header gerado (parser.tab.h).
- * Necessário para que outros arquivos que incluam o header saibam o
- * que é YYSTYPE sem criar dependências circulares.
+ * Define declarações que devem ir para o parser.tab.h
  *----------------------------------------------------------------------------*/
 %code requires {
-    /* Declaração forward para evitar loop de includes */
     struct ASTNode;
-    #define YYSTYPE struct ASTNode*
 }
+
+/*
+ * YYSTYPE: Define o tipo de dados para os valores semânticos.
+ * Usamos uma union para suportar diferentes tipos de dados.
+ */
+%union {
+    int ival;           /* Para tokens NUM (inteiros) */
+    char* sval;         /* Para tokens ID (strings) */
+    struct ASTNode* node; /* Para nós da AST */
+}
+
 
 /*-----------------------------------------------------------------------------
  * CONFIGURAÇÕES DO BISON
@@ -114,8 +113,14 @@ extern char *yytext;  /* Texto do token atual vindo do scanner */
 %token OPENPAR CLOSEPAR OPENCOL CLOSECOL OPENCHA CLOSECHA  /* Delimitadores */
 %token IF ELSE INT RETURN VOID WHILE     /* Palavras reservadas */
 
-%token NUM                               /* Número literal */
-%token ID                                /* Identificador */
+%token <ival> NUM                              /* Número literal */
+%token <sval> ID                               /* Identificador */
+
+/* Definição de tipos para não-terminais */
+%type <node> programa declaracao_lista declaracao var_declaracao tipo_especificador fun_declaracao
+%type <node> params param_lista param composto_decl local_declaracoes statement_lista statement
+%type <node> expressao_decl selecao_decl iteracao_decl retorno_decl expressao var simples_expressao
+%type <node> relacional soma_expressao termo fator ativacao args arg_lista
 
 /* Não precisamos declarar tipos pois tudo é YYSTYPE (ASTNode*) */
 
@@ -184,16 +189,25 @@ declaracao: var_declaracao
 var_declaracao: tipo_especificador ID SEMICOLON
               {
                   /* Declaração de variável simples: int x; */
-                  /* $2 é um nó ID criado pelo scanner */
-                  $$ = create_node(NODE_VAR_DECL, $1, $2);
+                  /* $2 agora é a string do nome do identificador */
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+                  
+                  $$ = create_node(NODE_VAR_DECL, $1, id_node);
                   $$->rightChild->lineno = @2.first_line;  /* Linha do ID */
                   $$->lineno = @2.first_line;
               }
               | tipo_especificador ID OPENCOL NUM CLOSECOL SEMICOLON
               {
                   /* Declaração de array: int x[10]; */
-                  /* $2 é nó ID, $4 é nó NUM com o tamanho */
-                  ASTNode* array_decl = create_node(NODE_ARRAY_DECL, $2, $4);
+                  /* $2 é string (ID), $4 é int (NUM) */
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+                  
+                  ASTNode* num_node = create_leaf_num($4);
+                  num_node->lineno = @4.first_line;
+
+                  ASTNode* array_decl = create_node(NODE_ARRAY_DECL, id_node, num_node);
                   $$ = create_node(NODE_VAR_DECL, $1, array_decl);
               }
               | error SEMICOLON
@@ -226,7 +240,10 @@ tipo_especificador: INT
 fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
                   /* Cria nó da função com tipo e nome */
-                  ASTNode* func_node = create_node(NODE_FUN_DECL, $1, $2);
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+
+                  ASTNode* func_node = create_node(NODE_FUN_DECL, $1, id_node);
                   func_node->rightChild->lineno = @2.first_line;
                   func_node->lineno = @2.first_line;
                   
@@ -271,14 +288,20 @@ param_lista: param_lista COMMA param
 param: tipo_especificador ID
      {
          /* Parâmetro simples: int x */
-         $$ = create_node(NODE_PARAM, $1, $2);
+         ASTNode* id_node = create_leaf_id($2);
+         id_node->lineno = @2.first_line;
+
+         $$ = create_node(NODE_PARAM, $1, id_node);
          $$->rightChild->lineno = @2.first_line;
          $$->lineno = @2.first_line;
      }
      | tipo_especificador ID OPENCOL CLOSECOL
      {
          /* Parâmetro array: int x[] */
-         ASTNode* array_param = create_node(NODE_ARRAY_DECL, $2, NULL);
+         ASTNode* id_node = create_leaf_id($2);
+         id_node->lineno = @2.first_line;
+
+         ASTNode* array_param = create_node(NODE_ARRAY_DECL, id_node, NULL);
          $$ = create_node(NODE_PARAM, $1, array_param);
      }
      ;
@@ -402,12 +425,17 @@ expressao: var ASSIGN expressao
  *----------------------------------------------------------------------------*/
 var: ID
    { 
-       /* Variável simples - $1 já é um nó ID do scanner */
-       $$ = $1; 
+       /* Variável simples */
+       $$ = create_leaf_id($1);
        $$->lineno = @1.first_line;
    }
    | ID OPENCOL expressao CLOSECOL
-   { $$ = create_node(NODE_ARRAY_ACCESS, $1, $3); }  /* Acesso a array */
+   { 
+       ASTNode* id_node = create_leaf_id($1);
+       id_node->lineno = @1.first_line;
+       
+       $$ = create_node(NODE_ARRAY_ACCESS, id_node, $3); 
+   }  /* Acesso a array */
    ;
 
 /*-----------------------------------------------------------------------------
@@ -418,10 +446,9 @@ var: ID
 simples_expressao: soma_expressao relacional soma_expressao
                  {
                      /* Cria nó de operador com os dois operandos */
-                     ASTNode* op_node = create_leaf_operator($2->number);
-                     op_node->leftChild = $1;
-                     op_node->rightChild = $3;
-                     $$ = op_node;
+                     $2->leftChild  = $1;
+                     $2->rightChild = $3;
+                     $$ = $2;
                  }
                  | soma_expressao
                  { $$ = $1; }  /* Sem operador relacional */
@@ -493,7 +520,10 @@ fator: OPENPAR expressao CLOSEPAR
      | ativacao
      { $$ = $1; }                /* Chamada de função */
      | NUM
-     { $$ = $1; }                /* Número literal */
+     { 
+         $$ = create_leaf_num($1); 
+         $$->lineno = @1.first_line;
+     }                /* Número literal */
      ;
 
 /*-----------------------------------------------------------------------------
@@ -502,7 +532,12 @@ fator: OPENPAR expressao CLOSEPAR
  * Sintaxe: nome_funcao(argumentos)
  *----------------------------------------------------------------------------*/
 ativacao: ID OPENPAR args CLOSEPAR
-        { $$ = create_node(NODE_FUN_CALL, $1, $3); }
+        { 
+            ASTNode* id_node = create_leaf_id($1);
+            id_node->lineno = @1.first_line;
+
+            $$ = create_node(NODE_FUN_CALL, id_node, $3); 
+        }
         ;
 
 /*-----------------------------------------------------------------------------

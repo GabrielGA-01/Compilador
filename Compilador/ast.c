@@ -47,13 +47,7 @@
  */
 ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
     /* Aloca memória para o novo nó */
-    ASTNode* newNode = (ASTNode*) malloc(sizeof(ASTNode));
-    
-    /* Verifica se a alocação foi bem-sucedida */
-    if (newNode == NULL) {
-        fprintf(stderr, "Error: Out of memory\n");
-        exit(1);  /* Termina o programa - não há como recuperar */
-    }
+    ASTNode* newNode = malloc(sizeof(ASTNode));
     
     /* Inicializa os campos do nó */
     newNode->type = type;           /* Tipo do nó */

@@ -23,7 +23,7 @@ extern int yylineno;
  * em qual linha cada token foi encontrado. Isso é essencial para
  * reportar erros com a linha correta.
  */
-#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;
+#define YY_USER_ACTION yylloc.first_line = yylineno;
 
 %}
 
@@ -112,14 +112,14 @@ quebralinha   [\r\n]+
 "while"       { return WHILE; }
     
     /* NÚMERO: Sequência de dígitos
-     * Quando encontramos um número, criamos um nó folha na AST
-     * contendo seu valor convertido para inteiro via atoi() */
-{numero}      { yylval = create_leaf_num(atoi(yytext)); return NUM; }
+     * Passamos apenas o valor inteiro para o parser via yylval.ival
+     */
+{numero}      { yylval.ival = atoi(yytext); return NUM; }
 
     /* IDENTIFICADOR: Nome de variável ou função
-     * Identificadores começam com letra e podem conter letras e dígitos.
-     * Usamos strdup para fazer uma cópia do nome */
-{identificador} { yylval = create_leaf_id(strdup(yytext)); return ID; }
+     * Passamos a string (cópia) para o parser via yylval.sval
+     */
+{identificador} { yylval.sval = strdup(yytext); return ID; }
 
     /* CARACTERES IGNORADOS */
 {whitespace}  { }
