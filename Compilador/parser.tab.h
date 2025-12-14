@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 53 "parser.y"
+#line 23 "parser.y"
 
     struct ASTNode;
 
@@ -97,11 +97,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 61 "parser.y"
+#line 27 "parser.y"
 
-    int ival;           /* Para tokens NUM (inteiros) */
-    char* sval;         /* Para tokens ID (strings) */
-    struct ASTNode* node; /* Para nós da AST */
+    int ival;
+    char* sval;
+    struct ASTNode* node;
 
 #line 107 "parser.tab.h"
 

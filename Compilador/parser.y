@@ -1,206 +1,94 @@
-/*******************************************************************************
- * Arquivo: parser.y
- * 
- * ANALISADOR SINTÁTICO (Parser) para a linguagem C-
- * 
- * Este arquivo define a gramática da linguagem C- usando Bison. O parser é a
- * segunda fase do compilador, responsável por:
- * 1. Receber tokens do scanner (analisador léxico)
- * 2. Verificar se a sequência de tokens segue as regras da gramática
- * 3. Construir a Árvore Sintática Abstrata (AST)
- * 4. Reportar erros sintáticos quando a estrutura do código está incorreta
- * 
- * A gramática C- é baseada no livro "Compiler Construction: Principles and 
- * Practice" de Kenneth C. Louden.
- ******************************************************************************/
-
 %{
-/*-----------------------------------------------------------------------------
- * SEÇÃO DE CÓDIGO C - Includes e Declarações
- * 
- * Código C que será incluído no início do arquivo gerado pelo Bison.
- * Aqui declaramos as dependências e variáveis globais necessárias.
- *----------------------------------------------------------------------------*/
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ast.h"       /* Estruturas e funções da AST */
-#include "analyze.h"   /* Interface da análise semântica */
+#include "ast.h"
+#include "analyze.h"
+#include "symtab.h"
+#include "cgen.h"
 
-/*
- * root: Ponteiro para a raiz da AST.
- * Após o parsing, esta variável conterá toda a representação do programa
- * como uma árvore que será usada nas fases seguintes (análise semântica,
- * geração de código).
- */
+extern FILE *yyin;
+int error_count = 0;
+extern int Error;
+
 ASTNode *root = NULL;
 
-/* Declarações de funções */
-void yyerror(const char *);          /* Função para reportar erros sintáticos */
-int yylex(void);                      /* Função do scanner que retorna tokens */
-void abrirArq();                      /* Função para abrir arquivo fonte */
-ASTNode* append_node(ASTNode* list, ASTNode* new_node);  /* Anexar nó à lista */
+void yyerror(const char *);
+int yylex(void);
 
 extern char *yytext;
 %}
 
-/*-----------------------------------------------------------------------------
- * DIRETIVA %code requires
- * 
- * Define declarações que devem ir para o parser.tab.h
- *----------------------------------------------------------------------------*/
 %code requires {
     struct ASTNode;
 }
 
-/*
- * YYSTYPE: Define o tipo de dados para os valores semânticos.
- * Usamos uma union para suportar diferentes tipos de dados.
- */
 %union {
-    int ival;           /* Para tokens NUM (inteiros) */
-    char* sval;         /* Para tokens ID (strings) */
-    struct ASTNode* node; /* Para nós da AST */
+    int ival;
+    char* sval;
+    struct ASTNode* node;
 }
 
+%start programa
 
-/*-----------------------------------------------------------------------------
- * CONFIGURAÇÕES DO BISON
- *----------------------------------------------------------------------------*/
+%left ADD SUB
+%left MUL DIV
 
-%start programa           /* Símbolo inicial da gramática */
+%nonassoc IFX
+%nonassoc ELSE
 
-/*
- * Precedência e Associatividade de Operadores
- * 
- * Operadores listados primeiro têm MENOR precedência.
- * %left significa associatividade à esquerda: a + b + c = (a + b) + c
- * 
- * Isso resolve ambiguidades na gramática determinando qual operador
- * "vence" quando há conflito.
- */
-%left ADD SUB             /* Menor precedência: + e - */
-%left MUL DIV             /* Maior precedência: * e / */
+%define parse.error verbose
+%locations
 
-/*
- * Resolução do conflito "dangling else"
- * 
- * Em C-, if (x) if (y) s else t é ambíguo:
- * - if (x) { if (y) s else t }  ou
- * - if (x) { if (y) s } else t
- * 
- * %prec IFX e %nonassoc resolvem isso fazendo o else se associar
- * ao if mais próximo (regra padrão em C/C++/Java).
- */
-%nonassoc IFX             /* Precedência do IF sem ELSE */
-%nonassoc ELSE            /* ELSE tem maior precedência que IFX */
+%token ERRO
+%token ADD SUB MUL DIV
+%token LT LET GET GT EQ DIF
+%token ASSIGN SEMICOLON COMMA
+%token OPENPAR CLOSEPAR OPENCOL CLOSECOL OPENCHA CLOSECHA
+%token IF ELSE INT RETURN VOID WHILE
 
-%define parse.error verbose  /* Mensagens de erro detalhadas */
-%locations                   /* Habilita rastreamento de linhas */
+%token <ival> NUM
+%token <sval> ID
 
-/*-----------------------------------------------------------------------------
- * DECLARAÇÃO DE TOKENS
- * 
- * Todos os tokens que podem vir do scanner. Estes são os "terminais" da
- * gramática - símbolos que aparecem diretamente no código fonte.
- *----------------------------------------------------------------------------*/
-
-%token ERRO                              /* Token de erro léxico */
-%token ADD SUB MUL DIV                   /* Operadores aritméticos */
-%token LT LET GET GT EQ DIF              /* Operadores relacionais */
-%token ASSIGN SEMICOLON COMMA            /* Atribuição e pontuação */
-%token OPENPAR CLOSEPAR OPENCOL CLOSECOL OPENCHA CLOSECHA  /* Delimitadores */
-%token IF ELSE INT RETURN VOID WHILE     /* Palavras reservadas */
-
-%token <ival> NUM                              /* Número literal */
-%token <sval> ID                               /* Identificador */
-
-/* Definição de tipos para não-terminais */
 %type <node> programa declaracao_lista declaracao var_declaracao tipo_especificador fun_declaracao
 %type <node> params param_lista param composto_decl local_declaracoes statement_lista statement
 %type <node> expressao_decl selecao_decl iteracao_decl retorno_decl expressao var simples_expressao
 %type <node> relacional soma_expressao termo fator ativacao args arg_lista
 
-/* Não precisamos declarar tipos pois tudo é YYSTYPE (ASTNode*) */
-
 %%
 
-/*******************************************************************************
- * SEÇÃO DE REGRAS DA GRAMÁTICA
- * 
- * Cada regra define como um símbolo não-terminal pode ser formado a partir
- * de outros símbolos. O formato é:
- * 
- *   não-terminal: alternativa1 { ação1 }
- *               | alternativa2 { ação2 }
- *               ;
- * 
- * $$ representa o valor do lado esquerdo (não-terminal sendo definido)
- * $1, $2, ... representam os valores dos símbolos do lado direito
- * @1, @2, ... contêm as informações de localização (linha) dos símbolos
- ******************************************************************************/
-
-/*-----------------------------------------------------------------------------
- * Regra 1: PROGRAMA (Símbolo Inicial)
- * 
- * Um programa em C- é uma lista de declarações (variáveis e funções).
- * A árvore resultante é armazenada na variável global 'root'.
- *----------------------------------------------------------------------------*/
 programa: declaracao_lista
         {
-            root = $1;  /* A raiz da AST é a lista de declarações */
+            root = $1;
         }
         | declaracao_lista error
         {
-            /* Recuperação de erro: tenta continuar mesmo com erro */
             root = $1;
-            yyerrok;    /* Limpa o estado de erro do parser */
+            yyerrok;
         }
         ;
 
-/*-----------------------------------------------------------------------------
- * Regra 2: LISTA DE DECLARAÇÕES
- * 
- * Zero ou mais declarações formam uma lista encadeada através do campo 'next'.
- * A função append_node adiciona novos nós ao final da lista.
- *----------------------------------------------------------------------------*/
 declaracao_lista: declaracao_lista declaracao
-                { $$ = append_node($1, $2); }  /* Adiciona declaração à lista */
+                { $$ = append_node($1, $2); }
                 | declaracao
-                { $$ = $1; }                    /* Lista com um único elemento */
+                { $$ = $1; }
                 ;
 
-/*-----------------------------------------------------------------------------
- * Regra 3: DECLARAÇÃO
- * 
- * Uma declaração pode ser de variável ou de função.
- *----------------------------------------------------------------------------*/
 declaracao: var_declaracao
           | fun_declaracao
           ;
 
-/*-----------------------------------------------------------------------------
- * Regra 4: DECLARAÇÃO DE VARIÁVEL
- * 
- * Variáveis podem ser simples (int x;) ou arrays (int x[10];).
- * A estrutura da AST é: VAR_DECL -> tipo, identificador
- *----------------------------------------------------------------------------*/
 var_declaracao: tipo_especificador ID SEMICOLON
               {
-                  /* Declaração de variável simples: int x; */
-                  /* $2 agora é a string do nome do identificador */
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
                   
                   $$ = create_node(NODE_VAR_DECL, $1, id_node);
-                  $$->rightChild->lineno = @2.first_line;  /* Linha do ID */
                   $$->lineno = @2.first_line;
               }
               | tipo_especificador ID OPENCOL NUM CLOSECOL SEMICOLON
               {
-                  /* Declaração de array: int x[10]; */
-                  /* $2 é string (ID), $4 é int (NUM) */
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
                   
@@ -212,92 +100,56 @@ var_declaracao: tipo_especificador ID SEMICOLON
               }
               | error SEMICOLON
               {
-                  /* Recuperação de erro: pula até o próximo ';' */
                   yyerrok;
                   $$ = NULL;
               }
               ;
 
-/*-----------------------------------------------------------------------------
- * Regra 5: ESPECIFICADOR DE TIPO
- * 
- * C- tem apenas dois tipos: int (inteiro) e void (sem valor).
- * Criamos um nó TYPE que armazena qual tipo foi especificado.
- *----------------------------------------------------------------------------*/
 tipo_especificador: INT
-                  { $$ = create_leaf_type(INT); }   /* Tipo inteiro */
+                  { $$ = create_leaf_type(INT); }
                   | VOID
-                  { $$ = create_leaf_type(VOID); }  /* Tipo void */
+                  { $$ = create_leaf_type(VOID); }
                   ;
 
-/*-----------------------------------------------------------------------------
- * Regra 6: DECLARAÇÃO DE FUNÇÃO
- * 
- * Funções têm: tipo de retorno, nome, parâmetros e corpo.
- * Estrutura: FUN_DECL -> tipo, nome
- *            FUN_BODY -> parâmetros, corpo (conectado via ->next)
- *----------------------------------------------------------------------------*/
 fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
               {
-                  /* Cria nó da função com tipo e nome */
                   ASTNode* id_node = create_leaf_id($2);
                   id_node->lineno = @2.first_line;
 
                   ASTNode* func_node = create_node(NODE_FUN_DECL, $1, id_node);
-                  func_node->rightChild->lineno = @2.first_line;
                   func_node->lineno = @2.first_line;
                   
-                  /* Cria nó do corpo com parâmetros e bloco de código */
                   ASTNode* body_node = create_node(NODE_FUN_BODY, $4, $6);
                   
-                  /* Conecta corpo ao nó da função via ponteiro 'next' */
                   func_node->next = body_node;
                   $$ = func_node;
               }
               ;
 
-/*-----------------------------------------------------------------------------
- * Regra 7: PARÂMETROS
- * 
- * A lista de parâmetros pode ser: lista de parâmetros, VOID, ou vazia.
- *----------------------------------------------------------------------------*/
 params: param_lista
-      { $$ = $1; }          /* Lista de parâmetros */
+      { $$ = $1; }
       | VOID
-      { $$ = NULL; }        /* Explicitamente void */
+      { $$ = NULL; }
       | 
-      { $$ = NULL; }        /* Lista vazia */
+      { $$ = NULL; }
       ;
 
-/*-----------------------------------------------------------------------------
- * Regra 8: LISTA DE PARÂMETROS
- * 
- * Parâmetros separados por vírgula, formando uma lista encadeada.
- *----------------------------------------------------------------------------*/
 param_lista: param_lista COMMA param
-           { $$ = append_node($1, $3); }  /* Adiciona parâmetro à lista */
+           { $$ = append_node($1, $3); }
            | param
-           { $$ = $1; }                    /* Lista com um parâmetro */
+           { $$ = $1; }
            ;
 
-/*-----------------------------------------------------------------------------
- * Regra 9: PARÂMETRO
- * 
- * Um parâmetro tem tipo e nome. Pode ser array (tipo nome[]).
- *----------------------------------------------------------------------------*/
 param: tipo_especificador ID
      {
-         /* Parâmetro simples: int x */
          ASTNode* id_node = create_leaf_id($2);
          id_node->lineno = @2.first_line;
 
          $$ = create_node(NODE_PARAM, $1, id_node);
-         $$->rightChild->lineno = @2.first_line;
          $$->lineno = @2.first_line;
      }
      | tipo_especificador ID OPENCOL CLOSECOL
      {
-         /* Parâmetro array: int x[] */
          ASTNode* id_node = create_leaf_id($2);
          id_node->lineno = @2.first_line;
 
@@ -306,126 +158,71 @@ param: tipo_especificador ID
      }
      ;
 
-/*-----------------------------------------------------------------------------
- * Regra 10: DECLARAÇÃO COMPOSTA (Bloco de Código)
- * 
- * Um bloco é delimitado por chaves e contém declarações locais e comandos.
- * Estrutura: COMPOUND_STMT -> declarações_locais, lista_de_comandos
- *----------------------------------------------------------------------------*/
 composto_decl: OPENCHA local_declaracoes statement_lista CLOSECHA
              { $$ = create_node(NODE_COMPOUND_STMT, $2, $3); }
              ;
 
-/*-----------------------------------------------------------------------------
- * Regra 11: DECLARAÇÕES LOCAIS
- * 
- * Zero ou mais declarações de variáveis dentro de um bloco.
- *----------------------------------------------------------------------------*/
 local_declaracoes: local_declaracoes var_declaracao
-                 { $$ = append_node($1, $2); }  /* Adiciona declaração */
+                 { $$ = append_node($1, $2); }
                  | 
-                 { $$ = NULL; }                  /* Lista vazia */
+                 { $$ = NULL; }
                  ;
 
-/*-----------------------------------------------------------------------------
- * Regra 12: LISTA DE COMANDOS (Statements)
- * 
- * Zero ou mais comandos dentro de um bloco.
- *----------------------------------------------------------------------------*/
 statement_lista: statement_lista statement
-               { $$ = append_node($1, $2); }   /* Adiciona comando */
+               { $$ = append_node($1, $2); }
                | 
-               { $$ = NULL; }                   /* Lista vazia */
+               { $$ = NULL; }
                ;
 
-/*-----------------------------------------------------------------------------
- * Regra 13: COMANDO (Statement)
- * 
- * Os tipos de comandos em C-: expressão, bloco, if, while, return.
- *----------------------------------------------------------------------------*/
-statement: expressao_decl     /* Expressão como comando (ex: x = 5;) */
-         | composto_decl      /* Bloco aninhado { ... } */
-         | selecao_decl       /* Comando if-else */
-         | iteracao_decl      /* Comando while */
-         | retorno_decl       /* Comando return */
-         | error              /* Recuperação de erro */
+statement: expressao_decl
+         | composto_decl
+         | selecao_decl
+         | iteracao_decl
+         | retorno_decl
+         | error
          {
              $$ = NULL;
          }
          ;
 
-/*-----------------------------------------------------------------------------
- * Regra 14: COMANDO DE EXPRESSÃO
- * 
- * Uma expressão seguida de ponto-e-vírgula, ou apenas ponto-e-vírgula.
- *----------------------------------------------------------------------------*/
 expressao_decl: expressao SEMICOLON
-              { $$ = $1; }        /* Expressão como comando */
+              { $$ = $1; }
               | SEMICOLON
-              { $$ = NULL; }      /* Comando vazio */
+              { $$ = NULL; }
               ;
 
-/*-----------------------------------------------------------------------------
- * Regra 15: COMANDO DE SELEÇÃO (if-else)
- * 
- * if (condição) comando [else comando]
- * O campo 'number' indica se há else (1 = tem, 0 = não tem).
- *----------------------------------------------------------------------------*/
 selecao_decl: IF OPENPAR expressao CLOSEPAR statement %prec IFX
             {
-                /* IF sem ELSE */
                 $$ = create_node(NODE_IF_STMT, $3, $5);
-                $$->number = 0;  /* Flag: NÃO tem else */
+                $$->number = 0;
             }
             | IF OPENPAR expressao CLOSEPAR statement ELSE statement
             {
-                /* IF com ELSE */
                 ASTNode* if_node = create_node(NODE_IF_STMT, $3, $5);
-                if_node->next = $7;    /* ELSE está no campo 'next' */
-                if_node->number = 1;   /* Flag: TEM else */
+                if_node->next = $7;
+                if_node->number = 1;
                 $$ = if_node;
             }
             ;
 
-/*-----------------------------------------------------------------------------
- * Regra 16: COMANDO DE ITERAÇÃO (while)
- * 
- * while (condição) comando
- *----------------------------------------------------------------------------*/
 iteracao_decl: WHILE OPENPAR expressao CLOSEPAR statement
              { $$ = create_node(NODE_WHILE_STMT, $3, $5); }
              ;
 
-/*-----------------------------------------------------------------------------
- * Regra 17: COMANDO DE RETORNO
- * 
- * return; ou return expressão;
- *----------------------------------------------------------------------------*/
 retorno_decl: RETURN SEMICOLON
-            { $$ = create_node(NODE_RETURN_STMT, NULL, NULL); }  /* Sem valor */
+            { $$ = create_node(NODE_RETURN_STMT, NULL, NULL); }
             | RETURN expressao SEMICOLON
-            { $$ = create_node(NODE_RETURN_STMT, $2, NULL); }    /* Com valor */
+            { $$ = create_node(NODE_RETURN_STMT, $2, NULL); }
             ;
 
-/*-----------------------------------------------------------------------------
- * Regra 18: EXPRESSÃO
- * 
- * Uma expressão pode ser uma atribuição ou uma expressão simples.
- *----------------------------------------------------------------------------*/
 expressao: var ASSIGN expressao
-         { $$ = create_node(NODE_ASSIGN_EXPR, $1, $3); }  /* Atribuição */
+         { $$ = create_node(NODE_ASSIGN_EXPR, $1, $3); }
          | simples_expressao
-         { $$ = $1; }                                      /* Sem atribuição */
+         { $$ = $1; }
          ;
 
-/*-----------------------------------------------------------------------------
- * Regra 19: VARIÁVEL
- * 
- * Uma variável simples (x) ou acesso a array (x[i]).
- *----------------------------------------------------------------------------*/
 var: ID
    { 
-       /* Variável simples */
        $$ = create_leaf_id($1);
        $$->lineno = @1.first_line;
    }
@@ -435,102 +232,68 @@ var: ID
        id_node->lineno = @1.first_line;
        
        $$ = create_node(NODE_ARRAY_ACCESS, id_node, $3); 
-   }  /* Acesso a array */
+   }
    ;
 
-/*-----------------------------------------------------------------------------
- * Regra 20: EXPRESSÃO SIMPLES
- * 
- * Comparação entre duas expressões ou apenas uma expressão de soma.
- *----------------------------------------------------------------------------*/
 simples_expressao: soma_expressao relacional soma_expressao
                  {
-                     /* Cria nó de operador com os dois operandos */
                      $2->leftChild  = $1;
                      $2->rightChild = $3;
                      $$ = $2;
                  }
                  | soma_expressao
-                 { $$ = $1; }  /* Sem operador relacional */
+                 { $$ = $1; }
                  ;
 
-/*-----------------------------------------------------------------------------
- * Regra 21: OPERADOR RELACIONAL
- * 
- * Operadores de comparação retornam um nó com o tipo de operador.
- *----------------------------------------------------------------------------*/
-relacional: LET { $$ = create_leaf_operator(LET); }  /* <= */
-          | LT  { $$ = create_leaf_operator(LT); }   /* <  */
-          | GT  { $$ = create_leaf_operator(GT); }   /* >  */
-          | GET { $$ = create_leaf_operator(GET); }  /* >= */
-          | EQ  { $$ = create_leaf_operator(EQ); }   /* == */
-          | DIF { $$ = create_leaf_operator(DIF); }  /* != */
+relacional: LET { $$ = create_leaf_operator(LET); }
+          | LT  { $$ = create_leaf_operator(LT); }
+          | GT  { $$ = create_leaf_operator(GT); }
+          | GET { $$ = create_leaf_operator(GET); }
+          | EQ  { $$ = create_leaf_operator(EQ); }
+          | DIF { $$ = create_leaf_operator(DIF); }
           ;
 
-/*-----------------------------------------------------------------------------
- * Regra 22: EXPRESSÃO DE SOMA/SUBTRAÇÃO
- * 
- * Expressões aditivas com operadores + e -.
- * O campo 'number' armazena qual operador foi usado.
- *----------------------------------------------------------------------------*/
 soma_expressao: soma_expressao ADD termo
               {
                   $$ = create_node(NODE_BINARY_OP, $1, $3);
-                  $$->number = ADD;  /* Marca como adição */
+                  $$->number = ADD;
               }
               | soma_expressao SUB termo
               {
                   $$ = create_node(NODE_BINARY_OP, $1, $3);
-                  $$->number = SUB;  /* Marca como subtração */
+                  $$->number = SUB;
               }
               | termo
               { $$ = $1; }
               ;
 
-/*-----------------------------------------------------------------------------
- * Regra 23: TERMO
- * 
- * Expressões multiplicativas com operadores * e /.
- * Maior precedência que + e -.
- *----------------------------------------------------------------------------*/
 termo: termo MUL fator
      {
          $$ = create_node(NODE_BINARY_OP, $1, $3);
-         $$->number = MUL;  /* Marca como multiplicação */
+         $$->number = MUL;
      }
      | termo DIV fator
      {
          $$ = create_node(NODE_BINARY_OP, $1, $3);
-         $$->number = DIV;  /* Marca como divisão */
+         $$->number = DIV;
      }
      | fator
      { $$ = $1; }
      ;
 
-/*-----------------------------------------------------------------------------
- * Regra 24: FATOR
- * 
- * Unidade básica de uma expressão: expressão entre parênteses, variável,
- * chamada de função ou número literal.
- *----------------------------------------------------------------------------*/
 fator: OPENPAR expressao CLOSEPAR
-     { $$ = $2; }                /* Expressão entre parênteses */
+     { $$ = $2; }
      | var
-     { $$ = $1; }                /* Variável */
+     { $$ = $1; }
      | ativacao
-     { $$ = $1; }                /* Chamada de função */
+     { $$ = $1; }
      | NUM
      { 
          $$ = create_leaf_num($1); 
          $$->lineno = @1.first_line;
-     }                /* Número literal */
+     }
      ;
 
-/*-----------------------------------------------------------------------------
- * Regra 25: ATIVAÇÃO (Chamada de Função)
- * 
- * Sintaxe: nome_funcao(argumentos)
- *----------------------------------------------------------------------------*/
 ativacao: ID OPENPAR args CLOSEPAR
         { 
             ASTNode* id_node = create_leaf_id($1);
@@ -540,57 +303,22 @@ ativacao: ID OPENPAR args CLOSEPAR
         }
         ;
 
-/*-----------------------------------------------------------------------------
- * Regra 26: ARGUMENTOS
- * 
- * Lista de argumentos passados a uma função.
- *----------------------------------------------------------------------------*/
 args: arg_lista
-    { $$ = $1; }        /* Lista de argumentos */
+    { $$ = $1; }
     | 
-    { $$ = NULL; }      /* Sem argumentos */
+    { $$ = NULL; }
     ;
 
-/*-----------------------------------------------------------------------------
- * Regra 27: LISTA DE ARGUMENTOS
- * 
- * Argumentos separados por vírgula.
- *----------------------------------------------------------------------------*/
 arg_lista: arg_lista COMMA expressao
-         { $$ = append_node($1, $3); }  /* Adiciona argumento */
+         { $$ = append_node($1, $3); }
          | expressao
-         { $$ = $1; }                    /* Um único argumento */
+         { $$ = $1; }
          ;
 
 %%
 
-/*******************************************************************************
- * SEÇÃO DE CÓDIGO C FINAL
- * 
- * Código C que aparece após as regras da gramática.
- * Contém a função main e funções auxiliares.
- ******************************************************************************/
-
-extern FILE *yyin;        /* Arquivo de entrada do scanner */
-int error_count = 0;      /* Contador de erros sintáticos */
-
-#include "symtab.h"       /* Tabela de símbolos */
-#include "cgen.h"         /* Geração de código */
-extern int Error;         /* Flag de erro semântico */
-
-/*-----------------------------------------------------------------------------
- * FUNÇÃO MAIN
- * 
- * Ponto de entrada do compilador. Executa todas as fases:
- * 1. Abre o arquivo fonte
- * 2. Parsing (análise sintática) - constrói a AST
- * 3. Análise semântica - verifica tipos e escopos
- * 4. Geração de código intermediário (se não houver erros)
- * 5. Salva os resultados em arquivos de saída
- *----------------------------------------------------------------------------*/
 int main(int argc, char *argv[])
 {
-  /* Verifica se foi passado um arquivo como argumento */
   if (argc > 1) {
     yyin = fopen(argv[1], "r");
     if (!yyin) {
@@ -599,24 +327,14 @@ int main(int argc, char *argv[])
     }
   }
   
-  /* FASE 2: Análise Sintática (Parsing) */
-  int aux = yyparse();  /* Chama o parser, que por sua vez chama o scanner */
+  int aux = yyparse();
   
   if(aux == 0 || root != NULL) {
-    /*-------------------------------------------------------------------------
-     * FASE 3: Análise Semântica
-     * 
-     * buildSymtab: Percorre a AST e constrói a tabela de símbolos,
-     *              verificando declarações duplicadas e variáveis não declaradas.
-     * typeCheck: Verifica compatibilidade de tipos nas operações.
-     *------------------------------------------------------------------------*/
     buildSymtab(root);
     typeCheck(root);
 
-    /* Cria diretório de saída se não existir */
     system("mkdir -p output");
 
-    /* Salva a Árvore Sintática Abstrata em arquivo */
     FILE* ast_file = fopen("output/ast.txt", "w");
     if (ast_file) {
         fprint_ast(ast_file, root, 0);
@@ -626,7 +344,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: Could not create output/ast.txt\n");
     }
 
-    /* Salva a Tabela de Símbolos em arquivo */
     FILE* symtab_file = fopen("output/symbol_table.txt", "w");
     if (symtab_file) {
         printSymTab(symtab_file);
@@ -636,16 +353,9 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Error: Could not create output/symbol_table.txt\n");
     }
 
-    /*-------------------------------------------------------------------------
-     * FASE 4: Geração de Código Intermediário
-     * 
-     * Só executa se não houver erros nas fases anteriores.
-     * O código intermediário usa formato de quádruplas.
-     *------------------------------------------------------------------------*/
     if (Error == 0 && error_count == 0) {
         generateProgram(root);
 
-        /* Salva código intermediário em arquivo */
         FILE* code_file = fopen("output/intermediate_code.txt", "w");
         if (code_file) {
             fprintCode(code_file);
@@ -662,24 +372,15 @@ int main(int argc, char *argv[])
   return aux;
 }
 
-/*-----------------------------------------------------------------------------
- * FUNÇÃO YYERROR
- * 
- * Chamada pelo Bison quando encontra um erro sintático.
- * Formata e imprime uma mensagem de erro amigável.
- *
- * @param msg: Mensagem de erro gerada pelo Bison
- *----------------------------------------------------------------------------*/
 void yyerror(const char *msg)
 {
-    extern int yylineno;   /* Número da linha atual */
-    extern char *yytext;   /* Texto do token problemático */
+    extern int yylineno;
+    extern char *yytext;
     error_count++;
     
-    /* Remove prefixo redundante "syntax error, " se presente */
     const char *prefix = "syntax error, ";
     if (strncmp(msg, prefix, strlen(prefix)) == 0) {
-        msg += strlen(prefix);  /* Avança o ponteiro para pular o prefixo */
+        msg += strlen(prefix);
     }
     
     fprintf(stderr, "[Syntax Error] Line %d: %s near '%s'\n", yylineno, msg, yytext);
