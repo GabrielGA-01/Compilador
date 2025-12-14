@@ -182,11 +182,13 @@ expressao_decl: expressao SEMICOLON
 selecao_decl: IF OPENPAR expressao CLOSEPAR statement %prec IFX
             {
                 $$ = create_node(NODE_IF_STMT, $3, $5);
+                $$->number = 0; /* Flag: NÃO tem else */
             }
             | IF OPENPAR expressao CLOSEPAR statement ELSE statement
             {
                 ASTNode* if_node = create_node(NODE_IF_STMT, $3, $5);
                 if_node->next = $7;
+                if_node->number = 1; /* Flag: TEM else */
                 $$ = if_node;
             }
             ;
@@ -309,6 +311,7 @@ extern FILE *yyin;
 int error_count = 0;
 
 #include "symtab.h"
+#include "cgen.h"
 extern int Error;
 
 int main(int argc, char *argv[])
@@ -349,6 +352,23 @@ int main(int argc, char *argv[])
         printf("Symbol table generated in output/symbol_table.txt\n");
     } else {
         fprintf(stderr, "Error: Could not create output/symbol_table.txt\n");
+    }
+
+    /* Generate intermediate code ONLY if no errors */
+    if (Error == 0 && error_count == 0) {
+        generateProgram(root);
+
+        /* Write intermediate code to file */
+        FILE* code_file = fopen("output/intermediate_code.txt", "w");
+        if (code_file) {
+            fprintCode(code_file);
+            fclose(code_file);
+            printf("Intermediate code generated in output/intermediate_code.txt\n");
+        } else {
+            fprintf(stderr, "Error: Could not create output/intermediate_code.txt\n");
+        }
+    } else {
+        printf("Intermediate code generation skipped due to errors\n");
     }
   }
   

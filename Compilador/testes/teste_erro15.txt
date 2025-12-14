@@ -1,0 +1,16 @@
+int funcaoint(){
+    int a;
+    a = 0;
+    return; 
+}
+
+void funcaovoid(){
+    int b;
+    retur(b);
+}
+
+void main(void){
+    int x;
+    x = funcaoint();
+    funcaovoid();
+}

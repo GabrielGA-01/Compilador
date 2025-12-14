@@ -27,13 +27,17 @@ echo "[4.5/5] Compilando tabela de símbolos e analisador..."
 gcc -c -o symtab.o symtab.c
 gcc -c -o analyze.o analyze.c
 
+# Compila o gerador de código intermediário.
+echo "[4.6/5] Compilando gerador de código intermediário..."
+gcc -c -o cgen.o cgen.c
+
 # Linka tudo para criar o executável final.
 echo "[5/5] Linkando os arquivos para criar o executável 'compilador'..."
-gcc -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o -lfl
+gcc -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o cgen.o -lfl
 
 # Limpa os arquivos intermediários.
 echo "Limpando arquivos temporários..."
-rm lex.yy.c lex.yy.o parser.tab.c ast.o symtab.o analyze.o
+rm lex.yy.c lex.yy.o parser.tab.c ast.o symtab.o analyze.o cgen.o
 
 echo ""
 echo "Sucesso! O executável 'compilador' foi criado."

@@ -174,7 +174,8 @@ static void insertNode( ASTNode * t)
                      typeError(t, buf);
                 }
                 
-                st_insert(name, t->lineno, location++, type, ID_VAR, 0, NULL);
+                int isArray = (t->rightChild != NULL && t->rightChild->type == NODE_ARRAY_DECL) ? 1 : 0;
+                st_insert(name, t->lineno, location++, type, ID_VAR, isArray, 0, NULL);
             }
         }
       }
@@ -209,7 +210,7 @@ static void insertNode( ASTNode * t)
                      }
                  }
                  
-                 st_insert(name, t->lineno, location++, type, ID_FUN, numParams, paramTypes);
+                 st_insert(name, t->lineno, location++, type, ID_FUN, 0, numParams, paramTypes);
              }
          }
       }
@@ -238,7 +239,8 @@ static void insertNode( ASTNode * t)
                  sprintf(buf, "Parameter '%s' already declared", name);
                  typeError(t, buf);
             } else {
-                st_insert(name, t->lineno, location++, type, ID_VAR, 0, NULL);
+                int isArray = (t->rightChild != NULL && t->rightChild->type == NODE_ARRAY_DECL) ? 1 : 0;
+                st_insert(name, t->lineno, location++, type, ID_VAR, isArray, 0, NULL);
             }
         }
       }
@@ -310,6 +312,12 @@ static void insertNode( ASTNode * t)
 void buildSymtab(ASTNode * syntaxTree)
 { 
   if (listing == NULL) listing = stdout;
+  
+  /* Insert built-in functions: input() and output() */
+  ExpType outputParamTypes[1] = { Integer };
+  st_insert("input", 0, location++, Integer, ID_FUN, 0, 0, NULL);
+  st_insert("output", 0, location++, Void, ID_FUN, 0, 1, outputParamTypes);
+  
   /* Combine insertion and type checking in one pass */
   traverse(syntaxTree,insertNode,checkNode);
   
@@ -339,6 +347,24 @@ static void checkNode(ASTNode * t)
   { case NODE_BINARY_OP:
     case NODE_ASSIGN_EXPR:
       if (t->type == NODE_ASSIGN_EXPR) {
+          /* Check for assignment to array without index */
+          if (t->leftChild->type == NODE_VAR) {
+              if (st_lookup_is_array(t->leftChild->identifier)) {
+                  char buf[256];
+                  sprintf(buf, "Cannot assign to array '%s' without index", t->leftChild->identifier);
+                  typeError(t, buf);
+              }
+          }
+          
+          /* Check for using array without index on the right side */
+          if (t->rightChild->type == NODE_VAR) {
+              if (st_lookup_is_array(t->rightChild->identifier)) {
+                  char buf[256];
+                  sprintf(buf, "Cannot use array '%s' without index", t->rightChild->identifier);
+                  typeError(t, buf);
+              }
+          }
+          
           /* Case 2: Check for Void assignment */
           /* Skip this error if the right side is an undeclared function (already reported) */
           int skipVoidError = 0;
@@ -353,7 +379,13 @@ static void checkNode(ASTNode * t)
           if (!skipVoidError && t->rightChild->expType == Void) {
               char buf[256];
               char *name = "unknown";
-              if (t->leftChild->type == NODE_VAR) name = t->leftChild->identifier;
+              if (t->leftChild->type == NODE_VAR) {
+                  name = t->leftChild->identifier;
+              } else if (t->leftChild->type == NODE_ARRAY_ACCESS && 
+                         t->leftChild->leftChild != NULL &&
+                         t->leftChild->leftChild->type == NODE_VAR) {
+                  name = t->leftChild->leftChild->identifier;
+              }
               sprintf(buf, "Invalid assignment to '%s' (Void value)", name);
               typeError(t, buf);
           } else if (t->leftChild->expType != Integer || t->rightChild->expType != Integer) {
@@ -397,6 +429,10 @@ static void checkNode(ASTNode * t)
               i++;
           }
       }
+      break;
+    case NODE_ARRAY_ACCESS:
+      /* Array access returns the element type, which is Integer in C- */
+      t->expType = Integer;
       break;
     default:
       break;

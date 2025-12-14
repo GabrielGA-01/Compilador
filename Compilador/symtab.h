@@ -23,7 +23,7 @@ typedef enum { ID_VAR, ID_FUN } IdKind;
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int numParams, ExpType *paramTypes );
+void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int isArray, int numParams, ExpType *paramTypes );
 
 /* Function st_lookup returns the memory 
  * location of a variable or -1 if not found
@@ -49,6 +49,10 @@ int st_lookup_num_params ( char * name );
  * of a function symbol
  */
 ExpType st_lookup_param_type ( char * name, int paramIndex );
+
+/* Function st_lookup_is_array returns 1 if the symbol is an array, 0 otherwise
+ */
+int st_lookup_is_array ( char * name );
 
 /* Procedure st_add_ref adds a line number to an existing symbol
  * searching all scopes.

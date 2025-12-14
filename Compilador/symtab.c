@@ -54,6 +54,7 @@ typedef struct BucketListRec
      int memloc ; /* memory location for variable */
      ExpType type; /* data type for variable */
      IdKind kind; /* kind of identifier */
+     int isArray; /* 1 if array, 0 otherwise */
      int numParams; /* number of parameters (for functions) */
      ExpType paramTypes[MAX_PARAMS]; /* types of parameters */
      char * scopeName; /* scope name of this variable */
@@ -94,7 +95,7 @@ void st_exit_scope(void) {
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int numParams, ExpType *paramTypes )
+void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int isArray, int numParams, ExpType *paramTypes )
 { int h = hash(name);
   BucketList l =  hashTable[h];
   
@@ -114,6 +115,7 @@ void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int
     l->memloc = loc;
     l->type = type;
     l->kind = kind;
+    l->isArray = isArray;
     l->numParams = numParams;
     if (paramTypes != NULL) {
         for (int i = 0; i < numParams && i < MAX_PARAMS; i++) {
@@ -355,6 +357,34 @@ ExpType st_lookup_param_type ( char * name, int paramIndex )
   
   if (found == NULL || paramIndex >= found->numParams) return Void;
   else return found->paramTypes[paramIndex];
+}
+
+int st_lookup_is_array ( char * name )
+{ int h = hash(name);
+  BucketList l =  hashTable[h];
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  /* First pass: Check current scope */
+  BucketList temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, currentScopeName) == 0) {
+          return temp->isArray;
+      }
+      temp = temp->next;
+  }
+  
+  /* Second pass: Check Global scope */
+  temp = l;
+  while (temp != NULL) {
+      if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+          return temp->isArray;
+      }
+      temp = temp->next;
+  }
+  
+  return 0;
 }
 
 /* Procedure printSymTab prints a formatted 
