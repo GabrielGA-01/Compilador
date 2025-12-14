@@ -1,15 +1,36 @@
 FUN_DECL
+  TYPE: INT
+  VAR: funcaoint
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: a
+    ASSIGN_EXPR
+      VAR: a
+      NUM: 0
+    RETURN_STMT
+FUN_DECL
+  TYPE: VOID
+  VAR: funcaovoid
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: b
+    RETURN_STMT
+      VAR: b
+FUN_DECL
   TYPE: VOID
   VAR: main
 FUN_BODY
   COMPOUND_STMT
     VAR_DECL
       TYPE: INT
-      VAR: a
-    VAR_DECL
-      TYPE: INT
-      VAR: c
-    COMPOUND_STMT
-      ASSIGN_EXPR
-        VAR: a
-        NUM: 0
+      VAR: x
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: funcaoint
+        VAR: funcaoint
+    FUN_CALL: funcaovoid
+      VAR: funcaovoid

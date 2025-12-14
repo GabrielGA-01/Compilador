@@ -1,7 +1,10 @@
 Hash            Name            Type            Kind            Scope           Line Numbers   
 ----            ----            ----            ----            -----           ------------   
-24              main            Void            Func            Global             8 
+24              main            Void            Func            Global            14 
 77              input           Integer         Func            Global             0 
-97              a               Integer         Var             main               9   16 
-99              c               Integer         Var             main              12 
+97              a               Integer         Var             funcaoint          4    5 
+98              b               Integer         Var             funcaovoid        10   11 
 117             output          Void            Func            Global             0 
+120             x               Integer         Var             main              15   16 
+147             funcaovoid      Void            Func            Global             9   17 
+191             funcaoint       Integer         Func            Global             3   16 

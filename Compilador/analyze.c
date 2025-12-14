@@ -434,6 +434,22 @@ static void checkNode(ASTNode * t)
       /* Array access returns the element type, which is Integer in C- */
       t->expType = Integer;
       break;
+    case NODE_RETURN_STMT:
+      {
+          ExpType funcType = st_lookup_type(currentFuncName);
+          if (funcType == Void) {
+              if (t->leftChild != NULL) {
+                  typeError(t, "Void function cannot return a value");
+              }
+          } else {
+              if (t->leftChild == NULL) {
+                  typeError(t, "Function expected to return a value");
+              } else if (t->leftChild->expType != funcType) {
+                  typeError(t, "Invalid return type");
+              }
+          }
+      }
+      break;
     default:
       break;
   }
