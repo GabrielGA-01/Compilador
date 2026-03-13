@@ -1,0 +1,99 @@
+/* 
+   Arquivo de Teste Abrangente para Compilador C-Minus 
+   Autor: Gerado para testes de sintaxe e lexico
+   Objetivo: Testar todas as estruturas da gramatica BNF
+*/
+
+int variavelGlobal;
+int vetorGlobal[10];
+
+/* Funcao 1: Teste de recursao e retorno de valor */
+int gcd(int u, int v)
+{
+    if (v == 0) return u;
+    else return gcd(v, u - u/v*v); /* u % v simulado */
+}
+
+/* Funcao 2: Teste de tipo void e array como parametro */
+void preencheVetor(int arr[], int tamanho)
+{
+    int i;
+    i = 0;
+    while (i < tamanho)
+    {
+        arr[i] = i * i; /* Atribuicao em array */
+        i = i + 1;
+    }
+}
+
+/* Funcao 3: Teste de aninhamento complexo e escopo local */
+int logicaComplexa(int a, int b)
+{
+    int resultado;
+    resultado = 0;
+
+    /* Testando if-else aninhado dentro de while */
+    while (a > 0)
+    {
+        if (a > b)
+        { 
+            resultado = resultado + (a - b);
+            a = a - 1;
+        }
+        else
+        {
+            if (a == b)
+            {
+                resultado = resultado + 1000;
+                a = 0; /* Forca saida do loop */
+            }
+            else
+            {
+                /* Teste de precedencia de operadores */
+                /* Deve ser lido como: resultado - (a * 2) */
+                resultado = resultado - a * 2; 
+                a = a + 1;
+            }
+        }
+    }
+    return resultado;
+}
+
+/* Funcao Principal */
+void main(void)
+{
+    int x; 
+    int y;
+    int i;
+
+    /* Teste de Input/Output (funcoes pre-definidas no Tiny/C-) */
+    x = input();
+    y = input();
+
+    /* Teste de chamadas de funcao */
+    output(gcd(x, y));
+
+    /* Teste de manipulacao de vetor global */
+    preencheVetor(vetorGlobal, 5);
+
+    /* Teste de loop e acesso a vetor */
+    i = 0;
+    while (i < 5)
+    {
+        if (vetorGlobal[i] != 0)
+        {
+            output(vetorGlobal[i]);
+        }
+        i = i + 1;
+    }
+
+    /* Teste de operadores relacionais diversos */
+    if (x <= y) 
+    {
+        if (x >= 0) output(1);
+    }
+    
+    /* Teste de expressao complexa com chamada no meio */
+    variavelGlobal = logicaComplexa(x, y) / 2;
+    output(variavelGlobal);
+}

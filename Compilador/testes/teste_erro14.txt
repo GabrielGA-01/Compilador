@@ -1,0 +1,8 @@
+/* Uso de array sem índice (atribuição ou acesso) */
+
+void main(void){
+    int a[10];
+    int x;
+    a = 2;
+    x = a;
+}
