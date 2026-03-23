@@ -1,21 +1,10 @@
 Hash            Name            Type            Kind            Scope           Line Numbers   
 ----            ----            ----            ----            -----           ------------   
-10              resultado       Integer         Var             logicaComplexa    32   33   40   40   47   47   54   54   59 
-24              main            Void            Func            Global            63 
-77              input           Integer         Func            Global             0   70   71 
-97              a               Integer         Var             logicaComplexa    30   36   38   40   41   41   45   48   54   55   55 
-98              b               Integer         Var             logicaComplexa    30   38   40   45 
-105             i               Integer         Var             main              67   80   81   83   85   87   87 
-105             i               Integer         Var             preencheVetor     20   21   22   24   24   24   25   25 
-117             u               Integer         Var             gcd               11   13   14   14 
-117             output          Void            Func            Global             0   74   85   93   98 
-118             v               Integer         Var             gcd               11   13   14   14   14 
-120             x               Integer         Var             main              65   70   74   91   93   97 
-121             y               Integer         Var             main              66   71   74   91   97 
-121             logicaComplexa  Integer         Func            Global            30   97 
-135             preencheVetor   Void            Func            Global            18   77 
-136             vetorGlobal     Integer         Var             Global             8   77   83   85 
-184             arr             Integer         Var             preencheVetor     18   24 
-184             variavelGlobal  Integer         Var             Global             7   97   98 
-190             tamanho         Integer         Var             preencheVetor     18   22 
-200             gcd             Integer         Func            Global            11   14   74 
+24              main            Void            Func            Global            11 
+77              input           Integer         Func            Global             0   13   13 
+117             u               Integer         Var             gcd                4    6    7    7 
+117             output          Void            Func            Global             0   14 
+118             v               Integer         Var             gcd                4    6    7    7    7 
+120             x               Integer         Var             main              12   13   14 
+121             y               Integer         Var             main              12   13   14 
+200             gcd             Integer         Func            Global             4    7   14 

@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
     if (Error == 0 && error_count == 0) {
         generateProgram(root);
 
-        FILE* code_file = fopen("output/intermediate_code.txt", "w");
+        FILE* code_file = fopen("output/intermediate_code_gcd.txt", "w");
         if (code_file) {
             fprintCode(code_file);
             fclose(code_file);
