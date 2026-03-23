@@ -1,31 +1,135 @@
+VAR_DECL
+  TYPE: INT
+  ARRAY_DECL: vet[10]
+    VAR: vet
+    NUM: 10
 FUN_DECL
   TYPE: INT
-  VAR: gcd
+  VAR: minloc
 FUN_BODY
   PARAM
     TYPE: INT
-    VAR: u
+    ARRAY_DECL: a
+      VAR: a
   PARAM
     TYPE: INT
-    VAR: v
+    VAR: low
+  PARAM
+    TYPE: INT
+    VAR: high
   COMPOUND_STMT
-    IF_STMT
-      OP: EQ
-        VAR: v
-        NUM: 0
-      RETURN_STMT
-        VAR: u
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: x
+    VAR_DECL
+      TYPE: INT
+      VAR: k
+    ASSIGN_EXPR
+      VAR: k
+      VAR: low
+    ASSIGN_EXPR
+      VAR: x
+      ARRAY_ACCESS: a
+        VAR: a
+        VAR: low
+    ASSIGN_EXPR
+      VAR: i
+      BINARY_OP: ADD
+        VAR: low
+        NUM: 1
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        VAR: high
+      COMPOUND_STMT
+        IF_STMT
+          OP: LT
+            ARRAY_ACCESS: a
+              VAR: a
+              VAR: i
+            VAR: x
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: x
+              ARRAY_ACCESS: a
+                VAR: a
+                VAR: i
+            ASSIGN_EXPR
+              VAR: k
+              VAR: i
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
     RETURN_STMT
-      FUN_CALL: gcd
-        VAR: gcd
-        VAR: v
+      VAR: k
+FUN_DECL
+  TYPE: VOID
+  VAR: sort
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: a
+      VAR: a
+  PARAM
+    TYPE: INT
+    VAR: low
+  PARAM
+    TYPE: INT
+    VAR: high
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: k
+    ASSIGN_EXPR
+      VAR: i
+      VAR: low
+    WHILE_STMT
+      OP: LT
+        VAR: i
         BINARY_OP: SUB
-          VAR: u
-          BINARY_OP: MUL
-            BINARY_OP: DIV
-              VAR: u
-              VAR: v
-            VAR: v
+          VAR: high
+          NUM: 1
+      COMPOUND_STMT
+        VAR_DECL
+          TYPE: INT
+          VAR: t
+        ASSIGN_EXPR
+          VAR: k
+          FUN_CALL: minloc
+            VAR: minloc
+            VAR: a
+            VAR: i
+            VAR: high
+        ASSIGN_EXPR
+          VAR: t
+          ARRAY_ACCESS: a
+            VAR: a
+            VAR: k
+        ASSIGN_EXPR
+          ARRAY_ACCESS: a
+            VAR: a
+            VAR: k
+          ARRAY_ACCESS: a
+            VAR: a
+            VAR: i
+        ASSIGN_EXPR
+          ARRAY_ACCESS: a
+            VAR: a
+            VAR: i
+          VAR: t
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
 FUN_DECL
   TYPE: VOID
   VAR: main
@@ -33,21 +137,46 @@ FUN_BODY
   COMPOUND_STMT
     VAR_DECL
       TYPE: INT
-      VAR: x
-    VAR_DECL
-      TYPE: INT
-      VAR: y
+      VAR: i
     ASSIGN_EXPR
-      VAR: x
-      FUN_CALL: input
-        VAR: input
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        NUM: 10
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          ARRAY_ACCESS: vet
+            VAR: vet
+            VAR: i
+          FUN_CALL: input
+            VAR: input
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    FUN_CALL: sort
+      VAR: sort
+      VAR: vet
+      NUM: 0
+      NUM: 10
     ASSIGN_EXPR
-      VAR: y
-      FUN_CALL: input
-        VAR: input
-    FUN_CALL: output
-      VAR: output
-      FUN_CALL: gcd
-        VAR: gcd
-        VAR: x
-        VAR: y
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        NUM: 10
+      COMPOUND_STMT
+        FUN_CALL: output
+          VAR: output
+          ARRAY_ACCESS: vet
+            VAR: vet
+            VAR: i
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
