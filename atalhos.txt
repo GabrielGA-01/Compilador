@@ -1,0 +1,24 @@
+Compilar
+./compilar.sh gdb --args ./compilador ./testes/gcd.txt
+
+Executar o projeto:
+gdb -q --args ./compilador ./testes/gcd.txt
+
+Usar breakpoint:
+break <nome aquivo>:<número da linha>
+
+# Seguir a execução até o fim ou breakpoint
+continue
+
+# Avançar uma linha
+step
+
+# Visualizar o conteúdo de uma variável:
+print <nome da variável>
+print *<nome do ponteiro>
+
+# Acompanhar os valores da variável
+display <nome da variável>
+
+# Pausar no momento em que muda o valor
+watch <nome da variável>
