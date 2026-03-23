@@ -15,7 +15,7 @@ typedef enum {
     OP_GET,
     OP_EQ,
     OP_DIF,
-    OP_IF_F,
+    OP_IFF,
     OP_GOTO,
     OP_LAB,
     OP_IN,
@@ -24,8 +24,8 @@ typedef enum {
     OP_CALL,
     OP_RET,
     OP_HALT,
-    OP_ARR_ACC,
-    OP_ARR_ASN
+    OP_ARRAY_ACCESS,
+    OP_ARRAY_ASSIGN
 } QuadOp;
 
 typedef enum {
@@ -50,6 +50,15 @@ typedef struct Quad {
     struct Quad *next;
 } Quad;
 
+
+Address emptyAddr();
+Address createVal(int val);
+Address createVar(char *name);
+Address createTemp();
+Address createLabel();
+
+void make_new_quad(QuadOp op, Address a1, Address a2, Address a3);
+void fprintCode(FILE* out);
 void generateProgram(ASTNode* tree);
 
 #endif
