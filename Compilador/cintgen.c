@@ -8,6 +8,7 @@ static int labelCount = 0;
 
 Quad *head = NULL;
 Quad *tail = NULL;
+TempStorage* TSHead = NULL;
 
 // Para indicar um operando sem uso
 Address emptyAddr() {
@@ -35,16 +36,6 @@ Address createVar(char *name) {
     return a;
 }
 
-// Para criar uma nova variável
-Address createTemp() {
-    Address a;
-    char buffer[20];
-    sprintf(buffer, "t%d", tempCount++);
-    a.kind = TEMP_VAR;
-    a.name = strdup(buffer);
-    return a;
-}
-
 // Para criar um novo label
 Address createLabel() {
     Address a;
@@ -53,6 +44,38 @@ Address createLabel() {
     a.kind = LABEL_KIND;
     a.name = strdup(buffer);
     return a;
+}
+
+// Para criar uma nova variável
+Address* createTemp() {
+    Address* a = (Address*)malloc(sizeof(Address));
+    char buffer[20];
+    sprintf(buffer, "t%d", tempCount++);
+    a->kind = TEMP_VAR;
+    a->name = strdup(buffer);
+    
+    return a;
+}
+
+// Tenta buscar se o temp já existe
+Address* search_temp(char* name, char* func_name){
+    TempStorage* current = TSHead;
+    while(current != NULL){
+        if(strcmp(current->temp_addr->name, name) && strcmp(current->func_name, func_name)){
+             return(current->temp_addr);
+        }
+        current = current->next;
+    }
+
+    Address* new_temp = createTemp();
+
+    TempStorage* new_storage = (TempStorage *)malloc(sizeof(TempStorage));
+    new_storage->func_name = func_name;
+    new_storage->temp_addr = new_temp;
+    new_storage->next = TSHead;
+    TSHead = new_storage;
+
+    return(new_temp);
 }
 
 // Já existe essa função em ast.c, porém precisa ser em letra minúscula o retorno
@@ -189,7 +212,8 @@ Quad* generateCode(ASTNode* tree){
                     param = generateCode(params);
                     param->addr3 = *func_data_name;       // Define o escopo        
                     
-                    make_new_quad(OP_LOAD, createTemp(), param->addr2, emptyAddr());
+                    Address* temp_name = search_temp(param->addr2.name, func_data_name->name);
+                    make_new_quad(OP_LOAD, *temp_name, param->addr2, emptyAddr());
                     
                     params = params->next;
                 }

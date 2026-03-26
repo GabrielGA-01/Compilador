@@ -55,11 +55,18 @@ typedef struct Quad {
     struct Quad *next;
 } Quad;
 
+typedef struct TempStorage {
+    struct TempStorage* next;
+    Address* temp_addr;
+    char* func_name;
+} TempStorage;
+
 Address emptyAddr();
 Address createVal(int val);
 Address createVar(char *name);
-Address createTemp();
 Address createLabel();
+Address* createTemp();
+Address* search_temp(char* name, char* func_name);
 
 Address* determine_type(ASTNode* current);
 Address* determine_name(ASTNode* current);
