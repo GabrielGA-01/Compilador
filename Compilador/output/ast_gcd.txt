@@ -1,0 +1,53 @@
+FUN_DECL
+  TYPE: INT
+  VAR: gcd
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: u
+  PARAM
+    TYPE: INT
+    VAR: v
+  COMPOUND_STMT
+    IF_STMT
+      OP: EQ
+        VAR: v
+        NUM: 0
+      RETURN_STMT
+        VAR: u
+    RETURN_STMT
+      FUN_CALL: gcd
+        VAR: gcd
+        VAR: v
+        BINARY_OP: SUB
+          VAR: u
+          BINARY_OP: MUL
+            BINARY_OP: DIV
+              VAR: u
+              VAR: v
+            VAR: v
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: x
+    VAR_DECL
+      TYPE: INT
+      VAR: y
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: y
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      FUN_CALL: gcd
+        VAR: gcd
+        VAR: x
+        VAR: y
