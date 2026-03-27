@@ -61,9 +61,12 @@ Address* createTemp() {
 Address* searchTemp(char* name, char* scope_name){
     TempStorage* current = TSHead;
     while(current != NULL){
+        // Verifica nome e escopo
         if(strcmp(current->var_name, name) == 0 && strcmp(current->scope_name, scope_name) == 0){
             return(current->temp_addr);
         }
+        // Verifica se é global
+        else if(strcmp(current->scope_name, "Global") == 0) return(current->temp_addr);
         current = current->next;
     }
 
@@ -74,6 +77,7 @@ Address* searchTemp(char* name, char* scope_name){
     new_storage->scope_name = scope_name;
     new_storage->temp_addr = new_temp;
     new_storage->next = TSHead;
+    
     TSHead = new_storage;
 
     return(new_temp);
@@ -164,9 +168,8 @@ void fprintCode(FILE* out) {
     }
 }
 
-Data* generateCode(ASTNode* node, char* scope){
-    Data* none = NULL;
-    if(node == NULL) return none;
+Address generateCode(ASTNode* node, char* scope){
+    if(node == NULL) return emptyAddr();
 
     switch (node->type){
     // Caso seja uma função
@@ -193,21 +196,30 @@ Data* generateCode(ASTNode* node, char* scope){
         break;
 
     case NODE_PARAM:
-        char* param_data_type = numberToType(node->leftChild->number);
-        char* param_name = node->rightChild->identifier;      
-        
-        // Faz a declaração
-        Address addr_param_name = createVar(param_name);
-        Address addr_param_data_type = createVar(param_data_type);
+        // Declaração de um parâmetro
+        Address addr_param_data_type = generateCode(node->leftChild, scope);
+        Address addr_param_name = generateCode(node->rightChild, scope);
         makeNewQuad(OP_ARG, addr_param_data_type, addr_param_name, emptyAddr());
 
-        // Carrega para um registrador
-        Address* temp_name = searchTemp(param_name, scope);
+        // Associa a um variável temp
+        Address* temp_name = searchTemp(addr_param_name.name, scope);
         makeNewQuad(OP_LOAD, *temp_name, addr_param_name, emptyAddr());
         
         // Vai para os irmãos
         if(node->next != NULL) generateCode(node->next, scope);
         break;
+
+    // Retorna o Address com o tipo
+    case NODE_TYPE:
+        char* node_data_type = numberToType(node->number);
+        Address addr_node_data_type = createVar(node_data_type); 
+        return(addr_node_data_type);
+    
+    // Retorn o Address com o nome
+    case NODE_VAR:
+        char* node_name = node->identifier;      
+        Address addr_node_name = createVar(node_name);
+        return(addr_node_name);
 
     // case NODE_IF_STMT:
     //     break;
@@ -239,7 +251,7 @@ Data* generateCode(ASTNode* node, char* scope){
         break;
     }
         
-    return none;
+    return emptyAddr();
 }
 
 void generateProgram(ASTNode* tree){

@@ -41,14 +41,6 @@ typedef enum {
     LABEL_KIND
 } OperandKind;
 
-typedef struct Data{
-    QuadOp op;
-    int val;
-    char* name;
-    char* data_type;
-    char* scope_name;
-} Data;
-
 typedef struct {
     OperandKind kind;
     int val;
@@ -83,7 +75,7 @@ Address* determineName(ASTNode* current);
 char* numberToType(int num);
 
 Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
-Data* generateCode(ASTNode* tree, char* escopo);
+Address generateCode(ASTNode* tree, char* escopo);
 
 void fprintCode(FILE* out);
 void generateProgram(ASTNode* tree);
