@@ -58,11 +58,11 @@ Address* createTemp() {
 }
 
 // Tenta buscar se o temp já existe
-Address* search_temp(char* name, char* func_name){
+Address* searchTemp(char* name, char* scope_name){
     TempStorage* current = TSHead;
     while(current != NULL){
-        if(strcmp(current->temp_addr->name, name) && strcmp(current->func_name, func_name)){
-             return(current->temp_addr);
+        if(strcmp(current->var_name, name) == 0 && strcmp(current->scope_name, scope_name) == 0){
+            return(current->temp_addr);
         }
         current = current->next;
     }
@@ -70,7 +70,8 @@ Address* search_temp(char* name, char* func_name){
     Address* new_temp = createTemp();
 
     TempStorage* new_storage = (TempStorage *)malloc(sizeof(TempStorage));
-    new_storage->func_name = func_name;
+    new_storage->var_name = name;
+    new_storage->scope_name = scope_name;
     new_storage->temp_addr = new_temp;
     new_storage->next = TSHead;
     TSHead = new_storage;
@@ -79,7 +80,7 @@ Address* search_temp(char* name, char* func_name){
 }
 
 // Já existe essa função em ast.c, porém precisa ser em letra minúscula o retorno
-char* number_to_type(int num) {
+char* numberToType(int num) {
     switch(num) {
         case INT: return "int";
         case VOID: return "void";
@@ -87,7 +88,7 @@ char* number_to_type(int num) {
 }
 
 // Forma novas quádruplas e salva usando os ponteiros head e tail
-Quad* make_new_quad(QuadOp op, Address a1, Address a2, Address a3) {
+Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3) {
     Quad *q = (Quad *)malloc(sizeof(Quad));
     q->op = op;
     q->addr1 = a1;
@@ -119,7 +120,7 @@ const char* opToString(QuadOp op) {
         case OP_GET:     return "get";
         case OP_EQ:      return "eq";
         case OP_DIF:     return "dif";
-        case OP_IFF:    return "iff";
+        case OP_IFF:     return "iff";
         case OP_GOTO:    return "goto";
         case OP_LAB:     return "lab";
         case OP_IN:      return "in";
@@ -130,9 +131,9 @@ const char* opToString(QuadOp op) {
         case OP_HALT:    return "halt";
         case OP_ARRAY_ACCESS: return "araccess";
         case OP_ARRAY_ASSIGN: return "arassign";
-        case OP_FUN: return "fun";
-        case OP_ARG: return "arg";
-        case OP_LOAD: return "load";
+        case OP_FUN:     return "fun";
+        case OP_ARG:     return "arg";
+        case OP_LOAD:    return "load";
         default:         return "unknown";
     }
 }
@@ -163,93 +164,77 @@ void fprintCode(FILE* out) {
     }
 }
 
-Address* determine_type(ASTNode* current){
-    Address* d_type = (Address *)malloc(sizeof(Address));
-    *d_type = emptyAddr();
-    // Olha para esquerda para ver o tipo
-    if(current->leftChild->type == NODE_TYPE){
-        char* type = number_to_type(current->leftChild->number);
-        *d_type = createVar(type);
-    }
-    else printf("Deu ruim - Tipo não encontrado");
+Data* generateCode(ASTNode* node, char* scope){
+    Data* none = NULL;
+    if(node == NULL) return none;
 
-    return d_type;
-}
-
-Address* determine_name(ASTNode* current){
-    Address* d_name = (Address *)malloc(sizeof(Address));
-    *d_name = emptyAddr();
-    // Olha para a direita para ver o nome
-    if(current->rightChild->type == NODE_VAR){
-        char* name = current->rightChild->identifier;
-        *d_name = createVar(name);
-    }
-    else printf("Deu ruim - Nome de função não econtrado");
-
-    return d_name;
-}
-
-Quad* generateCode(ASTNode* tree){
-    Quad *none = NULL;
-    if(tree == NULL) return none;
-
-    switch (tree->type){
+    switch (node->type){
+    // Caso seja uma função
     case NODE_FUN_DECL:
+        char* func_data_type = numberToType(node->leftChild->number);
+        char* func_name = node->rightChild->identifier;
 
-        Address* func_data_type = determine_type(tree);
-        Address* func_data_name = determine_name(tree);
-
-        make_new_quad(OP_FUN, *func_data_type, *func_data_name, emptyAddr());
+        Address addr_func_data_type = createVar(func_data_type);
+        Address addr_func_name = createVar(func_name);
+        makeNewQuad(OP_FUN, addr_func_data_type, addr_func_name, emptyAddr());
         
         // Verifica as partes da função
-        ASTNode *prox = tree->next;
-        if(prox->type == NODE_FUN_BODY){
-            // Verifica os parâmetros da função (se houver)
-            if(prox->leftChild != NULL && prox->leftChild->type == NODE_PARAM){
-                ASTNode *params = prox->leftChild; 
-                Quad* param;
-                while(params != NULL){
-                    param = generateCode(params);
-                    param->addr3 = *func_data_name;       // Define o escopo        
-                    
-                    Address* temp_name = search_temp(param->addr2.name, func_data_name->name);
-                    make_new_quad(OP_LOAD, *temp_name, param->addr2, emptyAddr());
-                    
-                    params = params->next;
-                }
-            }
-            else printf("Uma função sem o campo de parâmetros\n");
-
-            // Verifica o corpo da função
-            if(prox->rightChild != NULL && prox->rightChild->type == NODE_COMPOUND_STMT){
-                ASTNode *func_body = prox->rightChild->rightChild;
-                while(func_body != NULL){
-                    Quad* func_part = generateCode(func_body);
-
-                    // Se for alocação, define o escopo
-                    if(func_part != NULL && func_part->op == OP_ALLOC){
-                        func_part->addr2 = *func_data_name;
-                    }
-                    // Caso contrário, segue
-                    func_body = func_body->next;
-                }
-
-            }
-            else printf("Função sem corpo");
-        }
-        else printf("Deu ruim - Uma função está sem o corpo");
+        
+        // Verifica os parâmetros da função (se houver)
+        ASTNode* fun_body = node->next;
+        if(fun_body != NULL && fun_body->type == NODE_FUN_BODY) generateCode(fun_body, func_name);
+        break;
+    
+    case NODE_FUN_BODY:
+        // Verificação dos parâmetros
+        if(node->leftChild != NULL && node->leftChild->type == NODE_PARAM) generateCode(node->leftChild, scope);
+        // Verificação dos componetes da função
+        if(node->rightChild != NULL && node->rightChild->type == NODE_COMPOUND_STMT) generateCode(node->rightChild, scope);
         break;
 
     case NODE_PARAM:
-        // Identifica nome e tipo e retorna
-        Address* param_data_type = determine_type(tree);
-        Address* param_data_name = determine_name(tree);
-        return(make_new_quad(OP_PARAM, *param_data_type, *param_data_name, emptyAddr()));
+        char* param_data_type = numberToType(node->leftChild->number);
+        char* param_name = node->rightChild->identifier;      
+        
+        // Faz a declaração
+        Address addr_param_name = createVar(param_name);
+        Address addr_param_data_type = createVar(param_data_type);
+        makeNewQuad(OP_ARG, addr_param_data_type, addr_param_name, emptyAddr());
+
+        // Carrega para um registrador
+        Address* temp_name = searchTemp(param_name, scope);
+        makeNewQuad(OP_LOAD, *temp_name, addr_param_name, emptyAddr());
+        
+        // Vai para os irmãos
+        if(node->next != NULL) generateCode(node->next, scope);
         break;
 
-    case NODE_IF_STMT:
+    // case NODE_IF_STMT:
+    //     break;
+    // case NODE_OPERATOR:
+    //     // Identifica o tipo de operação
+    //     QuadOp operation;
+
         
-        break;
+
+    //     // Acessa o filho da esquerda e obtém o valor
+    //     int num = node->number;
+
+    //     // Decodifica a operação
+    //     switch(num) {
+    //         case 260: operation = OP_ADD; break;
+    //         case 261: operation = OP_SUB; break;
+    //         case 262: operation = OP_MUL; break;
+    //         case 263: operation = OP_DIV; break;
+    //         case 264: operation = OP_LT;  break;
+    //         case 265: operation = OP_LET; break;
+    //         case 266: operation = OP_GET; break;
+    //         case 267: operation = OP_GT;  break;
+    //         case 268: operation = OP_EQ;  break;
+    //         case 269: operation = OP_DIF; break;
+    //         default:  operation = OP_ADD; break;
+    //     }
+
     default:
         break;
     }
@@ -262,7 +247,7 @@ void generateProgram(ASTNode* tree){
     
     // Percorre todos os nós irmãos da raíz
     while(current != NULL){
-        generateCode(current);
+        if(current->type != NODE_FUN_BODY) generateCode(current, "Global");
         current = current->next;
     }
     

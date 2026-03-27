@@ -41,6 +41,14 @@ typedef enum {
     LABEL_KIND
 } OperandKind;
 
+typedef struct Data{
+    QuadOp op;
+    int val;
+    char* name;
+    char* data_type;
+    char* scope_name;
+} Data;
+
 typedef struct {
     OperandKind kind;
     int val;
@@ -58,7 +66,8 @@ typedef struct Quad {
 typedef struct TempStorage {
     struct TempStorage* next;
     Address* temp_addr;
-    char* func_name;
+    char* var_name;
+    char* scope_name;
 } TempStorage;
 
 Address emptyAddr();
@@ -66,15 +75,15 @@ Address createVal(int val);
 Address createVar(char *name);
 Address createLabel();
 Address* createTemp();
-Address* search_temp(char* name, char* func_name);
+Address* searchTemp(char* name, char* func_name);
 
-Address* determine_type(ASTNode* current);
-Address* determine_name(ASTNode* current);
+Address* determineType(ASTNode* current);
+Address* determineName(ASTNode* current);
 
-char* number_to_type(int num);
+char* numberToType(int num);
 
-Quad* make_new_quad(QuadOp op, Address a1, Address a2, Address a3);
-Quad* generateCode(ASTNode* tree);
+Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
+Data* generateCode(ASTNode* tree, char* escopo);
 
 void fprintCode(FILE* out);
 void generateProgram(ASTNode* tree);
