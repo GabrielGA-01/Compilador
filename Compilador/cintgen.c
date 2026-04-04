@@ -4,14 +4,14 @@
 #include "cintgen.h"
 
 static int tempCount = 0;
-static int labelCount = 0;
+static int labelCount = -1;
 
 Quad *head = NULL;
 Quad *tail = NULL;
 TempStorage* TSHead = NULL;
 
 // Para indicar um operando sem uso
-Address emptyAddr() {
+Address createEmptyAddr() {
     Address a;
     a.kind = EMPTY;
     a.val = 0;
@@ -20,7 +20,7 @@ Address emptyAddr() {
 }
 
 // Para criar um operando numérico
-Address createVal(int val) {
+Address createNumericAddr(int val) {
     Address a;
     a.kind = INT_CONST;
     a.val = val;
@@ -29,7 +29,7 @@ Address createVal(int val) {
 }
 
 // Para criar um operando string
-Address createVar(char *name) {
+Address createStringAddr(char *name) {
     Address a;
     a.kind = STRING_VAR;
     a.name = strdup(name);
@@ -37,7 +37,7 @@ Address createVar(char *name) {
 }
 
 // Para criar um novo label
-Address createLabel() {
+Address createLabelAddr() {
     Address a;
     char buffer[20];
     sprintf(buffer, "L%d", labelCount++);
@@ -47,7 +47,7 @@ Address createLabel() {
 }
 
 // Para criar uma nova variável
-Address* createTemp() {
+Address* createTempAddr() {
     Address* a = (Address*)malloc(sizeof(Address));
     char buffer[20];
     sprintf(buffer, "t%d", tempCount++);
@@ -58,7 +58,7 @@ Address* createTemp() {
 }
 
 // Tenta buscar se o temp já existe
-Address* searchTemp(char* name, char* scope_name){
+Address* searchCreateTempAddr(char* name, char* scope_name, int array_size){
     TempStorage* current = TSHead;
     while(current != NULL){
         // Verifica nome e escopo
@@ -70,14 +70,15 @@ Address* searchTemp(char* name, char* scope_name){
         current = current->next;
     }
 
-    Address* new_temp = createTemp();
+    Address* new_temp = createTempAddr();
 
     TempStorage* new_storage = (TempStorage *)malloc(sizeof(TempStorage));
     new_storage->var_name = name;
     new_storage->scope_name = scope_name;
     new_storage->temp_addr = new_temp;
+    new_storage->array_size = array_size;
     new_storage->next = TSHead;
-    
+
     TSHead = new_storage;
 
     return(new_temp);
@@ -125,18 +126,20 @@ const char* opToString(QuadOp op) {
         case OP_EQ:      return "eq";
         case OP_DIF:     return "dif";
         case OP_IFF:     return "iff";
-        case OP_GOTO:    return "goto";
-        case OP_LAB:     return "lab";
+        case OP_JUMP:    return "jmp";
+        case OP_LABEL:     return "lab";
         case OP_IN:      return "in";
         case OP_OUT:     return "out";
         case OP_PARAM:   return "param";
         case OP_CALL:    return "call";
         case OP_RET:     return "ret";
         case OP_HALT:    return "halt";
-        case OP_ARRAY_ACCESS: return "araccess";
-        case OP_ARRAY_ASSIGN: return "arassign";
+        case OP_ARRAY_ACCESS: return "arrces";
+        case OP_ARRAY_ASSIGN: return "arrsgn";
         case OP_FUN:     return "fun";
+        case OP_END_FUN: return "end";
         case OP_ARG:     return "arg";
+        case OP_ARG_ARRAY: return "arrarg";
         case OP_LOAD:    return "load";
         default:         return "unknown";
     }
@@ -169,7 +172,7 @@ void fprintCode(FILE* out) {
 }
 
 Address generateCode(ASTNode* node, char* scope){
-    if(node == NULL) return emptyAddr();
+    if(node == NULL) return createEmptyAddr();
 
     switch (node->type){
     // Caso seja uma função
@@ -177,20 +180,30 @@ Address generateCode(ASTNode* node, char* scope){
         char* func_data_type = numberToType(node->leftChild->number);
         char* func_name = node->rightChild->identifier;
 
-        Address addr_func_data_type = createVar(func_data_type);
-        Address addr_func_name = createVar(func_name);
-        makeNewQuad(OP_FUN, addr_func_data_type, addr_func_name, emptyAddr());
+        Address addr_func_data_type = createStringAddr(func_data_type);
+        Address addr_func_name = createStringAddr(func_name);
+        makeNewQuad(OP_FUN, addr_func_data_type, addr_func_name, createEmptyAddr());
         
         // Verifica as partes da função
         
         // Verifica os parâmetros da função (se houver)
         ASTNode* fun_body = node->next;
+
+        // Estrutura a função
         if(fun_body != NULL && fun_body->type == NODE_FUN_BODY) generateCode(fun_body, func_name);
+
+        // Fim da funço
+        makeNewQuad(OP_END_FUN, addr_func_name, createEmptyAddr(), createEmptyAddr());
+
         break;
     
     case NODE_FUN_BODY:
         // Verificação dos parâmetros
-        if(node->leftChild != NULL && node->leftChild->type == NODE_PARAM) generateCode(node->leftChild, scope);
+        ASTNode* param = node->leftChild;
+        while(param != NULL && param->type == NODE_PARAM){
+            generateCode(param, scope);
+            param = param->next;
+        }
         // Verificação dos componetes da função
         if(node->rightChild != NULL && node->rightChild->type == NODE_COMPOUND_STMT) generateCode(node->rightChild, scope);
         break;
@@ -198,60 +211,133 @@ Address generateCode(ASTNode* node, char* scope){
     case NODE_PARAM:
         // Declaração de um parâmetro
         Address addr_param_data_type = generateCode(node->leftChild, scope);
-        Address addr_param_name = generateCode(node->rightChild, scope);
-        makeNewQuad(OP_ARG, addr_param_data_type, addr_param_name, emptyAddr());
+        Address addr_param_name = createStringAddr(node->rightChild->identifier);
 
-        // Associa a um variável temp
-        Address* temp_name = searchTemp(addr_param_name.name, scope);
-        makeNewQuad(OP_LOAD, *temp_name, addr_param_name, emptyAddr());
-        
-        // Vai para os irmãos
-        if(node->next != NULL) generateCode(node->next, scope);
+        // Chuta que não é array e depois verifica
+        QuadOp op = OP_ARG;
+        int array_size = 0;
+        if(node->rightChild != NULL && node->rightChild->expType == NODE_ARRAY_DECL){
+            op = OP_ARG_ARRAY;
+            ASTNode* a_size = node->rightChild->rightChild;
+            if(a_size == NULL) array_size = 1;
+            else array_size = a_size->number;
+        }
+
+        makeNewQuad(op, addr_param_data_type, addr_param_name, createEmptyAddr());
+    
+        break;
+
+    case NODE_COMPOUND_STMT:
+        ASTNode* instruction = node->rightChild;
+        // Percorre todas instruções dentro do corpo da função
+        // Há um caso especial para quando há um IF
+        while(instruction != NULL){
+            generateCode(instruction, scope);
+            if(instruction->type == NODE_IF_STMT && instruction->next != NULL) instruction = instruction->next->next;
+            else instruction = instruction->next;
+        }
+        break;
+
+    case NODE_IF_STMT:
+        Address compare = generateCode(node->leftChild, scope);
+        Address if_false_label = createLabelAddr();
+        makeNewQuad(OP_IFF, compare, if_false_label, createEmptyAddr());
+
+        // Inicio do caso para verdade
+        generateCode(node->rightChild, scope);
+        // Salto para o fim do IF
+        Address if_true_label = createLabelAddr();
+        makeNewQuad(OP_JUMP, if_true_label, createEmptyAddr(), createEmptyAddr());
+
+        // Label do início do caso para falso
+        makeNewQuad(OP_LABEL, if_false_label, createEmptyAddr(), createEmptyAddr());
+        generateCode(node->next, scope);
+
+        // Label indicando o fim do IF
+        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
+        break;
+
+    case NODE_RETURN_STMT:
+        Address ret = generateCode(node->leftChild, scope);
+
+        makeNewQuad(OP_RET, ret, createEmptyAddr(), createEmptyAddr());
+        return ret;
+        break;
+
+    case NODE_FUN_CALL:
+        int param_number = 0;
+        Address func_call_name = createStringAddr(node->leftChild->identifier);
+        ASTNode* parameter= node->rightChild;
+        while(parameter != NULL){
+            Address current_parameter = generateCode(parameter, scope);
+            makeNewQuad(OP_PARAM, current_parameter, createEmptyAddr(), createEmptyAddr());
+            param_number++;
+            parameter = parameter->next;
+        }
+
+        Address fun_call_temp = *createTempAddr();
+        makeNewQuad(OP_CALL, fun_call_temp, func_call_name, createNumericAddr(param_number));
+
+        return(fun_call_temp);
+        break;
+
+    case NODE_BINARY_OP:
+    case NODE_OPERATOR:
+        // Identifica o tipo de operação
+        QuadOp operation;
+        // Decodifica a operação
+        switch(node->number) {
+            case 260: operation = OP_ADD; break;
+            case 261: operation = OP_SUB; break;
+            case 262: operation = OP_MUL; break;
+            case 263: operation = OP_DIV; break;
+            case 264: operation = OP_LT;  break;
+            case 265: operation = OP_LET; break;
+            case 266: operation = OP_GET; break;
+            case 267: operation = OP_GT;  break;
+            case 268: operation = OP_EQ;  break;
+            case 269: operation = OP_DIF; break;
+            default:  operation = OP_ADD; break;
+        }
+
+        createLabelAddr();
+        Address left_operator = generateCode(node->leftChild, scope);
+        Address right_operator = generateCode(node->rightChild, scope);
+
+        Address* temp_operator = createTempAddr();
+        makeNewQuad(operation, *temp_operator, left_operator, right_operator);
+
+        return(*temp_operator);
         break;
 
     // Retorna o Address com o tipo
     case NODE_TYPE:
         char* node_data_type = numberToType(node->number);
-        Address addr_node_data_type = createVar(node_data_type); 
+        Address addr_node_data_type = createStringAddr(node_data_type); 
         return(addr_node_data_type);
-    
-    // Retorn o Address com o nome
+        break;
+
+    // Retorn um temp com o valor
     case NODE_VAR:
         char* node_name = node->identifier;      
-        Address addr_node_name = createVar(node_name);
-        return(addr_node_name);
+        Address addr_node_name = createStringAddr(node_name);
 
-    // case NODE_IF_STMT:
-    //     break;
-    // case NODE_OPERATOR:
-    //     // Identifica o tipo de operação
-    //     QuadOp operation;
+        Address var_temp_addr = *createTempAddr(&node_name, scope, 1);
+        makeNewQuad(OP_LOAD, var_temp_addr, addr_node_name, createEmptyAddr());
 
-        
+        return(var_temp_addr);
+        break;
 
-    //     // Acessa o filho da esquerda e obtém o valor
-    //     int num = node->number;
-
-    //     // Decodifica a operação
-    //     switch(num) {
-    //         case 260: operation = OP_ADD; break;
-    //         case 261: operation = OP_SUB; break;
-    //         case 262: operation = OP_MUL; break;
-    //         case 263: operation = OP_DIV; break;
-    //         case 264: operation = OP_LT;  break;
-    //         case 265: operation = OP_LET; break;
-    //         case 266: operation = OP_GET; break;
-    //         case 267: operation = OP_GT;  break;
-    //         case 268: operation = OP_EQ;  break;
-    //         case 269: operation = OP_DIF; break;
-    //         default:  operation = OP_ADD; break;
-    //     }
+    case NODE_NUM:
+        Address addr_number = createNumericAddr(node->number);
+        return(addr_number);
+        break;
 
     default:
         break;
     }
         
-    return emptyAddr();
+    return createEmptyAddr();
 }
 
 void generateProgram(ASTNode* tree){

@@ -16,8 +16,8 @@ typedef enum {
     OP_EQ,
     OP_DIF,
     OP_IFF,
-    OP_GOTO,
-    OP_LAB,
+    OP_JUMP,
+    OP_LABEL,
     OP_IN,
     OP_OUT,
     OP_PARAM,
@@ -27,7 +27,9 @@ typedef enum {
     OP_ARRAY_ACCESS,
     OP_ARRAY_ASSIGN,
     OP_FUN,
+    OP_END_FUN,
     OP_ARG,
+    OP_ARG_ARRAY,
     OP_LOAD,
     OP_ALLOC,
     NONE_OP
@@ -60,14 +62,15 @@ typedef struct TempStorage {
     Address* temp_addr;
     char* var_name;
     char* scope_name;
+    int array_size;
 } TempStorage;
 
-Address emptyAddr();
-Address createVal(int val);
-Address createVar(char *name);
-Address createLabel();
-Address* createTemp();
-Address* searchTemp(char* name, char* func_name);
+Address createEmptyAddr();
+Address createNumericAddr(int val);
+Address createStringAddr(char *name);
+Address createLabelAddr();
+Address* createTempAddr();
+Address* searchCreateTemp(char* name, char* func_name, int array_size);
 
 Address* determineType(ASTNode* current);
 Address* determineName(ASTNode* current);
