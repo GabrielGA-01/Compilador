@@ -118,7 +118,7 @@ const char* opToString(QuadOp op) {
         case OP_SUB:     return "sub";
         case OP_MUL:     return "mul";
         case OP_DIV:     return "div";
-        case OP_ASN:     return "asn";
+        case OP_ASSIGN:     return "assign";
         case OP_LT:      return "lt";
         case OP_LET:     return "let";
         case OP_GT:      return "gt";
@@ -141,6 +141,8 @@ const char* opToString(QuadOp op) {
         case OP_ARG:     return "arg";
         case OP_ARG_ARRAY: return "arrarg";
         case OP_LOAD:    return "load";
+        case OP_STORE:   return "store";
+        case OP_ALLOC:   return "alloc";
         default:         return "unknown";
     }
 }
@@ -148,7 +150,7 @@ const char* opToString(QuadOp op) {
 // Extrai corretamente o tipo do operando e escreve ele
 void fprintAddr(FILE* out, Address a) {
     switch(a.kind) {
-        case EMPTY: fprintf(out, "_"); break;
+        case EMPTY: fprintf(out, "-"); break;
         case INT_CONST: fprintf(out, "%d", a.val); break;
         case STRING_VAR: fprintf(out, "%s", a.name); break;
         case TEMP_VAR: fprintf(out, "%s", a.name); break;
@@ -212,25 +214,62 @@ Address generateCode(ASTNode* node, char* scope){
         // Declaração de um parâmetro
         Address addr_param_data_type = generateCode(node->leftChild, scope);
         Address addr_param_name = createStringAddr(node->rightChild->identifier);
+        
+        QuadOp op_param;
+        int array_size_param;
 
         // Chuta que não é array e depois verifica
-        QuadOp op = OP_ARG;
-        int array_size = 0;
-        if(node->rightChild != NULL && node->rightChild->expType == NODE_ARRAY_DECL){
-            op = OP_ARG_ARRAY;
-            ASTNode* a_size = node->rightChild->rightChild;
-            if(a_size == NULL) array_size = 1;
-            else array_size = a_size->number;
+        if(node->rightChild != NULL){
+            if(node->rightChild->type == NODE_VAR){
+                op_param = OP_ARG;
+                array_size_param = 0;
+            }
+            else if(node->rightChild->type == NODE_ARRAY_DECL){
+                op_param = OP_ARG_ARRAY;
+                ASTNode* a_size = node->rightChild->rightChild;
+                if(a_size == NULL) array_size_param = 1;
+                else array_size_param = a_size->number;
+            }
         }
 
-        makeNewQuad(op, addr_param_data_type, addr_param_name, createEmptyAddr());
+        makeNewQuad(op_param, addr_param_data_type, addr_param_name, createEmptyAddr());
+    
+        break;
+
+    case NODE_VAR_DECL:
+        // Declaração de um parâmetro
+        Address addr_var_decl_data_type = generateCode(node->leftChild, scope);
+        Address addr_var_decl_name = createStringAddr(node->rightChild->identifier);
+        
+        QuadOp op_var_decl;
+        int array_size_var_decl;
+
+        // Chuta que não é array e depois verifica
+        if(node->rightChild != NULL){
+            if(node->type == NODE_VAR_DECL){
+                if(node->rightChild->type == NODE_VAR){
+                    op_var_decl = OP_ALLOC;
+                    array_size_var_decl = 0;
+                }
+                // Fazer caso do array
+            }
+        }
+
+        makeNewQuad(op_var_decl, addr_var_decl_data_type, addr_var_decl_name, createStringAddr(scope));
     
         break;
 
     case NODE_COMPOUND_STMT:
-        ASTNode* instruction = node->rightChild;
+        // Verifica as variáveis que são declaradas na função
+        ASTNode* declaracao = node->leftChild;
+        while(declaracao != NULL){
+            generateCode(declaracao, scope);
+            declaracao = declaracao->next;
+        }
+
         // Percorre todas instruções dentro do corpo da função
         // Há um caso especial para quando há um IF
+        ASTNode* instruction = node->rightChild;
         while(instruction != NULL){
             generateCode(instruction, scope);
             if(instruction->type == NODE_IF_STMT && instruction->next != NULL) instruction = instruction->next->next;
@@ -310,6 +349,23 @@ Address generateCode(ASTNode* node, char* scope){
         return(*temp_operator);
         break;
 
+    case NODE_ASSIGN_EXPR:
+        Address value = generateCode(node->rightChild, scope);
+    
+        // Não funciona para array
+        if(node->leftChild != NULL){
+            if(node->leftChild->type == NODE_VAR){
+                Address variable = createStringAddr(node->leftChild->identifier);
+                makeNewQuad(OP_STORE, variable, value, createEmptyAddr());
+            }
+            else if(node->leftChild->type == NODE_ARRAY_ACCESS){
+                Address variable = generateCode(node->leftChild, scope);
+                makeNewQuad(OP_ASSIGN, variable, value, createEmptyAddr());
+            }
+        }
+
+        break;
+
     // Retorna o Address com o tipo
     case NODE_TYPE:
         char* node_data_type = numberToType(node->number);
@@ -348,6 +404,7 @@ void generateProgram(ASTNode* tree){
         if(current->type != NODE_FUN_BODY) generateCode(current, "Global");
         current = current->next;
     }
+    makeNewQuad(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     
     FILE* file = fopen("output/new_intermediate_code.txt", "w");
     fprintCode(file);

@@ -8,7 +8,7 @@ typedef enum {
     OP_SUB,
     OP_MUL,
     OP_DIV,
-    OP_ASN,
+    OP_ASSIGN,
     OP_LT,
     OP_LET,
     OP_GT,
@@ -31,6 +31,7 @@ typedef enum {
     OP_ARG,
     OP_ARG_ARRAY,
     OP_LOAD,
+    OP_STORE,
     OP_ALLOC,
     NONE_OP
 } QuadOp;
