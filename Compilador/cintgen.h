@@ -29,10 +29,11 @@ typedef enum {
     OP_FUN,
     OP_END_FUN,
     OP_ARG,
-    OP_ARG_ARRAY,
+    OP_ARRAY_ARG,
     OP_LOAD,
     OP_STORE,
     OP_ALLOC,
+    OP_ARRAY_ALLOC,
     NONE_OP
 } QuadOp;
 
@@ -66,6 +67,9 @@ typedef struct TempStorage {
     int array_size;
 } TempStorage;
 
+int isArray(ASTNode* node);
+
+Address determineVariableSize(ASTNode* node);
 Address createEmptyAddr();
 Address createNumericAddr(int val);
 Address createStringAddr(char *name);
@@ -79,7 +83,7 @@ Address* determineName(ASTNode* current);
 char* numberToType(int num);
 
 Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
-Address generateCode(ASTNode* tree, char* escopo);
+Address generateCode(ASTNode* tree, char* escopo, int mode);
 
 void fprintCode(FILE* out);
 void generateProgram(ASTNode* tree);
