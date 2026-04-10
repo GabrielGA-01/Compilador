@@ -15,7 +15,7 @@ typedef enum {
     OP_GET,
     OP_EQ,
     OP_DIF,
-    OP_IFF,
+    OP_IFT,
     OP_JUMP,
     OP_LABEL,
     OP_IN,

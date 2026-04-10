@@ -125,7 +125,7 @@ const char* opToString(QuadOp op) {
         case OP_GET:     return "get";
         case OP_EQ:      return "eq";
         case OP_DIF:     return "dif";
-        case OP_IFF:     return "iff";
+        case OP_IFT:     return "ift";
         case OP_JUMP:    return "jmp";
         case OP_LABEL:     return "lab";
         case OP_IN:      return "in";
@@ -278,32 +278,36 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
     case NODE_IF_STMT:
         Address compare_result_if = generateCode(node->leftChild, scope, 1);
-        Address if_false_label = createLabelAddr();
-        makeNewQuad(OP_IFF, compare_result_if, if_false_label, createEmptyAddr());
-
-        // Inicio do caso para verdade
-        generateCode(node->rightChild, scope, 1);
-        // Salto para o fim do IF
+        Address if_end_label = createLabelAddr();
         Address if_true_label = createLabelAddr();
-        makeNewQuad(OP_JUMP, if_true_label, createEmptyAddr(), createEmptyAddr());
 
-        // Label do início do caso para falso
-        makeNewQuad(OP_LABEL, if_false_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_IFT, compare_result_if, if_true_label, createEmptyAddr());
+        
+        // Início do caso para falso
         generateCode(node->next, scope, 1);
+        makeNewQuad(OP_JUMP, if_end_label, createEmptyAddr(), createEmptyAddr());
+
+        // Início do caso para verdadeiro
+        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
+        generateCode(node->rightChild, scope, 1);
 
         // Label indicando o fim do IF
-        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, if_end_label, createEmptyAddr(), createEmptyAddr());
+
         break;
 
     case NODE_WHILE_STMT:
         Address while_initial_label = createLabelAddr();
+        Address while_content = createLabelAddr();
         Address while_final_label = createLabelAddr();
 
         // Cria label no início do while
         makeNewQuad(OP_LABEL, while_initial_label, createEmptyAddr(), createEmptyAddr());
     
         Address compare_result_while = generateCode(node->leftChild, scope, 1);
-        makeNewQuad(OP_IFF, compare_result_while, while_final_label, createEmptyAddr());
+        makeNewQuad(OP_IFT, compare_result_while, while_content, createEmptyAddr());
+        makeNewQuad(OP_JUMP, while_final_label, createEmptyAddr(), createEmptyAddr());  // Caso falso
+        makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
 
         // Conteúdo do while
         generateCode(node->rightChild, scope, 0);
