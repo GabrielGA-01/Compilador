@@ -32,6 +32,7 @@ typedef enum {
     OP_ARRAY_ARG,
     OP_LOAD,
     OP_STORE,
+    OP_MOVI,
     OP_ALLOC,
     OP_ARRAY_ALLOC,
     NONE_OP
