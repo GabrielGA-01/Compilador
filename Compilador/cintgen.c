@@ -118,7 +118,6 @@ const char* opToString(QuadOp op) {
         case OP_SUB:     return "sub";
         case OP_MUL:     return "mul";
         case OP_DIV:     return "div";
-        case OP_ASSIGN:     return "assign";
         case OP_LT:      return "lt";
         case OP_LET:     return "let";
         case OP_GT:      return "gt";
@@ -134,17 +133,13 @@ const char* opToString(QuadOp op) {
         case OP_CALL:    return "call";
         case OP_RET:     return "ret";
         case OP_HALT:    return "halt";
-        case OP_ARRAY_ACCESS: return "arrces";
-        case OP_ARRAY_ASSIGN: return "arrsgn";
         case OP_FUN:     return "fun";
         case OP_END_FUN: return "end";
         case OP_ARG:     return "arg";
-        case OP_ARRAY_ARG: return "arrarg";
         case OP_LOAD:    return "load";
         case OP_STORE:   return "store";
         case OP_MOVI:    return "movi";
         case OP_ALLOC:   return "alloc";
-        case OP_ARRAY_ALLOC: return "allocar";
         default:         return "unknown";
     }
 }
@@ -240,7 +235,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address addr_param_name = generateCode(node->rightChild, scope, 0);
         Address array_size_param = determineVariableSize(node->rightChild);
         
-        QuadOp op_param = isArray(node->rightChild) == 1 ? OP_ARRAY_ARG : OP_ARG;
+        QuadOp op_param = OP_ARG;
 
         makeNewQuad(op_param, addr_param_name, array_size_param, createStringAddr(scope));
     
@@ -253,7 +248,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         
         Address array_size_var_decl = determineVariableSize(node->rightChild);
 
-        QuadOp op_var_decl = isArray(node->rightChild) == 1 ? OP_ARRAY_ALLOC : OP_ALLOC;
+        QuadOp op_var_decl = OP_ALLOC;
         
         makeNewQuad(op_var_decl, addr_var_decl_name, array_size_var_decl, createStringAddr(scope));
     
