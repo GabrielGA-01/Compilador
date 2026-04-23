@@ -452,7 +452,7 @@ void generateProgram(ASTNode* tree){
     
     // Percorre todos os nós irmãos da raíz
     while(current != NULL){
-        if(current->type != NODE_FUN_BODY && current->type) generateCode(current, "global", 1);
+        if(current->type != NODE_FUN_BODY) generateCode(current, "global", 1);
         if(current->type == NODE_IF_STMT && current->next != NULL) current = current->next->next;
         else current = current->next;
     }
