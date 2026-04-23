@@ -267,7 +267,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         ASTNode* instruction = node->rightChild;
         while(instruction != NULL){
             generateCode(instruction, scope, 1);
-            if(instruction->type == NODE_IF_STMT && instruction->next != NULL) instruction = instruction->next->next;
+            if(instruction->type == NODE_IF_STMT && instruction->number == 1 && instruction->number == 1 && instruction->next != NULL) instruction = instruction->next->next;
             else instruction = instruction->next;
         }
         break;
@@ -279,8 +279,10 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
         makeNewQuad(OP_IFT, compare_result_if, if_true_label, createEmptyAddr());
         
-        // Início do caso para falso
-        generateCode(node->next, scope, 1);
+        // Início do caso para falso se tiver else
+        if(node->number == 1){
+            generateCode(node->next, scope, 1);
+        }
         makeNewQuad(OP_JUMP, if_end_label, createEmptyAddr(), createEmptyAddr());
 
         // Início do caso para verdadeiro
@@ -326,12 +328,12 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             Address array_access_pos = determineVariableSize(node);
             
             // Carrega o endereço para um registrador e o acessa com um deslocamento
-            Address *reg_with_addr_access = createTempAddr();
-            makeNewQuad(OP_MOVI, *reg_with_addr_access, array_access_name, createEmptyAddr());
+            // Address *reg_with_addr_access = createTempAddr();
+            // makeNewQuad(OP_MOVI, *reg_with_addr_access, array_access_name, createEmptyAddr());
             
             Address *array_access_temp = createTempAddr();
 
-            makeNewQuad(OP_LOAD, *array_access_temp, *reg_with_addr_access, array_access_pos);
+            makeNewQuad(OP_LOAD, *array_access_temp, array_access_name, array_access_pos);
             return *array_access_temp;
         }
         break;
@@ -397,10 +399,10 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         if(isArray(node->leftChild) == 0) position_assign_expr.val--; // Se for uma variável, lê a "posição zero"
 
         // Carrega o endereço para um registrador e o acessa com um deslocamento
-        Address *reg_with_addr = createTempAddr();
-        makeNewQuad(OP_MOVI, *reg_with_addr, variable_addr, createEmptyAddr());
+        // Address *reg_with_addr = createTempAddr();
+        // makeNewQuad(OP_MOVI, *reg_with_addr, variable_addr, createEmptyAddr());
 
-        makeNewQuad(OP_STORE, *reg_with_addr, value_to_store, position_assign_expr);
+        makeNewQuad(OP_STORE, variable_addr, value_to_store, position_assign_expr);
 
         break;
 
@@ -422,12 +424,12 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             if(isArray(node) == 0) pos_temp_addr.val--; // Se for uma variável, lê a "posição zero"
             
             // Carrega o endereço para um registrador e o acessa com um deslocamento
-            Address *reg_with_addr_var = createTempAddr();
-            makeNewQuad(OP_MOVI, *reg_with_addr_var, addr_node_name, createEmptyAddr());
+            // Address *reg_with_addr_var = createTempAddr();
+            // makeNewQuad(OP_MOVI, *reg_with_addr_var, addr_node_name, createEmptyAddr());
             
             Address var_temp_addr = *createTempAddr();
             
-            makeNewQuad(OP_LOAD, var_temp_addr, *reg_with_addr_var, pos_temp_addr);
+            makeNewQuad(OP_LOAD, var_temp_addr, addr_node_name, pos_temp_addr);
             return(var_temp_addr);
         }
 
