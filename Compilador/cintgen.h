@@ -55,14 +55,6 @@ typedef struct Quad {
     struct Quad *next;
 } Quad;
 
-typedef struct TempStorage {
-    struct TempStorage* next;
-    Address* temp_addr;
-    char* var_name;
-    char* scope_name;
-    int array_size;
-} TempStorage;
-
 int isArray(ASTNode* node);
 
 Address determineVariableSize(ASTNode* node);
@@ -71,10 +63,6 @@ Address createNumericAddr(int val);
 Address createStringAddr(char *name);
 Address createLabelAddr();
 Address* createTempAddr();
-Address* searchCreateTemp(char* name, char* func_name, int array_size);
-
-Address* determineType(ASTNode* current);
-Address* determineName(ASTNode* current);
 
 char* numberToType(int num);
 

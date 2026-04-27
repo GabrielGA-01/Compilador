@@ -8,7 +8,6 @@ static int labelCount = -1;
 
 Quad *head = NULL;
 Quad *tail = NULL;
-TempStorage* TSHead = NULL;
 
 // Para indicar um operando sem uso
 Address createEmptyAddr() {
@@ -55,33 +54,6 @@ Address* createTempAddr() {
     a->name = strdup(buffer);
     
     return a;
-}
-
-// Tenta buscar se o temp já existe
-Address* searchCreateTempAddr(char* name, char* scope_name, int array_size){
-    TempStorage* current = TSHead;
-    while(current != NULL){
-        // Verifica nome e escopo
-        if(strcmp(current->var_name, name) == 0 && strcmp(current->scope_name, scope_name) == 0){
-            return(current->temp_addr);
-        }
-        // Verifica se é global
-        else if(strcmp(current->scope_name, "Global") == 0) return(current->temp_addr);
-        current = current->next;
-    }
-
-    Address* new_temp = createTempAddr();
-
-    TempStorage* new_storage = (TempStorage *)malloc(sizeof(TempStorage));
-    new_storage->var_name = name;
-    new_storage->scope_name = scope_name;
-    new_storage->temp_addr = new_temp;
-    new_storage->array_size = array_size;
-    new_storage->next = TSHead;
-
-    TSHead = new_storage;
-
-    return(new_temp);
 }
 
 // Já existe essa função em ast.c, porém precisa ser em letra minúscula o retorno
