@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "cintgen.h"
+#include "symtab.h" // Para buscar por vetor na tabela de símbolos
 
 static int tempCount = 0;
 static int labelCount = -1;
@@ -391,17 +392,20 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address addr_node_name = createStringAddr(node_name);
 
         if(mode == 0) return(addr_node_name);
+
         else{
-            Address pos_temp_addr = determineVariableSize(node);
-            if(isArray(node) == 0) pos_temp_addr.val--; // Se for uma variável, lê a "posição zero"
-            
-            // Carrega o endereço para um registrador e o acessa com um deslocamento
-            // Address *reg_with_addr_var = createTempAddr();
-            // makeNewQuad(OP_MOVI, *reg_with_addr_var, addr_node_name, createEmptyAddr());
-            
             Address var_temp_addr = *createTempAddr();
-            
-            makeNewQuad(OP_LOAD, var_temp_addr, addr_node_name, pos_temp_addr);
+            // Caso queira o endereço de um array
+            if(st_lookup_is_array(node_name) == 1){
+                makeNewQuad(OP_MOVI, var_temp_addr, addr_node_name, createEmptyAddr());
+            }
+            // Caso queira o valor da variável
+            else{
+                Address pos_temp_addr = determineVariableSize(node);
+                if(isArray(node) == 0) pos_temp_addr.val--; // Se for uma variável, lê a "posição zero"
+
+                makeNewQuad(OP_LOAD, var_temp_addr, addr_node_name, pos_temp_addr);
+            }
             return(var_temp_addr);
         }
 
