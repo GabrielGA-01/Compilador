@@ -113,6 +113,7 @@ const char* opToString(QuadOp op) {
         case OP_STORE:   return "store";
         case OP_MOVI:    return "movi";
         case OP_ALLOC:   return "alloc";
+        case OP_FREE:    return "free";
         default:         return "unknown";
     }
 }
@@ -228,11 +229,13 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         break;
 
     case NODE_COMPOUND_STMT:
-        // Verifica as variáveis que são declaradas na função
-        ASTNode* declaracao = node->leftChild;
-        while(declaracao != NULL){
-            generateCode(declaracao, scope, 1);
-            declaracao = declaracao->next;
+        // Verifica as variáveis que são declaradas na função se mode != 2
+        if(mode != 2){
+            ASTNode* declaracao = node->leftChild;
+            while(declaracao != NULL){
+                generateCode(declaracao, scope, 1);
+                declaracao = declaracao->next;
+            }
         }
 
         // Percorre todas instruções dentro do corpo da função
@@ -272,6 +275,16 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address while_content = createLabelAddr();
         Address while_final_label = createLabelAddr();
 
+        // Declara as variáveis do while antes de entrar nele
+        ASTNode* variable_decl = node->rightChild->leftChild; //->NODE_COMPOUND_STMT->Variables declarations
+
+        int while_variables = 0;
+        while(variable_decl != NULL){
+            generateCode(variable_decl, scope, 1);
+            variable_decl = variable_decl->next;
+            while_variables++;
+        }
+        
         // Cria label no início do while
         makeNewQuad(OP_LABEL, while_initial_label, createEmptyAddr(), createEmptyAddr());
     
@@ -281,12 +294,17 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
 
         // Conteúdo do while
-        generateCode(node->rightChild, scope, 0);
+        generateCode(node->rightChild, scope, 2);
         makeNewQuad(OP_JUMP, while_initial_label, createEmptyAddr(), createEmptyAddr());
 
 
         // Cria label no final do while
         makeNewQuad(OP_LABEL, while_final_label, createEmptyAddr(), createEmptyAddr());
+
+        // Desaloca as variáveos do while
+        if(while_variables != 0){
+            makeNewQuad(OP_FREE, createNumericAddr(while_variables), createEmptyAddr(), createEmptyAddr());
+        }
 
         break;
 
@@ -329,10 +347,14 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             parameter = parameter->next;
         }
 
-        Address fun_call_temp = *createTempAddr();
-        makeNewQuad(OP_CALL, fun_call_temp, func_call_name, createNumericAddr(param_number));
-
-        return(fun_call_temp);
+        // Se não for tipo void retorna o valor
+        if(st_lookup_type(func_call_name.name) != Void){
+            Address fun_call_temp = *createTempAddr();
+            makeNewQuad(OP_CALL, fun_call_temp, func_call_name, createNumericAddr(param_number));
+            return(fun_call_temp);
+        }
+        // Caso contrário, apenas chama a função
+        else makeNewQuad(OP_CALL, createEmptyAddr(), func_call_name, createNumericAddr(param_number));
         break;
 
     case NODE_BINARY_OP:
@@ -425,7 +447,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
 void generateProgram(ASTNode* tree){
     ASTNode *current = tree;
-    
+
     // Percorre todos os nós irmãos da raíz
     while(current != NULL){
         if(current->type != NODE_FUN_BODY) generateCode(current, "global", 1);

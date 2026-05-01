@@ -30,6 +30,7 @@ typedef enum {
     OP_STORE,
     OP_MOVI,
     OP_ALLOC,
+    OP_FREE,
     NONE_OP
 } QuadOp;
 
