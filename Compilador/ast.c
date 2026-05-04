@@ -11,6 +11,7 @@ ASTNode* create_node(NodeType type, ASTNode* left, ASTNode* right) {
     newNode->leftChild = left;
     newNode->rightChild = right;
     newNode->next = NULL;
+    newNode->number = -1;
     
     extern int yylineno;
     newNode->lineno = yylineno;
