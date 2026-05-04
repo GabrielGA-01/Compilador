@@ -18,6 +18,7 @@ IdKind st_lookup_kind ( char * name );
 int st_lookup_num_params ( char * name );
 ExpType st_lookup_param_type ( char * name, int paramIndex );
 int st_lookup_is_array ( char * name );
+int st_lookup_is_array_scope ( char * name, char * scopeName );
 void st_add_ref( char * name, int lineno );
 void st_enter_scope(char * scopeName);
 void st_exit_scope(void);

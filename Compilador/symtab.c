@@ -344,6 +344,31 @@ int st_lookup_is_array ( char * name )
   return 0;
 }
 
+// verifica se simbolo eh array passando o escopo explicitamente
+int st_lookup_is_array_scope ( char * name, char * scopeName )
+{ 
+    int h = hash(name);
+    BucketList l =  hashTable[h];
+    
+    BucketList temp = l;
+    while (temp != NULL) {
+        if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, scopeName) == 0) {
+            return temp->isArray;
+        }
+        temp = temp->next;
+    }
+    
+    temp = l;
+    while (temp != NULL) {
+        if (strcmp(name, temp->name) == 0 && strcmp(temp->scopeName, "Global") == 0) {
+            return temp->isArray;
+        }
+        temp = temp->next;
+    }
+    
+    return 0;
+}
+
 // imprime tabela formatada
 void printSymTab(FILE * listing)
 { 
