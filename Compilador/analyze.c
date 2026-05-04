@@ -190,7 +190,7 @@ static void insertNode( ASTNode * t)
                  sprintf(buf, "Parameter '%s' already declared", name);
                  typeError(t, buf);
             } else {
-                int isArray = (t->rightChild != NULL && t->rightChild->type == NODE_ARRAY_DECL) ? 1 : 0;
+                int isArray = (t->rightChild != NULL && t->rightChild->type == NODE_ARRAY_DECL) ? 2 : 0;
                 st_insert(name, t->lineno, location++, type, ID_VAR, isArray, 0, NULL);
             }
         }
