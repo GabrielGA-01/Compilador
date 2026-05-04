@@ -430,8 +430,9 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         else{
             Address var_temp_addr = *createTempAddr();
             // Caso queira o endereço de um array
-            if(st_lookup_is_array(node_name) >= 1){
+            if(st_lookup_is_array_scope(node_name, scope) == 1){
                 makeNewQuad(OP_MOVI, var_temp_addr, node_var_name, createEmptyAddr());
+                printf("%s %d", node_name, st_lookup_is_array_scope(node_name, scope));
             }
             // Caso queira o valor da variável
             else{
