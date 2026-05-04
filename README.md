@@ -5,11 +5,9 @@ cd Compilador
 ```
 Em seguida, rode o script "compilar.sh":
 ```bash
-./compilar.sh
+./compilar.sh gdb --args ./compilador
 ```
 Finalmente, execute o compilador:
 ```bash
-./compilador ./testes/nome_do_arquivo.txt
+gdb -q --args ./compilador ./testes/sort.txt
 ```
-
-> Para trocar o arquivo de entrada, altere a linha 63 do arquivo "scanner.l", substituindo "sort.txt" pelo arquivo que desejar.
