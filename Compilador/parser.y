@@ -333,17 +333,8 @@ int main(int argc, char *argv[])
     }
 
     if (Error == 0 && error_count == 0) {
-        printf("Tentando gerar código intermediário...\n");
         generateProgram(root);
-
-        // FILE* code_file = fopen("output/intermediate_code.txt", "w");
-        // if (code_file) {
-        //     fprintCode(code_file);
-        //     fclose(code_file);
-        //     printf("Intermediate code generated in output/intermediate_code.txt\n");
-        // } else {
-        //     fprintf(stderr, "Error: Could not create output/intermediate_code.txt\n");
-        // }
+        printf("Intermediate code generated successfully!\n");
     } else {
         printf("Intermediate code generation skipped due to errors\n");
     }
