@@ -1,0 +1,19 @@
+void soma(int a[], int b, int c){
+    b = 1 + b;
+}
+
+int vet[10];
+
+void main(void)
+{
+   int x; int y;
+   x = input(); 
+   y = input();
+   soma(vet, vet[0], vet[5]);
+
+   while(x < y){
+    int a;
+    int b;
+    x = y;
+   }
+}
