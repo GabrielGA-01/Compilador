@@ -473,7 +473,7 @@ void generateProgram(ASTNode* tree){
     }
     makeNewQuad(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     
-    FILE* file = fopen("output/new_intermediate_code.txt", "w");
+    FILE* file = fopen("output/intermediate_code.txt", "w");
     fprintCode(file);
     fclose(file);
 }
