@@ -39,7 +39,8 @@ typedef enum {
     INT_CONST,
     STRING_VAR,
     TEMP_VAR,
-    LABEL_KIND
+    LABEL_KIND,
+    REGISTER_KIND
 } OperandKind;
 
 typedef struct {
@@ -56,13 +57,19 @@ typedef struct Quad {
     struct Quad *next;
 } Quad;
 
+typedef struct FuncLabel {
+    char* name;
+    Address* label;
+    struct FuncLabel* next;
+} FuncLabel;
+
 int isArray(ASTNode* node);
 
 Address determineVariableSize(ASTNode* node);
 Address createEmptyAddr();
 Address createNumericAddr(int val);
 Address createStringAddr(char *name);
-Address createLabelAddr();
+Address* createLabelAddr();
 Address* createTempAddr();
 
 char* numberToType(int num);
@@ -70,7 +77,7 @@ char* numberToType(int num);
 Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
 Address generateCode(ASTNode* tree, char* escopo, int mode);
 
-void fprintCode(FILE* out);
+void fprintCode(FILE* out, Quad* head);
 void generateProgram(ASTNode* tree);
 
 #endif

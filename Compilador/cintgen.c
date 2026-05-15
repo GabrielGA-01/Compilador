@@ -10,6 +10,9 @@ static int labelCount = -1;
 Quad *head = NULL;
 Quad *tail = NULL;
 
+FuncLabel *functionsHead = NULL;
+FuncLabel *functionsTail = NULL;
+
 // Para indicar um operando sem uso
 Address createEmptyAddr() {
     Address a;
@@ -37,12 +40,16 @@ Address createStringAddr(char *name) {
 }
 
 // Para criar um novo label
-Address createLabelAddr() {
-    Address a;
+Address* createLabelAddr() {
+    Address* a = (Address*)malloc(sizeof(Address));
     char buffer[20];
-    sprintf(buffer, "L%d", labelCount++);
-    a.kind = LABEL_KIND;
-    a.name = strdup(buffer);
+    
+    ++labelCount; // Incrementa primeiro
+    sprintf(buffer, "L%d", labelCount); // Usa depois
+    
+    a->kind = LABEL_KIND;
+    a->name = strdup(buffer);
+    a->val = 0;
     return a;
 }
 
@@ -55,6 +62,22 @@ Address* createTempAddr() {
     a->name = strdup(buffer);
     
     return a;
+}
+
+void createFuncLabel(char* name, Address* label){
+    FuncLabel* a = (FuncLabel*)malloc(sizeof(FuncLabel));
+    a->name = strdup(name);
+    a->label = label;
+    a->next = NULL;
+
+    if(functionsHead == NULL){
+        functionsHead = a;
+        functionsTail = a;
+    }
+    else{
+        functionsTail->next = a;
+        functionsTail = a;
+    }
 }
 
 // Já existe essa função em ast.c, porém precisa ser em letra minúscula o retorno
@@ -124,13 +147,14 @@ void fprintAddr(FILE* out, Address a) {
         case EMPTY: fprintf(out, "-"); break;
         case INT_CONST: fprintf(out, "%d", a.val); break;
         case STRING_VAR: fprintf(out, "%s", a.name); break;
+        case REGISTER_KIND: fprintf(out, "%s", a.name); break;
         case TEMP_VAR: fprintf(out, "%s", a.name); break;
         case LABEL_KIND: fprintf(out, "%s", a.name); break;
     }
 }
 
 // Organiza a escrita das quádruplas no arquivo
-void fprintCode(FILE* out) {
+void fprintCode(FILE* out, Quad* head) {
     Quad *current = head;
     while(current != NULL) {
         fprintf(out, "(%s, ", opToString(current->op));
@@ -173,8 +197,12 @@ Address generateCode(ASTNode* node, char* scope, int mode){
     // Caso seja uma função
     case NODE_FUN_DECL:
         char* func_data_type = numberToType(node->leftChild->number);
-        char* func_name = node->rightChild->identifier;
-
+        char* func_name = node->rightChild->identifier; 
+    
+        Address* fun_decl_label = createLabelAddr();
+        makeNewQuad(OP_LABEL, *fun_decl_label, createEmptyAddr(), createEmptyAddr());
+        createFuncLabel(func_name, fun_decl_label);
+    
         Address addr_func_data_type = createStringAddr(func_data_type);
         Address addr_func_name = createStringAddr(func_name);
         makeNewQuad(OP_FUN, addr_func_data_type, addr_func_name, createEmptyAddr());
@@ -250,30 +278,30 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
     case NODE_IF_STMT:
         Address compare_result_if = generateCode(node->leftChild, scope, 1);
-        Address if_end_label = createLabelAddr();
-        Address if_true_label = createLabelAddr();
+        Address* if_end_label = createLabelAddr();
+        Address* if_true_label = createLabelAddr();
 
-        makeNewQuad(OP_IFT, compare_result_if, if_true_label, createEmptyAddr());
+        makeNewQuad(OP_IFT, compare_result_if, *if_true_label, createEmptyAddr());
         
         // Início do caso para falso se tiver else
         if(node->number == 1){
             generateCode(node->next, scope, 1);
         }
-        makeNewQuad(OP_JUMP, if_end_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_JUMP, *if_end_label, createEmptyAddr(), createEmptyAddr());
 
         // Início do caso para verdadeiro
-        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, *if_true_label, createEmptyAddr(), createEmptyAddr());
         generateCode(node->rightChild, scope, 1);
 
         // Label indicando o fim do IF
-        makeNewQuad(OP_LABEL, if_end_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, *if_end_label, createEmptyAddr(), createEmptyAddr());
 
         break;
 
     case NODE_WHILE_STMT:
-        Address while_initial_label = createLabelAddr();
-        Address while_content = createLabelAddr();
-        Address while_final_label = createLabelAddr();
+        Address* while_initial_label = createLabelAddr();
+        Address* while_content = createLabelAddr();
+        Address* while_final_label = createLabelAddr();
 
         // Declara as variáveis do while antes de entrar nele
         ASTNode* variable_decl = node->rightChild->leftChild; //->NODE_COMPOUND_STMT->Variables declarations
@@ -286,20 +314,20 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         }
         
         // Cria label no início do while
-        makeNewQuad(OP_LABEL, while_initial_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, *while_initial_label, createEmptyAddr(), createEmptyAddr());
     
         Address compare_result_while = generateCode(node->leftChild, scope, 1);
-        makeNewQuad(OP_IFT, compare_result_while, while_content, createEmptyAddr());
-        makeNewQuad(OP_JUMP, while_final_label, createEmptyAddr(), createEmptyAddr());  // Caso falso
-        makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
+        makeNewQuad(OP_IFT, compare_result_while, *while_content, createEmptyAddr());
+        makeNewQuad(OP_JUMP, *while_final_label, createEmptyAddr(), createEmptyAddr());  // Caso falso
+        makeNewQuad(OP_LABEL, *while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
 
         // Conteúdo do while
         generateCode(node->rightChild, scope, 2);
-        makeNewQuad(OP_JUMP, while_initial_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_JUMP, *while_initial_label, createEmptyAddr(), createEmptyAddr());
 
 
         // Cria label no final do while
-        makeNewQuad(OP_LABEL, while_final_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, *while_final_label, createEmptyAddr(), createEmptyAddr());
 
         // Desaloca as variáveos do while
         if(while_variables != 0){
@@ -432,7 +460,6 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             // Caso queira o endereço de um array
             if(st_lookup_is_array_scope(node_name, scope) == 1){
                 makeNewQuad(OP_MOVI, var_temp_addr, node_var_name, createEmptyAddr());
-                printf("%s %d", node_name, st_lookup_is_array_scope(node_name, scope));
             }
             // Caso queira o valor da variável
             else{
@@ -474,6 +501,6 @@ void generateProgram(ASTNode* tree){
     makeNewQuad(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     
     FILE* file = fopen("output/intermediate_code.txt", "w");
-    fprintCode(file);
+    fprintCode(file, head);
     fclose(file);
 }
