@@ -6,6 +6,7 @@
 #include "analyze.h"
 #include "symtab.h"
 #include "cintgen.h"
+#include "casm.h"
 
 extern FILE *yyin;
 int error_count = 0;
@@ -333,8 +334,15 @@ int main(int argc, char *argv[])
     }
 
     if (Error == 0 && error_count == 0) {
+        // Código intermediário
         generateProgram(root);
         printf("Intermediate code generated successfully!\n");
+
+        // Código assembly
+        extern Quad* head;
+        extern FuncLabel* functionsHead;
+        generateAssembly(head, functionsHead);
+        printf("Assembly code generated successfully!\n");
     } else {
         printf("Intermediate code generation skipped due to errors\n");
     }

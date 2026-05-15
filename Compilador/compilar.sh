@@ -26,11 +26,14 @@ gcc -g -c -o analyze.o analyze.c
 echo "[4.6/5] Compilando gerador de código intermediário..."
 gcc -g -c -o cintgen.o cintgen.c
 
+echo "[4.7/5] Compilando gerador de assembly..."
+gcc -g -c -o casm.o casm.c
+
 echo "[5/5] Linkando os arquivos..."
-gcc -g -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o cintgen.o -lfl
+gcc -g -o compilador lex.yy.o parser.tab.c ast.o symtab.o analyze.o cintgen.o casm.o -lfl
 
 echo "Limpando arquivos temporários..."
-rm lex.yy.c lex.yy.o parser.tab.c ast.o symtab.o analyze.o cintgen.o
+rm lex.yy.c lex.yy.o parser.tab.c ast.o symtab.o analyze.o cintgen.o casm.o
 
 echo ""
 echo "Sucesso! O executável 'compilador' foi criado."
