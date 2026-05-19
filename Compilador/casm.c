@@ -126,6 +126,24 @@ int verifyVariableShift(char* scope, char* varName) {
     return -1;
 }
 
+int getFirstVariableShift(char* scope) {
+    variablesAtStack* currentScope = scopesHead;
+
+    while (currentScope != NULL) {
+        if (strcmp(currentScope->scope, scope) == 0) {
+            break;
+        }
+        currentScope = currentScope->next;
+    }
+
+    // Se o escopo não foi encontrado, ou se ele não possui nenhuma variável
+    if (currentScope == NULL || currentScope->var == NULL) {
+        return -1;
+    }
+
+    return currentScope->var->offset;
+}
+
 void removeVariableFromStack(char *scope) {
     variablesAtStack* currentScope = scopesHead;
 
@@ -261,13 +279,13 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
 
     // Inializa o valor da pilha geral com o espaço que sobrou e faz jump para main (aparece na ordem inversa abaixo)
     insertQuadAfter(before, OP_JUMP, *searchFuncLabel("main", funHead), createEmptyAddr(), createEmptyAddr());
-    insertQuadAfter(before, OP_MOVI, *PilhaGeral, *PilhaGlobal, createEmptyAddr());
+    insertQuadAfter(before, OP_MOVR, *PilhaGeral, *PilhaGlobal, createEmptyAddr());
     
-    char *scope = "_";
+    char *scope = NULL;
     int isAlloc = 1;
     while(current != NULL){
         // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
-        if(current->op != OP_ARG && isAlloc == 1 && strcmp("main", scope) != 0){
+        if(current->op != OP_ARG && isAlloc == 1 && scope != NULL && strcmp("main", scope) != 0){
             addVariableToStack(scope, "&ret", 1);
             isAlloc = 0;
         }
@@ -289,10 +307,54 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
             insertQuadAfter(current, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(alloc_size));
             current = removeQuad(before, current);
             break;
+        case OP_FREE:
+            // Libera alocações após while
+            int i = current->addr1.val;
+            while(i != 0){
+                i -= 1;
+                removeVariableFromStack(scope);
+            }
+            break;
+        case OP_LOAD:
+            // Atualiza a operação de load
+            if(current->addr3.kind == INT_CONST) current->op = OP_LOADD;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_LOADDR;
+            break;
+        case OP_STORE:
+            // Atualiza a operação de store
+            if(current->addr3.kind == INT_CONST) current->op = OP_STORED;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_STOREDR;
+            break;      
+        case OP_MOV:
+            if(current->addr2.kind == STRING_VAR){
+                int varShift = verifyVariableShift(scope, current->addr2.name);
+                current->op = OP_LOADD;
+                current->addr2 = *PilhaGeral;
+                current->addr3 = createNumericAddr(varShift);
+            }
+            break;
+        case OP_END_FUN:
+            int stackUp = getFirstVariableShift(scope);
+            Address stackUpAddr = createNumericAddr(stackUp);
+            if(strcmp(scope, "main") == 0){
+                insertQuadAfter(current, OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+                insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
+                current = removeQuad(before, current);
+            }
+            else{
+                int retShift = verifyVariableShift(scope, "&ret");
+                Address* retAddr = createTempAddr();
+
+                // Carrega o endereço de retorno || Libera a pilha || Faz o salto
+                insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
+                insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
+                insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                current = removeQuad(before, current);
+            }
+            break;
         default:
             break;
         }
-
 
 
         if(current == NULL && before != NULL) current = before->next;
