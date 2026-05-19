@@ -122,7 +122,8 @@ const char* opToString(QuadOp op) {
         case OP_DIF:     return "bne";
         case OP_IFT:     return "ift";
         case OP_JUMP:    return "jmp";
-        case OP_LABEL:     return "lab";
+        case OP_JR:      return "jr";
+        case OP_LABEL:   return "lab";
         case OP_IN:      return "in";
         case OP_OUT:     return "out";
         case OP_PARAM:   return "param";
@@ -133,8 +134,14 @@ const char* opToString(QuadOp op) {
         case OP_END_FUN: return "end";
         case OP_ARG:     return "arg";
         case OP_LOAD:    return "load";
+        case OP_LOADD:   return "loadd";
+        case OP_LOADDR:  return "loaddr";
         case OP_STORE:   return "store";
+        case OP_STORED:  return "stored";
+        case OP_STOREDR: return "storedr";
+        case OP_MOV:    return "mov";
         case OP_MOVI:    return "movi";
+        case OP_MOVR:    return "movr";
         case OP_ALLOC:   return "alloc";
         case OP_FREE:    return "free";
         default:         return "unknown";
@@ -317,7 +324,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
 
         // Conteúdo do while
-        generateCode(node->rightChild, scope, 2);
+        generateCode(node->rightChild, scope, 2);   // Não declara as variáveis de novo
         makeNewQuad(OP_JUMP, *while_initial_label, createEmptyAddr(), createEmptyAddr());
 
 
@@ -343,7 +350,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             
             // Carrega o endereço para um registrador e o acessa com um deslocamento
             Address *array_access_reg_with_addr = createTempAddr();
-            makeNewQuad(OP_MOVI, *array_access_reg_with_addr, array_access_name, createEmptyAddr());
+            makeNewQuad(OP_MOV, *array_access_reg_with_addr, array_access_name, createEmptyAddr());
             
             // Caso seja um ponteiro, faz um novo acesso à memória
             if(st_lookup_is_array_scope(array_access_name.name, scope) == 2){
@@ -433,7 +440,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
         // Carrega o endereço para um registrador e o acessa com um deslocamento
         Address *assign_expr_reg_with_addr = createTempAddr();
-        makeNewQuad(OP_MOVI, *assign_expr_reg_with_addr, node_assign_name, createEmptyAddr());
+        makeNewQuad(OP_MOV, *assign_expr_reg_with_addr, node_assign_name, createEmptyAddr());
 
         // Caso seja um ponteiro, faz um novo acesso à memória
         if(st_lookup_is_array_scope(node_assign_name.name, scope) == 2){
@@ -441,7 +448,14 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             makeNewQuad(OP_LOAD, *assign_expr_reg_with_addr, *assign_expr_reg_with_addr, assign_expr_deslocamento_indireto);
         }
 
-        makeNewQuad(OP_STORE, *assign_expr_reg_with_addr, value_to_store, assign_expr_deslocamento);
+        Address reg_with_value = value_to_store;
+        if(value_to_store.kind == INT_CONST){
+            Address* regNum = createTempAddr();
+            reg_with_value = *regNum;
+            makeNewQuad(OP_MOV, *regNum, value_to_store, createEmptyAddr());
+        }
+
+        makeNewQuad(OP_STORE, *assign_expr_reg_with_addr, reg_with_value, assign_expr_deslocamento);
 
         break;
 
@@ -463,7 +477,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             Address var_temp_addr = *createTempAddr();
             // Caso queira o endereço de um array
             if(st_lookup_is_array_scope(node_name, scope) == 1){
-                makeNewQuad(OP_MOVI, var_temp_addr, node_var_name, createEmptyAddr());
+                makeNewQuad(OP_MOV, var_temp_addr, node_var_name, createEmptyAddr());
             }
             // Caso queira o valor da variável
             else{
@@ -472,7 +486,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
                 // Carrega o endereço para um registrador e o acessa com um deslocamento
                 Address *node_var_reg_with_addr = createTempAddr();
-                makeNewQuad(OP_MOVI, *node_var_reg_with_addr, node_var_name, createEmptyAddr());
+                makeNewQuad(OP_MOV, *node_var_reg_with_addr, node_var_name, createEmptyAddr());
 
                 makeNewQuad(OP_LOAD, var_temp_addr, *node_var_reg_with_addr, node_var_deslocamento);
             }
