@@ -114,12 +114,12 @@ const char* opToString(QuadOp op) {
         case OP_SUB:     return "sub";
         case OP_MUL:     return "mul";
         case OP_DIV:     return "div";
-        case OP_LT:      return "lt";
-        case OP_LET:     return "let";
-        case OP_GT:      return "gt";
-        case OP_GET:     return "get";
-        case OP_EQ:      return "eq";
-        case OP_DIF:     return "dif";
+        case OP_LT:      return "blt";
+        case OP_LET:     return "ble";
+        case OP_GT:      return "bgt";
+        case OP_GET:     return "bge";
+        case OP_EQ:      return "beq";
+        case OP_DIF:     return "bne";
         case OP_IFT:     return "ift";
         case OP_JUMP:    return "jmp";
         case OP_LABEL:     return "lab";
@@ -277,11 +277,8 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         break;
 
     case NODE_IF_STMT:
-        Address compare_result_if = generateCode(node->leftChild, scope, 1);
+        Address if_true_label = generateCode(node->leftChild, scope, 1);
         Address* if_end_label = createLabelAddr();
-        Address* if_true_label = createLabelAddr();
-
-        makeNewQuad(OP_IFT, compare_result_if, *if_true_label, createEmptyAddr());
         
         // Início do caso para falso se tiver else
         if(node->number == 1){
@@ -290,7 +287,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         makeNewQuad(OP_JUMP, *if_end_label, createEmptyAddr(), createEmptyAddr());
 
         // Início do caso para verdadeiro
-        makeNewQuad(OP_LABEL, *if_true_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
         generateCode(node->rightChild, scope, 1);
 
         // Label indicando o fim do IF
@@ -300,12 +297,11 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
     case NODE_WHILE_STMT:
         Address* while_initial_label = createLabelAddr();
-        Address* while_content = createLabelAddr();
         Address* while_final_label = createLabelAddr();
-
+        
         // Declara as variáveis do while antes de entrar nele
         ASTNode* variable_decl = node->rightChild->leftChild; //->NODE_COMPOUND_STMT->Variables declarations
-
+        
         int while_variables = 0;
         while(variable_decl != NULL){
             generateCode(variable_decl, scope, 1);
@@ -315,11 +311,10 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         
         // Cria label no início do while
         makeNewQuad(OP_LABEL, *while_initial_label, createEmptyAddr(), createEmptyAddr());
-    
-        Address compare_result_while = generateCode(node->leftChild, scope, 1);
-        makeNewQuad(OP_IFT, compare_result_while, *while_content, createEmptyAddr());
+        
+        Address while_content = generateCode(node->leftChild, scope, 1);
         makeNewQuad(OP_JUMP, *while_final_label, createEmptyAddr(), createEmptyAddr());  // Caso falso
-        makeNewQuad(OP_LABEL, *while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
+        makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
 
         // Conteúdo do while
         generateCode(node->rightChild, scope, 2);
@@ -414,10 +409,19 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address left_operator = generateCode(node->leftChild, scope, 1);
         Address right_operator = generateCode(node->rightChild, scope, 1);
 
-        Address* temp_operator = createTempAddr();
-        makeNewQuad(operation, *temp_operator, left_operator, right_operator);
-
-        return(*temp_operator);
+        
+        Address* retorno = NULL;
+        if(node->number < 264){
+            // Retorno é um temporário
+            retorno = createTempAddr();
+            makeNewQuad(operation, *retorno, left_operator, right_operator);
+        }
+        else{
+            // Retorno é uma label
+            retorno = createLabelAddr();
+            makeNewQuad(operation, left_operator, right_operator, *retorno);
+        }
+        return(*retorno);
         break;
 
     case NODE_ASSIGN_EXPR:
