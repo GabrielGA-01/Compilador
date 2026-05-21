@@ -111,15 +111,23 @@ Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3) {
 const char* opToString(QuadOp op) {
     switch(op) {
         case OP_ADD:     return "add";
+        case OP_ADDI:    return "addi";
+        case OP_ADDR:    return "addr";
         case OP_SUB:     return "sub";
+        case OP_SUBI:    return "subi";
+        case OP_SUBR:    return "subr";
         case OP_MUL:     return "mul";
+        case OP_MULI:    return "muli";
+        case OP_MULR:    return "mulr";
         case OP_DIV:     return "div";
-        case OP_LT:      return "blt";
-        case OP_LET:     return "ble";
-        case OP_GT:      return "bgt";
-        case OP_GET:     return "bge";
-        case OP_EQ:      return "beq";
-        case OP_DIF:     return "bne";
+        case OP_DIVI:    return "divi";
+        case OP_DIVR:    return "divr";
+        case OP_BLT:     return "blt";
+        case OP_BLE:     return "ble";
+        case OP_BGT:     return "bgt";
+        case OP_BGE:     return "bge";
+        case OP_BEQ:     return "beq";
+        case OP_BNE:     return "bne";
         case OP_IFT:     return "ift";
         case OP_JUMP:    return "jmp";
         case OP_JR:      return "jr";
@@ -403,12 +411,12 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             case 261: operation = OP_SUB; break;
             case 262: operation = OP_MUL; break;
             case 263: operation = OP_DIV; break;
-            case 264: operation = OP_LT;  break;
-            case 265: operation = OP_LET; break;
-            case 266: operation = OP_GET; break;
-            case 267: operation = OP_GT;  break;
-            case 268: operation = OP_EQ;  break;
-            case 269: operation = OP_DIF; break;
+            case 264: operation = OP_BLT; break;
+            case 265: operation = OP_BLE; break;
+            case 266: operation = OP_BGE; break;
+            case 267: operation = OP_BGT; break;
+            case 268: operation = OP_BEQ; break;
+            case 269: operation = OP_BNE; break;
             default:  operation = OP_ADD; break;
         }
 
@@ -416,17 +424,35 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address left_operator = generateCode(node->leftChild, scope, 1);
         Address right_operator = generateCode(node->rightChild, scope, 1);
 
+        // Todas essas operações exigem que o primeiro operando seja um registrador
+        // Se for um número, move para um registrador antes de utilizar
+        Address true_left_operator = left_operator;
+        if(left_operator.kind == INT_CONST){
+            true_left_operator = *createTempAddr();
+            makeNewQuad(OP_MOV, true_left_operator,  left_operator, createEmptyAddr());
+        }
         
         Address* retorno = NULL;
+        // Caso aritmético
         if(node->number < 264){
             // Retorno é um temporário
             retorno = createTempAddr();
-            makeNewQuad(operation, *retorno, left_operator, right_operator);
+            makeNewQuad(operation, *retorno, true_left_operator, right_operator);
         }
+        // Caso lógico
         else{
             // Retorno é uma label
             retorno = createLabelAddr();
-            makeNewQuad(operation, left_operator, right_operator, *retorno);
+            Address true_left_operator = left_operator;
+            Address true_right_operator = right_operator;
+
+            // Para operações de branch é esperado que o segundo valor também seja um registrador
+            if(right_operator.kind == INT_CONST){
+                true_right_operator = *createTempAddr();
+                makeNewQuad(OP_MOV, true_right_operator,  right_operator, createEmptyAddr());
+            }  
+
+            makeNewQuad(operation, true_left_operator, true_right_operator, *retorno);
         }
         return(*retorno);
         break;

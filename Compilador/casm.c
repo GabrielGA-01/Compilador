@@ -332,7 +332,24 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
                 current->addr2 = *PilhaGeral;
                 current->addr3 = createNumericAddr(varShift);
             }
+            else if(current->addr2.kind == INT_CONST) current->op = OP_MOVI;
             break;
+        case OP_ADD:
+            if(current->addr3.kind == INT_CONST) current->op = OP_ADDI;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_ADDR;
+            break;
+        case OP_SUB:
+            if(current->addr3.kind == INT_CONST) current->op = OP_SUBI;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_SUBR;
+            break;
+        case OP_DIV:
+            if(current->addr3.kind == INT_CONST) current->op = OP_DIVI;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_DIVR;
+            break;
+        case OP_MUL:
+            if(current->addr3.kind == INT_CONST) current->op = OP_MULI;
+            else if(current->addr3.kind == TEMP_VAR) current->op = OP_MULR;
+        break;
         case OP_END_FUN:
             int stackUp = getFirstVariableShift(scope);
             Address stackUpAddr = createNumericAddr(stackUp);
