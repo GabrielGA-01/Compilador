@@ -267,7 +267,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
         // Verifica tamanho e reduz a pilha global
         int alloc_size = current->addr2.val;
         addVariableToStack("global", current->addr1.name, alloc_size);
-        insertQuadAfter(current, OP_SUB, *PilhaGlobal, *PilhaGlobal, createNumericAddr(alloc_size));
+        insertQuadAfter(current, OP_SUBI, *PilhaGlobal, *PilhaGlobal, createNumericAddr(alloc_size));
         current = removeQuad(before, current);
 
         before = before->next;
@@ -283,6 +283,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
     
     char *scope = NULL;
     int isAlloc = 1;
+    int numParam = 0;
     while(current != NULL){
         // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
         if(current->op != OP_ARG && isAlloc == 1 && scope != NULL && strcmp("main", scope) != 0){
@@ -327,7 +328,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
             break;      
         case OP_MOV:
             if(current->addr2.kind == STRING_VAR){
-                int varShift = verifyVariableShift(scope, current->addr2.name);
+                int varShift = verifyVariableShift(scope, current->addr2.name) + numParam;  // Desconta a posição de parâmetros adicionados à pilha
                 current->op = OP_LOADD;
                 current->addr2 = *PilhaGeral;
                 current->addr3 = createNumericAddr(varShift);
@@ -349,23 +350,110 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
         case OP_MUL:
             if(current->addr3.kind == INT_CONST) current->op = OP_MULI;
             else if(current->addr3.kind == TEMP_VAR) current->op = OP_MULR;
-        break;
+            break;
+        case OP_PARAM:
+            // Apenas faz a alocação do espaço, a liberação é feita na função que for chamada
+
+            // Caso a próxima instrução for um call output
+            // Apenas adiciona o registrador a ser escrito nela
+            if(current->next != NULL && current->next->op == OP_CALL &&
+               strcmp(current->next->addr2.name, "output") == 0){
+                current->next->addr1 = current->addr1;
+            }
+            // Caso geral de parâmetro
+            else{
+                // Aloca um espaço na pilha || Adiciona o parâmetro
+                insertQuadAfter(current, OP_STORE, *PilhaGeral, current->addr1, createNumericAddr(1));
+                insertQuadAfter(current, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+
+                // Incrementa o número de pametros na pilha
+                numParam += 1;
+            }
+            
+            current = removeQuad(before, current);
+            break;
+        case OP_CALL:
+            // Adiciona o endereço de retorno à pilha e recebe o retorno da função
+            Address* retAddrs = createLabelAddr();
+
+            char* funcName = current->addr2.name;
+            // Caso seja input, apenas faz um input
+            if(strcmp(funcName, "input") == 0){
+                insertQuadAfter(current, OP_IN, current->addr1, createEmptyAddr(), createEmptyAddr()); 
+                
+                // Não possui parâmetros para estarem na pilha
+            }
+            // Caso seja output
+            else if(strcmp(funcName, "output") == 0){
+                insertQuadAfter(current, OP_OUT, current->addr1, createEmptyAddr(), createEmptyAddr());
+
+                // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
+            }
+            // Caso geral de chamada de função
+            else{
+                Address* tempWithRetAddr = createTempAddr();
+
+                // 6 - Faz a leitura do valor retornado se houver
+                if(current->addr1.kind == TEMP_VAR){
+                    // 2 - Libera o espaço da pilha
+                    insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+                    // 1 - Carrega o último valor da pilha (o retorno de uma função)
+                    insertQuadAfter(current, OP_LOAD, current->addr1,*PilhaGeral, createNumericAddr(1));
+
+                }
+                // 5 - Cria label de retorno
+                insertQuadAfter(current, OP_LABEL, *retAddrs, createEmptyAddr(), createEmptyAddr());
+                // 4 - Faz a chamada da função
+                insertQuadAfter(current, OP_JUMP, *searchFuncLabel(funcName, funHead), createEmptyAddr(), createEmptyAddr());
+                // 3 - Adiciona o registrador com o endereço de retorno à pilha
+                insertQuadAfter(current, OP_STORE, *PilhaGeral, *tempWithRetAddr, createNumericAddr(1));
+                // 2 - Aloca espaço na pilha
+                insertQuadAfter(current, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+                // 1 - Move o endereço de retorno para um registrador
+                insertQuadAfter(current, OP_MOV, *tempWithRetAddr, *retAddrs, createEmptyAddr());
+
+                // Atualiza o número de parâmetros na pilha
+                numParam -= current->addr3.val;
+            }
+
+            current = removeQuad(before, current);
+            break;
+        case OP_RET:
         case OP_END_FUN:
+            // Ao chegar ao fim, libera todo o espaço alocado na pilha para ela...
+            // Incluindo o dos parâmetros que recebeu
             int stackUp = getFirstVariableShift(scope);
             Address stackUpAddr = createNumericAddr(stackUp);
+
+            // Função main
             if(strcmp(scope, "main") == 0){
                 insertQuadAfter(current, OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
                 insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
                 current = removeQuad(before, current);
             }
+
+            // Todas as demais
             else{
-                int retShift = verifyVariableShift(scope, "&ret");
+                int retShift = verifyVariableShift(scope, "&ret") + numParam;  // Desconta a posição de parâmetros adicionados à pilha;
                 Address* retAddr = createTempAddr();
 
-                // Carrega o endereço de retorno || Libera a pilha || Faz o salto
-                insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
-                insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
-                insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                // Caso haja um retorno de algum valor
+                if(current->op == OP_RET && current->addr1.kind != EMPTY ){
+                    // Carrega o endereço de retorno || Libera a pilha (n-1) || Adiciona o retorno na pilha || Faz o salto
+                    insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
+                    stackUpAddr.val -= 1;
+                    insertQuadAfter(current, OP_STORE, *PilhaGeral, current->addr1, createNumericAddr(1));
+                    insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
+                    insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                }
+                // Caso não haja retorno de valor
+                else{
+                    // Carrega o endereço de retorno || Libera a pilha || Faz o salto
+                    insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
+                    insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
+                    insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                }
+                
                 current = removeQuad(before, current);
             }
             break;

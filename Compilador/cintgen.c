@@ -246,7 +246,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         if(node->rightChild != NULL && node->rightChild->type == NODE_COMPOUND_STMT) generateCode(node->rightChild, scope, 1);
         break;
 
-    // Declaração de um parâmetro
+    // Declaração de um parâmetro de uma função
     case NODE_PARAM:
         // Address addr_param_data_type = generateCode(node->leftChild, scope); // Não precisa do tipo
         Address addr_param_name = generateCode(node->rightChild, scope, 0);
@@ -376,7 +376,14 @@ Address generateCode(ASTNode* node, char* scope, int mode){
     case NODE_RETURN_STMT:
         Address ret = generateCode(node->leftChild, scope, 1);
 
-        makeNewQuad(OP_RET, ret, createEmptyAddr(), createEmptyAddr());
+        // Se for um número, passa para um registrador antes
+        Address true_ret = ret;
+        if(ret.kind == INT_CONST){
+            true_ret = *createTempAddr();
+            makeNewQuad(OP_MOV, true_ret, ret, createEmptyAddr());
+        } 
+
+        makeNewQuad(OP_RET, true_ret, createEmptyAddr(), createEmptyAddr());
         return ret;
         break;
 
@@ -386,7 +393,15 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         ASTNode* parameter= node->rightChild;
         while(parameter != NULL){
             Address current_parameter = generateCode(parameter, scope, 1);
-            makeNewQuad(OP_PARAM, current_parameter, createEmptyAddr(), createEmptyAddr());
+
+            // Garante que o parâmetro está em um registrador
+            Address real_current_patameter = current_parameter;
+            if(current_parameter.kind == INT_CONST){
+                real_current_patameter = *createTempAddr();
+                makeNewQuad(OP_MOV, real_current_patameter, current_parameter, createEmptyAddr());
+            }
+
+            makeNewQuad(OP_PARAM, real_current_patameter, createEmptyAddr(), createEmptyAddr());
             param_number++;
             parameter = parameter->next;
         }
