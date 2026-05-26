@@ -74,9 +74,17 @@ typedef struct Quad {
 
 typedef struct FuncLabel {
     char* name;
+    int safeCall;
     Address* label;
     struct FuncLabel* next;
 } FuncLabel;
+
+typedef struct tempControl {
+    Address temp;
+    int sum;
+    int safe;
+    struct tempControl* next;
+} tempControl;
 
 int isArray(ASTNode* node);
 

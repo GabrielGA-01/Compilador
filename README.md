@@ -21,4 +21,7 @@ Garantir que em operações de bench sejam usandos apenas registradores - OK
 Fazer a atualização de operações aritméricas entre R e I - OK
 Fazer o retorno das funções - OK
 Fazer a chamada de função e preparação dos parâmetros - OK
+Corrigir a lógica do número de parâmetros na pilha (param) para ser por escopo - OK. Solução: adiciona na lista de variáveis de verdade
+Fazer a correção no acesso à variáveis globais - OK
+Fazer verificação de registrador sobrando em func call
 Atualizar temporários em registradores

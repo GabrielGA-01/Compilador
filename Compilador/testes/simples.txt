@@ -1,33 +1,15 @@
 int bla(){
-    return 1;
+    if(1 == 2);
+    return 3;
 }
 
 void main(void)
 {
-    int x; int y; int z[10];
-    x = 0;
-    z[0] = 5;
-    z[1] = 6;
-    x = input(); 
-    y = input();
-
-    x = 1 + 2;
-    x = 3 - 4;
-    x = 5 / 6;
-    x = 7 * 8;
-
-    y = 1 + x;
-    y = 1 - x;
-    y = 1 / x;
-    y = 1 * x;
-
-    if(2 > 3){
-        x = 2;  
-    }
-    if (x>y)
-        output(x);
-    else
-        output(y);
+    int vet[10];
+    int y;
+    int x;
+    y = 2;
+    x = vet[y] + vet[x] + bla();
 
     return;
 }

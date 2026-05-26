@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdlib.h>
 #include "casm.h"
 #include "cintgen.h"
@@ -234,6 +235,67 @@ void printStack() {
     printf("================================================================\n\n");
 }
 
+void printTempControl(tempControl* functionsHead) {
+    tempControl* current_node = functionsHead;
+
+    printf("\n=================== ESPELHO DO CONTROLE TEMPORÁRIO ===================\n");
+    
+    if (current_node == NULL) {
+        printf("A lista de controle temporário está totalmente vazia.\n");
+        printf("=======================================================================\n\n");
+        return;
+    }
+
+    // Percorre a lista encadeada de controle temporário
+    while (current_node != NULL) {
+        // Exibe o nome da variável temporária como o identificador do bloco
+        printf("Temporária: [%s]\n", current_node->temp.name ? current_node->temp.name : "NULL");
+        
+        // Exibe os atributos alinhados para manter a legibilidade
+        printf("  ├── Valor (Val): %-5d | Tipo (Kind): %-3d\n", 
+               current_node->temp.val, 
+               current_node->temp.kind);
+        printf("  └── Soma (Sum): %-6d | Seguro (Safe): %-3d\n", 
+               current_node->sum, 
+               current_node->safe);
+               
+        printf("-----------------------------------------------------------------------\n");
+        current_node = current_node->next;
+    }
+    printf("=======================================================================\n\n");
+}
+
+void printFuncLabel(FuncLabel *current_func) {
+
+    printf("\n==================== ESPELHO DOS RÓTULOS DE FUNÇÃO ====================\n");
+    
+    if (current_func == NULL) {
+        printf("A lista de rótulos de função está totalmente vazia.\n");
+        printf("=======================================================================\n\n");
+        return;
+    }
+
+    // Percorre a lista encadeada de funções/rótulos
+    while (current_func != NULL) {
+        printf("Função/Escopo: [%s]\n", current_func->name ? current_func->name : "NULL");
+        printf("  ├── Chamada Segura (SafeCall): %-3d\n", current_func->safeCall);
+        
+        // Verifica se o ponteiro interno Address existe antes de acessar seus dados
+        if (current_func->label == NULL) {
+            printf("  └── Rótulo (Label): (Nenhum endereço/rótulo associado)\n");
+        } else {
+            printf("  └── Rótulo (Label) -> Nome: %-10s | Valor: %-3d | Tipo: %-3d\n", 
+                   current_func->label->name ? current_func->label->name : "NULL", 
+                   current_func->label->val, 
+                   current_func->label->kind);
+        }
+        
+        printf("-----------------------------------------------------------------------\n");
+        current_func = current_func->next;
+    }
+    printf("=======================================================================\n\n");
+}
+
 // Lógica de eliminar uma quádrupla
 Quad* removeQuad(Quad* before, Quad* current){
     if (current == NULL) return NULL;
@@ -246,7 +308,7 @@ Quad* removeQuad(Quad* before, Quad* current){
     return NULL;
 }
 
-void generateAssembly(Quad* quadHead, FuncLabel* funHead){
+void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead){
     Address* PilhaGlobal = createRegisterAddr(61);
     
     // Move o valor inicial para a pilha global
@@ -283,7 +345,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
     
     char *scope = NULL;
     int isAlloc = 1;
-    int numParam = 0;
     while(current != NULL){
         // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
         if(current->op != OP_ARG && isAlloc == 1 && scope != NULL && strcmp("main", scope) != 0){
@@ -328,12 +389,28 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
             break;      
         case OP_MOV:
             if(current->addr2.kind == STRING_VAR){
-                int varShift = verifyVariableShift(scope, current->addr2.name) + numParam;  // Desconta a posição de parâmetros adicionados à pilha
-                current->op = OP_LOADD;
-                current->addr2 = *PilhaGeral;
-                current->addr3 = createNumericAddr(varShift);
+                char* varName = current->addr2.name;
+                int varShift = verifyVariableShift(scope, varName);
+                // Caso seja uma variável local
+                if(varShift != -1){
+                    current->op = OP_LOADD;
+                    current->addr2 = *PilhaGeral;
+                    current->addr3 = createNumericAddr(varShift);
+                }
+                // Caso contrário, busca no global
+                else{
+                    varShift = verifyVariableShift("global", varName);
+                    if(varShift != -1){
+                        current->addr2 = *PilhaGlobal;
+                        current->addr3 = createNumericAddr(varShift);
+                    }
+                    else{
+                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varName);
+                        perror("");
+                    }
+                }
             }
-            else if(current->addr2.kind == INT_CONST) current->op = OP_MOVI;
+            else if(current->addr2.kind == INT_CONST || current->addr2.kind == LABEL_KIND) current->op = OP_MOVI;
             break;
         case OP_ADD:
             if(current->addr3.kind == INT_CONST) current->op = OP_ADDI;
@@ -367,7 +444,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
                 insertQuadAfter(current, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
 
                 // Incrementa o número de pametros na pilha
-                numParam += 1;
+                addVariableToStack(scope, "&param", 1);
             }
             
             current = removeQuad(before, current);
@@ -412,8 +489,10 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
                 // 1 - Move o endereço de retorno para um registrador
                 insertQuadAfter(current, OP_MOV, *tempWithRetAddr, *retAddrs, createEmptyAddr());
 
-                // Atualiza o número de parâmetros na pilha
-                numParam -= current->addr3.val;
+                // Remove os parâmetros na pilha de variáveis da função
+                for(int i = 0; i < current->addr3.val; i++){
+                    removeVariableFromStack(scope);
+                }
             }
 
             current = removeQuad(before, current);
@@ -434,7 +513,21 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
 
             // Todas as demais
             else{
-                int retShift = verifyVariableShift(scope, "&ret") + numParam;  // Desconta a posição de parâmetros adicionados à pilha;
+                Address pilha;
+                int retShift = verifyVariableShift(scope, "&ret");
+                // Caso não esteja no escopo local, procura no global
+                if(retShift != -1){
+                    pilha = *PilhaGeral;
+                }
+                else{
+                    retShift = verifyVariableShift("global", "&ret");
+                    if(retShift != -1) pilha = *PilhaGlobal;
+                    else{
+                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", "&ret");
+                        perror("");
+                    }
+                }
+
                 Address* retAddr = createTempAddr();
 
                 // Caso haja um retorno de algum valor
@@ -442,16 +535,16 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
                     // Carrega o endereço de retorno || Libera a pilha (n-1) || Adiciona o retorno na pilha || Faz o salto
                     insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
                     stackUpAddr.val -= 1;
-                    insertQuadAfter(current, OP_STORE, *PilhaGeral, current->addr1, createNumericAddr(1));
-                    insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
-                    insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                    insertQuadAfter(current, OP_STORE, pilha, current->addr1, createNumericAddr(1));
+                    insertQuadAfter(current, OP_ADD, pilha, pilha, stackUpAddr);
+                    insertQuadAfter(current, OP_LOAD, *retAddr,pilha, createNumericAddr(retShift));
                 }
                 // Caso não haja retorno de valor
                 else{
                     // Carrega o endereço de retorno || Libera a pilha || Faz o salto
                     insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
-                    insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, stackUpAddr);
-                    insertQuadAfter(current, OP_LOAD, *retAddr, *PilhaGeral, createNumericAddr(retShift));
+                    insertQuadAfter(current, OP_ADD, pilha, pilha, stackUpAddr);
+                    insertQuadAfter(current, OP_LOAD, *retAddr, pilha, createNumericAddr(retShift));
                 }
                 
                 current = removeQuad(before, current);
@@ -469,6 +562,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead){
         }
     }
     printStack();
+    printFuncLabel(funHead);
+    printTempControl(tempControlHead);
     FILE* file = fopen("output/assembly_code.txt", "w");
     fprintCode(file, quadHead);
     fclose(file);

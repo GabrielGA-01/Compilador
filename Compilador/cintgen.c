@@ -5,13 +5,17 @@
 #include "symtab.h" // Para buscar por vetor na tabela de símbolos
 
 static int tempCount = 0;
-static int labelCount = -1;
+static int labelCount = 0;
 
 Quad *head = NULL;
 Quad *tail = NULL;
 
 FuncLabel *functionsHead = NULL;
 FuncLabel *functionsTail = NULL;
+
+tempControl *tempControlHead = NULL;
+
+char *globalScope;
 
 // Para indicar um operando sem uso
 Address createEmptyAddr() {
@@ -44,12 +48,14 @@ Address* createLabelAddr() {
     Address* a = (Address*)malloc(sizeof(Address));
     char buffer[20];
     
-    ++labelCount; // Incrementa primeiro
+    labelCount; // Incrementa primeiro
     sprintf(buffer, "L%d", labelCount); // Usa depois
     
+    labelCount++;
+
     a->kind = LABEL_KIND;
     a->name = strdup(buffer);
-    a->val = 0;
+    a->val = labelCount;
     return a;
 }
 
@@ -57,9 +63,11 @@ Address* createLabelAddr() {
 Address* createTempAddr() {
     Address* a = (Address*)malloc(sizeof(Address));
     char buffer[20];
-    sprintf(buffer, "t%d", tempCount++);
+    sprintf(buffer, "t%d", tempCount);
     a->kind = TEMP_VAR;
+    a->val = tempCount;
     a->name = strdup(buffer);
+    tempCount++;
     
     return a;
 }
@@ -69,6 +77,7 @@ void createFuncLabel(char* name, Address* label){
     a->name = strdup(name);
     a->label = label;
     a->next = NULL;
+    a->safeCall = 1;
 
     if(functionsHead == NULL){
         functionsHead = a;
@@ -77,6 +86,86 @@ void createFuncLabel(char* name, Address* label){
     else{
         functionsTail->next = a;
         functionsTail = a;
+    }
+}
+
+// Procura e soma ou insere
+void update_or_insert(Address new_temp) {
+    tempControl* current_node = tempControlHead;
+    tempControl* previous_node = NULL;
+    int found = 0;
+
+    // Procura na estrutura
+    while (current_node != NULL) {
+        if (current_node->temp.name != NULL && new_temp.name != NULL) {
+            if (strcmp(current_node->temp.name, new_temp.name) == 0) {
+                found = 1;
+                
+                // Se tentar acessar novamente após um fun call
+                if (current_node->safe == 1) {
+                    current_node->safe = -1;
+                    
+                    // A mudança de 1 para -1 ocorreu! 
+                    // Faz a busca na estrutura FuncLabel buscando pelo name == scope
+                    FuncLabel* current_func = functionsHead; // Usando a cabeça global da lista de funções
+                    while (current_func != NULL) {
+                        if (current_func->name != NULL && globalScope != NULL) {
+                            if (strcmp(current_func->name, globalScope) == 0) {
+                                current_func->safeCall = 0;
+                                break; // Encontrou o escopo correspondente, pode parar a busca interna
+                            }
+                        }
+                        current_func = current_func->next;
+                    }
+                }
+                
+                // Contagem
+                current_node->sum += 1;
+                break;
+            }
+        }
+        previous_node = current_node;
+        current_node = current_node->next;
+    }
+
+    // Se não houver, insere ao final
+    if (!found) {
+        tempControl* new_node = (tempControl*)malloc(sizeof(tempControl));
+        if (new_node == NULL) {
+            printf("Memory allocation error.\n");
+            return;
+        }
+
+        new_node->temp.kind = new_temp.kind;
+        new_node->temp.val = new_temp.val;
+        if (new_temp.name != NULL) {
+            new_node->temp.name = strdup(new_temp.name); 
+        } else {
+            new_node->temp.name = NULL;
+        }
+
+        new_node->sum = 1;
+        new_node->safe = 0;
+        new_node->next = NULL;
+
+        // Se o tempControlHead global for nulo, apenas atribui
+        if (tempControlHead == NULL) {
+            tempControlHead = new_node; 
+        } else {
+            previous_node->next = new_node;
+        }
+    }
+}
+
+// Faz o controle de segurança
+void enable_safe_conditional() {
+    tempControl* current_node = tempControlHead;
+    
+    while (current_node != NULL) {
+        if (current_node->safe == 0) {
+            current_node->safe = 1;
+        }
+        current_node = current_node->next;
     }
 }
 
@@ -95,6 +184,12 @@ Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3) {
     q->addr1 = a1;
     q->addr2 = a2;
     q->addr3 = a3;
+
+    // Adiciona na lista de controle
+    if(a1.kind == TEMP_VAR) update_or_insert(a1);
+    if(a2.kind == TEMP_VAR) update_or_insert(a2); // Provavelmente nem precisa
+    if(a3.kind == TEMP_VAR) update_or_insert(a3);
+
     q->next = NULL;
 
     if (head == NULL) {
@@ -206,6 +301,7 @@ int isArray(ASTNode* node){
 }
 
 Address generateCode(ASTNode* node, char* scope, int mode){
+    globalScope = scope;
     if(node == NULL) return createEmptyAddr();
 
     switch (node->type){
@@ -408,12 +504,16 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
         // Se não for tipo void retorna o valor
         if(st_lookup_type(func_call_name.name) != Void){
+            enable_safe_conditional();  // Guarda os temporários seguros
             Address fun_call_temp = *createTempAddr();
             makeNewQuad(OP_CALL, fun_call_temp, func_call_name, createNumericAddr(param_number));
             return(fun_call_temp);
         }
         // Caso contrário, apenas chama a função
-        else makeNewQuad(OP_CALL, createEmptyAddr(), func_call_name, createNumericAddr(param_number));
+        else{
+            makeNewQuad(OP_CALL, createEmptyAddr(), func_call_name, createNumericAddr(param_number));
+            enable_safe_conditional();  // Guarda os temporários seguros
+        }
         break;
 
     case NODE_BINARY_OP:
@@ -549,6 +649,10 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 }
 
 void generateProgram(ASTNode* tree){
+    tempControlHead = (tempControl*)malloc(sizeof(tempControl));
+    tempControlHead->temp.name = NULL;
+    tempControlHead->next = NULL;
+
     ASTNode *current = tree;
 
     // Percorre todos os nós irmãos da raíz

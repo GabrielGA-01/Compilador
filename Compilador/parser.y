@@ -341,7 +341,8 @@ int main(int argc, char *argv[])
         // Código assembly
         extern Quad* head;
         extern FuncLabel* functionsHead;
-        generateAssembly(head, functionsHead);
+        extern tempControl* tempControlHead;
+        generateAssembly(head, functionsHead, tempControlHead);
         printf("Assembly code generated successfully!\n");
     } else {
         printf("Intermediate code generation skipped due to errors\n");

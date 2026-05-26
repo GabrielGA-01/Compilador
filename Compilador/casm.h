@@ -16,7 +16,14 @@ typedef struct variablesAtStack {
     struct variablesAtStack* next; 
 } variablesAtStack;
 
+// Igual a tempControl
+typedef struct regControl {
+    Address reg;
+    int sum;
+    int safe;
+    struct tempControl* next;
+} regControl;
 
-void generateAssembly(Quad* quadHead, FuncLabel* funHead);
+void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead);
 
 #endif
