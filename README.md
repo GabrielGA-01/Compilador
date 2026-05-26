@@ -23,5 +23,5 @@ Fazer o retorno das funções - OK
 Fazer a chamada de função e preparação dos parâmetros - OK
 Corrigir a lógica do número de parâmetros na pilha (param) para ser por escopo - OK. Solução: adiciona na lista de variáveis de verdade
 Fazer a correção no acesso à variáveis globais - OK
-Fazer verificação de registrador sobrando em func call
-Atualizar temporários em registradores
+Atualizar temporários em registradores - Problema de indentificação de temp na chamada de função - Ok - Resolvido
+Fazer verificação de registrador sobrando em func call - Pendente

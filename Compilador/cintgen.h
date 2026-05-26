@@ -96,6 +96,7 @@ Address* createLabelAddr();
 Address* createTempAddr();
 
 char* numberToType(int num);
+void update_or_insert(Address new_temp);
 
 Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
 Address generateCode(ASTNode* tree, char* escopo, int mode);

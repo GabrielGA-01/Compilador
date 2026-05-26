@@ -6,6 +6,7 @@
 
 #define MEM_SIZE 63
 #define PILHA_GLOBAL MEM_SIZE
+#define NUMBER_OF_REGISTERS 3
 
 variablesAtStack* scopesHead = NULL;
 
@@ -34,6 +35,11 @@ Quad* insertQuadAfter(Quad* target, QuadOp op, Address a1, Address a2, Address a
     q->next = target->next;
     target->next = q;
 
+    // Adiciona na lista de controle
+    if(a1.kind == TEMP_VAR) update_or_insert(a1);
+    if(a2.kind == TEMP_VAR) update_or_insert(a2); // Provavelmente nem precisa
+    if(a3.kind == TEMP_VAR) update_or_insert(a3);
+
     return q;
 }
 
@@ -48,6 +54,140 @@ Address* createRegisterAddr(int number) {
     a->name = strdup(buffer);
     a->val = number;
     return a;
+}
+
+regControl* populateRegisters(int n) {
+    if (n <= 0) return NULL;
+
+    regControl* regVector = (regControl*)malloc(n * sizeof(regControl));
+    if (regVector == NULL) {
+        printf("Memory allocation error for register vector.\n");
+        return NULL;
+    }
+
+    char buffer[20];
+
+    for (int i = 0; i < n; i++) {
+        sprintf(buffer, "R%d", i);
+
+        // Inicializa o Address interno
+        regVector[i].reg.kind = REGISTER_KIND;
+        regVector[i].reg.name = strdup(buffer);
+        regVector[i].reg.val = i;
+
+        // Nova inicialização: sem nome
+        regVector[i].labelName = NULL;
+
+        // Inicializações anteriores mantidas
+        regVector[i].sum = 0;
+        regVector[i].safe = 1;
+    }
+
+    return regVector;
+}
+
+// Função que gerencia o mapeamento de temporárias para registradores
+Address* allocate_register(char* temp_name, tempControl* tempControlHead, regControl* regVector) {
+    if (temp_name == NULL || regVector == NULL) {
+        perror("Error: Invalid arguments passed to allocate_register");
+        return NULL;
+    }
+
+    // 1. Procurar se em algum dos registradores o labelName é o mesmo do temp
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        if (regVector[i].labelName != NULL) {
+            if (strcmp(regVector[i].labelName, temp_name) == 0) {
+                // 1.1. Caso seja, reduz em 1 o valor da soma
+                regVector[i].sum -= 1;
+                
+                // Retorna o endereço do registrador encontrado
+                return &(regVector[i].reg);
+            }
+        }
+    }
+
+    // 2. Caso não tenham o labelName correspondente...
+    // Primeiro, precisamos buscar os dados da temporária em tempControlHead
+    tempControl* current_temp = tempControlHead;
+    int temp_sum = 1;  // Valores padrão de contingência
+    int temp_safe = 0;
+
+    while (current_temp != NULL) {
+        if (current_temp->temp.name != NULL && strcmp(current_temp->temp.name, temp_name) == 0) {
+            temp_sum = current_temp->sum;
+            temp_safe = current_temp->safe;
+            break;
+        }
+        current_temp = current_temp->next;
+    }
+
+    // 2.1. Procurar o primeiro registrador cuja soma é zero
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        if (regVector[i].sum == 0) {
+            // Se o labelName antigo existia (está sendo substituído), limpa a memória dele
+            if (regVector[i].labelName != NULL) {
+                free(regVector[i].labelName);
+            }
+
+            // Atualiza o labelName e o safe
+            regVector[i].labelName = strdup(temp_name);
+            regVector[i].safe = temp_safe;
+
+            // MODIFICAÇÃO AQUI: Inicializa a nova soma como sum(label) - 1
+            regVector[i].sum = temp_sum - 1;
+
+            // Retorna o endereço do registrador escolhido
+            return &(regVector[i].reg);
+        }
+    }
+
+    // 2.2. Caso não tenha nenhum registrador disponível (nenhum sum == 0)
+    // Imprime o estado de uso dos registradores antes do perror
+    fprintf(stderr, "\n--- Active Registers in Use ---\n");
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        fprintf(stderr, "Register %s is holding: %s (Sum: %d)\n", 
+                regVector[i].reg.name ? regVector[i].reg.name : "??",
+                regVector[i].labelName ? regVector[i].labelName : "(free but blocked)", 
+                regVector[i].sum);
+    }
+    fprintf(stderr, "-------------------------------\n");
+
+    perror("Error: No physical registers available (Spill required)");
+    return NULL;
+}
+
+void check_register_leaks(regControl* regVector) {
+    if (regVector == NULL) return;
+
+    int leaks_found = 0;
+
+    // Primeiro passamos verificando se há erros
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        if (regVector[i].sum != 0) {
+            leaks_found = 1;
+            break;
+        }
+    }
+
+    // Se houver algum vazamento/erro, detalha o cenário antes de travar
+    if (leaks_found) {
+        fprintf(stderr, "\n❌ FATAL COMPILER ERROR: Register allocation leak detected!\n");
+        fprintf(stderr, "Some temporaries were not properly released (sum != 0).\n");
+        fprintf(stderr, "-------------------------------------------------------\n");
+
+        for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+            if (regVector[i].sum != 0) {
+                fprintf(stderr, "-> Register %s is deadlocked holding: %s | Remaining Sum: %d\n",
+                        regVector[i].reg.name ? regVector[i].reg.name : "??",
+                        regVector[i].labelName ? regVector[i].labelName : "(unknown)",
+                        regVector[i].sum);
+            }
+        }
+        fprintf(stderr, "-------------------------------------------------------\n");
+        
+        // Finaliza a execução do compilador apontando erro crítico
+        exit(EXIT_FAILURE); 
+    }
 }
 
 void addVariableToStack(char* scope, char *varName, int numPositions) {
@@ -296,6 +436,34 @@ void printFuncLabel(FuncLabel *current_func) {
     printf("=======================================================================\n\n");
 }
 
+void printRegControl(regControl* regVector) {
+    int n = NUMBER_OF_REGISTERS;
+    printf("\n=================== ESPELHO DO CONTROLE DE REGISTRADORES ===================\n");
+    
+    if (regVector == NULL || n <= 0) {
+        printf("O vetor de registradores está vazio ou não foi inicializado.\n");
+        printf("============================================================================\n\n");
+        return;
+    }
+
+    // Percorre o vetor usando índices numéricos
+    for (int i = 0; i < n; i++) {
+        printf("Registrador: [%s]\n", regVector[i].reg.name ? regVector[i].reg.name : "NULL");
+        
+        // Exibe o labelName (mostra "Nenhum" caso seja NULL)
+        printf("  ├── Rótulo Associado (LabelName): %s\n", 
+               regVector[i].labelName ? regVector[i].labelName : "(Nenhum)");
+               
+        printf("  └── Valor (Val): %-4d | Soma (Sum): %-4d | Seguro (Safe): %-3d\n", 
+               regVector[i].reg.val, 
+               regVector[i].sum, 
+               regVector[i].safe);
+               
+        printf("----------------------------------------------------------------------------\n");
+    }
+    printf("============================================================================\n\n");
+}
+
 // Lógica de eliminar uma quádrupla
 Quad* removeQuad(Quad* before, Quad* current){
     if (current == NULL) return NULL;
@@ -309,6 +477,12 @@ Quad* removeQuad(Quad* before, Quad* current){
 }
 
 void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead){
+    regControl *regVector = populateRegisters(NUMBER_OF_REGISTERS);
+
+    printFuncLabel(funHead);
+    printTempControl(tempControlHead);
+    printRegControl(regVector);
+
     Address* PilhaGlobal = createRegisterAddr(61);
     
     // Move o valor inicial para a pilha global
@@ -456,13 +630,14 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             char* funcName = current->addr2.name;
             // Caso seja input, apenas faz um input
             if(strcmp(funcName, "input") == 0){
-                insertQuadAfter(current, OP_IN, current->addr1, createEmptyAddr(), createEmptyAddr()); 
-                
+                Address inputReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_IN, inputReg, createEmptyAddr(), createEmptyAddr()); 
                 // Não possui parâmetros para estarem na pilha
             }
             // Caso seja output
             else if(strcmp(funcName, "output") == 0){
-                insertQuadAfter(current, OP_OUT, current->addr1, createEmptyAddr(), createEmptyAddr());
+                Address outputReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_OUT, outputReg, createEmptyAddr(), createEmptyAddr());
 
                 // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
             }
@@ -475,7 +650,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     // 2 - Libera o espaço da pilha
                     insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
                     // 1 - Carrega o último valor da pilha (o retorno de uma função)
-                    insertQuadAfter(current, OP_LOAD, current->addr1,*PilhaGeral, createNumericAddr(1));
+                    Address funretReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                    insertQuadAfter(current, OP_LOAD, funretReg,*PilhaGeral, createNumericAddr(1));
 
                 }
                 // 5 - Cria label de retorno
@@ -554,16 +730,25 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             break;
         }
 
+        if(current != NULL && 1 == 1){
+            if(current->addr1.kind == TEMP_VAR) current->addr1 = *allocate_register(current->addr1.name, tempControlHead, regVector);
+            if(current->addr2.kind == TEMP_VAR) current->addr2 = *allocate_register(current->addr2.name, tempControlHead, regVector);
+            if(current->addr3.kind == TEMP_VAR) current->addr3 = *allocate_register(current->addr3.name, tempControlHead, regVector);
+        }
 
+        // Lógica de percorrimento
         if(current == NULL && before != NULL) current = before->next;
         else{
             before = current;
             current = current->next;
         }
     }
+    // Debug
     printStack();
-    printFuncLabel(funHead);
-    printTempControl(tempControlHead);
+    printRegControl(regVector);
+
+    check_register_leaks(regVector);    // Todos registradores devem ter soma 0 ao final
+
     FILE* file = fopen("output/assembly_code.txt", "w");
     fprintCode(file, quadHead);
     fclose(file);
