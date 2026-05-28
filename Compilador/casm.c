@@ -6,7 +6,7 @@
 
 #define MEM_SIZE 63
 #define PILHA_GLOBAL MEM_SIZE
-#define NUMBER_OF_REGISTERS 3
+#define NUMBER_OF_REGISTERS 4
 
 variablesAtStack* scopesHead = NULL;
 
@@ -152,6 +152,7 @@ Address* allocate_register(char* temp_name, tempControl* tempControlHead, regCon
     }
     fprintf(stderr, "-------------------------------\n");
 
+    fprintf(stderr, "Without space for: %s\n", temp_name);
     perror("Error: No physical registers available (Spill required)");
     return NULL;
 }
@@ -188,6 +189,69 @@ void check_register_leaks(regControl* regVector) {
         // Finaliza a execução do compilador apontando erro crítico
         exit(EXIT_FAILURE); 
     }
+}
+
+// Retorna o status de safeCall da função
+int is_function_safe(char* scope_name, FuncLabel* funcLabelHead) {
+    if (scope_name == NULL || funcLabelHead == NULL) {
+        return -99; 
+    }
+
+    FuncLabel* current = funcLabelHead;
+
+    // Percorre a lista de rótulos de função
+    while (current != NULL) {
+        if (current->name != NULL && strcmp(current->name, scope_name) == 0) {
+            return current->safeCall; // Encontrou, retorna o status
+        }
+        current = current->next;
+    }
+
+    // Caso saia do laço sem encontrar o escopo
+    return -99; 
+}
+
+// Adiciona um valor ao allocatedParam do escopo e retorna o novo total
+int update_and_get_allocated_param(char* scope_name, int number, FuncLabel* funcLabelHead) {
+    if (scope_name == NULL || funcLabelHead == NULL) {
+        return -99;
+    }
+
+    FuncLabel* current = funcLabelHead;
+
+    // Percorre a lista procurando o escopo correspondente
+    while (current != NULL) {
+        if (current->name != NULL && strcmp(current->name, scope_name) == 0) {
+            current->allocatedParam += number; // Adiciona o número recebido
+            return current->allocatedParam;    // Retorna o valor atualizado
+        }
+        current = current->next;
+    }
+
+    // Escopo não encontrado
+    fprintf(stderr, "Warning: Scope '%s' not found to update allocatedParam.\n", scope_name);
+    return -99;
+}
+
+// Retorna o endereço da estrutura reg ou NULL se não encontrar
+Address* find_unsafe_active_register(regControl* regVector) {
+    if (regVector == NULL) {
+        return NULL;
+    }
+
+    // Percorre o banco de registradores do compilador
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        // Critério: Inseguro (-1) E ativo/com uso pendente (sum != 0)
+        if (regVector[i].safe == -1 && regVector[i].sum != 0) {
+            
+            // Retorna o endereço da estrutura reg do registrador encontrado
+            return &regVector[i].reg;
+        }
+    }
+
+    // Retorna NULL caso todos os registradores ativos estejam seguros (safe == 1)
+    // ou se todos os inseguros já estiverem livres (sum == 0)
+    return NULL;
 }
 
 void addVariableToStack(char* scope, char *varName, int numPositions) {
@@ -519,6 +583,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
     
     char *scope = NULL;
     int isAlloc = 1;
+    int hasParam = 0;
     while(current != NULL){
         // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
         if(current->op != OP_ARG && isAlloc == 1 && scope != NULL && strcmp("main", scope) != 0){
@@ -613,12 +678,29 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             }
             // Caso geral de parâmetro
             else{
+                // Caso não tenha alocado nenhum parâmetro ainda e seja função insegura
+                if(hasParam == 0 && is_function_safe(scope, funHead) == -1){
+                    hasParam = 1;
+                    // Aloca um espaço para guardar o valor do registrador inseguro
+                    insertQuadAfter(before, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+                    // Acompanha o número de parâmetros alocados por escopo
+                    addVariableToStack(scope, "&safeReg", 1);
+
+                    current = before;
+                    break;
+                }
+
                 // Aloca um espaço na pilha || Adiciona o parâmetro
-                insertQuadAfter(current, OP_STORE, *PilhaGeral, current->addr1, createNumericAddr(1));
+                Address* paramReg = allocate_register(current->addr1.name, tempControlHead, regVector);
+
+                insertQuadAfter(current, OP_STORE, *PilhaGeral, *paramReg, createNumericAddr(1));
                 insertQuadAfter(current, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
 
                 // Incrementa o número de pametros na pilha
                 addVariableToStack(scope, "&param", 1);
+
+                // Acompanha o número de parâmetros alocados por escopo
+                update_and_get_allocated_param(scope, 1, funHead);
             }
             
             current = removeQuad(before, current);
@@ -626,6 +708,9 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         case OP_CALL:
             // Adiciona o endereço de retorno à pilha e recebe o retorno da função
             Address* retAddrs = createLabelAddr();
+
+            // Acompanha o número de parâmetros liberados após a chamada
+            update_and_get_allocated_param(scope, -current->addr3.val, funHead);
 
             char* funcName = current->addr2.name;
             // Caso seja input, apenas faz um input
@@ -645,11 +730,28 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             else{
                 Address* tempWithRetAddr = createTempAddr();
 
+                // Identifica, se houver, um registrador inseguro
+                Address* unsafeReg = NULL;
+                unsafeReg = find_unsafe_active_register(regVector);
+
+                // 7 - Recupera o valor do registrador inseguro, se houver
+                if(is_function_safe(scope, funHead) == -1){
+                    int auxOffset = verifyVariableShift(scope, "&safeReg") - current->addr3.val; // Menos o que vai ser liberado no final
+
+                    // 3 - Libera o espaço do registrador inseguro se não houver mais parâmetros alocados (allocated = 0)
+                    if(update_and_get_allocated_param(scope, 0, funHead) == 0){
+                        insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+                        hasParam = 0;
+                    }
+                    // 1 - Carrega o valor para o registrador inseguro
+                    insertQuadAfter(current, OP_LOAD, *unsafeReg, *PilhaGeral, createNumericAddr(auxOffset));
+                }
                 // 6 - Faz a leitura do valor retornado se houver
                 if(current->addr1.kind == TEMP_VAR){
                     // 2 - Libera o espaço da pilha
                     insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
                     // 1 - Carrega o último valor da pilha (o retorno de uma função)
+                    // Não pode ser o próprio registrador inseguro, pois ele ainda tem mais uso
                     Address funretReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
                     insertQuadAfter(current, OP_LOAD, funretReg,*PilhaGeral, createNumericAddr(1));
 
@@ -665,9 +767,28 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 // 1 - Move o endereço de retorno para um registrador
                 insertQuadAfter(current, OP_MOV, *tempWithRetAddr, *retAddrs, createEmptyAddr());
 
+                // 0 - Guarda o valor do registrador inseguro
+                if(is_function_safe(scope, funHead) == -1){                  
+                    int auxOffset = verifyVariableShift(scope, "&safeReg");
+                    Address* auxTemp = createTempAddr();
+
+                    // 2 - Guarda o valor do registrador inseguro
+                    insertQuadAfter(current, OP_STORE, *auxTemp, *unsafeReg, createNumericAddr(0));
+                    // 1 - Acessa o endereço de &param
+                    insertQuadAfter(current, OP_LOAD, *auxTemp, *PilhaGeral, createNumericAddr(auxOffset));
+                }
+
                 // Remove os parâmetros na pilha de variáveis da função
                 for(int i = 0; i < current->addr3.val; i++){
                     removeVariableFromStack(scope);
+                }
+
+                // Agora sim, após ter feito o acesso à memória e liberado os parâmetros enviados, 
+                // pode liberar o registrador inseguro
+                if(is_function_safe(scope, funHead) == -1){    
+                    if(update_and_get_allocated_param(scope, 0, funHead) == 0){
+                        removeVariableFromStack(scope);
+                    }
                 }
             }
 
@@ -708,10 +829,12 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
 
                 // Caso haja um retorno de algum valor
                 if(current->op == OP_RET && current->addr1.kind != EMPTY ){
+                    Address* regAddr = allocate_register(current->addr1.name, tempControlHead, regVector);
+
                     // Carrega o endereço de retorno || Libera a pilha (n-1) || Adiciona o retorno na pilha || Faz o salto
                     insertQuadAfter(current, OP_JR, *retAddr, createEmptyAddr(), createEmptyAddr());
                     stackUpAddr.val -= 1;
-                    insertQuadAfter(current, OP_STORE, pilha, current->addr1, createNumericAddr(1));
+                    insertQuadAfter(current, OP_STORE, pilha, *regAddr, createNumericAddr(1));
                     insertQuadAfter(current, OP_ADD, pilha, pilha, stackUpAddr);
                     insertQuadAfter(current, OP_LOAD, *retAddr,pilha, createNumericAddr(retShift));
                 }

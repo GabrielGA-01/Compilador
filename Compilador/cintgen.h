@@ -75,6 +75,7 @@ typedef struct Quad {
 typedef struct FuncLabel {
     char* name;
     int safeCall;
+    int allocatedParam;
     Address* label;
     struct FuncLabel* next;
 } FuncLabel;

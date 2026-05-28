@@ -1,15 +1,11 @@
-int bla(){
-    if(1 == 2);
-    return 3;
+int bla(int b){
+    return b;
 }
 
 void main(void)
 {
     int vet[10];
     int y;
-    int x;
-    y = 2;
-    x = vet[y] + vet[x] + bla();
-
+    y = y + bla(y);
     return;
 }

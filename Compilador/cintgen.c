@@ -78,6 +78,7 @@ void createFuncLabel(char* name, Address* label){
     a->label = label;
     a->next = NULL;
     a->safeCall = 1;
+    a->allocatedParam = 0;
 
     if(functionsHead == NULL){
         functionsHead = a;
@@ -104,6 +105,7 @@ void update_or_insert(Address new_temp) {
                 // Se tentar acessar novamente após um fun call
                 if (current_node->safe == 1) {
                     current_node->safe = -1;
+                    printf("Inseguro para %s", new_temp.name);
                     
                     // A mudança de 1 para -1 ocorreu! 
                     // Faz a busca na estrutura FuncLabel buscando pelo name == scope
@@ -111,7 +113,7 @@ void update_or_insert(Address new_temp) {
                     while (current_func != NULL) {
                         if (current_func->name != NULL && globalScope != NULL) {
                             if (strcmp(current_func->name, globalScope) == 0) {
-                                current_func->safeCall = 0;
+                                current_func->safeCall = -1;
                                 break; // Encontrou o escopo correspondente, pode parar a busca interna
                             }
                         }
@@ -661,7 +663,7 @@ void generateProgram(ASTNode* tree){
         if(current->type == NODE_IF_STMT && current->next != NULL) current = current->next->next;
         else current = current->next;
     }
-    makeNewQuad(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    enable_safe_conditional();
     
     FILE* file = fopen("output/intermediate_code.txt", "w");
     fprintCode(file, head);
