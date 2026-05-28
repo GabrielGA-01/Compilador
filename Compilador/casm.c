@@ -618,54 +618,79 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             break;
         case OP_LOAD:
             // Atualiza a operação de load
-            if(current->addr3.kind == INT_CONST) current->op = OP_LOADD;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_LOADDR;
-            break;
-        case OP_STORE:
-            // Atualiza a operação de store
-            if(current->addr3.kind == INT_CONST) current->op = OP_STORED;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_STOREDR;
-            break;      
-        case OP_MOV:
-            if(current->addr2.kind == STRING_VAR){
-                char* varName = current->addr2.name;
-                int varShift = verifyVariableShift(scope, varName);
+            if(current->addr3.kind == INT_CONST){
+                current->op = OP_LOADD;
+
+                char* varNameLoad = current->addr2.name;
+                int varShiftLoad = verifyVariableShift(scope, varNameLoad);
                 // Caso seja uma variável local
-                if(varShift != -1){
-                    current->op = OP_ADD;
-                    current->addr2 = *PilhaGeral;
-                    current->addr3 = createNumericAddr(varShift);
+                if(varShiftLoad != -1){
+                    current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
+                    current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                 }
                 // Caso contrário, busca no global
                 else{
-                    varShift = verifyVariableShift("global", varName);
-                    if(varShift != -1){
-                        current->addr2 = *PilhaGlobal;
-                        current->addr3 = createNumericAddr(varShift);
+                    varShiftLoad = verifyVariableShift("global", varNameLoad);
+                    if(varShiftLoad != -1){
+                        current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
+                        current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                     }
                     else{
-                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varName);
+                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameLoad);
                         perror("");
                     }
                 }
+            }
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_LOADDR;
+            break;
+        case OP_STORE:
+            // Atualiza a operação de store
+            if(current->addr3.kind == INT_CONST){
+                current->op = OP_STORED;
+                
+                char* varNameStore = current->addr1.name;
+                int varShiftStore = verifyVariableShift(scope, varNameStore);
+                // Caso seja uma variável local
+                if(varShiftStore != -1){
+                    current->addr1 = *PilhaGeral;   // Utiliza a pilha geral
+                    current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
+                }
+                // Caso contrário, busca no global
+                else{
+                    varShiftStore = verifyVariableShift("global", varNameStore);
+                    if(varShiftStore != -1){
+                        current->addr1 = *PilhaGlobal;  // Utiliza a pilha global
+                        current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
+                    }
+                    else{
+                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameStore);
+                        perror("");
+                    }
+                }
+            }
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_STOREDR;
+            break;      
+        case OP_MOV:
+            if(current->addr2.kind == TEMP_VAR || current->addr2.kind == REGISTER_KIND){
+                current->op = OP_MOVR;
             }
             else if(current->addr2.kind == INT_CONST || current->addr2.kind == LABEL_KIND) current->op = OP_MOVI;
             break;
         case OP_ADD:
             if(current->addr3.kind == INT_CONST) current->op = OP_ADDI;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_ADDR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_ADDR;
             break;
         case OP_SUB:
             if(current->addr3.kind == INT_CONST) current->op = OP_SUBI;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_SUBR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_SUBR;
             break;
         case OP_DIV:
             if(current->addr3.kind == INT_CONST) current->op = OP_DIVI;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_DIVR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_DIVR;
             break;
         case OP_MUL:
             if(current->addr3.kind == INT_CONST) current->op = OP_MULI;
-            else if(current->addr3.kind == TEMP_VAR) current->op = OP_MULR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_MULR;
             break;
         case OP_PARAM:
             // Apenas faz a alocação do espaço, a liberação é feita na função que for chamada
@@ -731,8 +756,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 Address* tempWithRetAddr = createTempAddr();
 
                 // Identifica, se houver, um registrador inseguro
-                Address* unsafeReg = NULL;
-                unsafeReg = find_unsafe_active_register(regVector);
+                Address* unsafeReg = find_unsafe_active_register(regVector);
 
                 // 7 - Recupera o valor do registrador inseguro, se houver
                 if(is_function_safe(scope, funHead) == -1){
@@ -825,7 +849,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     }
                 }
 
-                Address* retAddr = createTempAddr();
+                Address* retAddr =  allocate_register(createTempAddr()->name, tempControlHead, regVector);
 
                 // Caso haja um retorno de algum valor
                 if(current->op == OP_RET && current->addr1.kind != EMPTY ){
