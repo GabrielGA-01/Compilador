@@ -5,6 +5,7 @@ int bla(int b){
 void main(void)
 {
     int vet[10];
+    int vete[5];
     int y;
     y = y + bla(y);
     return;

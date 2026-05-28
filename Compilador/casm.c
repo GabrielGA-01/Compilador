@@ -331,7 +331,7 @@ int verifyVariableShift(char* scope, char* varName) {
     return -1;
 }
 
-int getFirstVariableShift(char* scope) {
+int getScopeVariableShift(char* scope) {
     variablesAtStack* currentScope = scopesHead;
 
     while (currentScope != NULL) {
@@ -346,7 +346,7 @@ int getFirstVariableShift(char* scope) {
         return -1;
     }
 
-    return currentScope->var->offset;
+    return currentScope->var->offset + currentScope->var->size - 1; // Posição da última variável na pilha + seu tamanho - 1
 }
 
 void removeVariableFromStack(char *scope) {
@@ -632,7 +632,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 int varShift = verifyVariableShift(scope, varName);
                 // Caso seja uma variável local
                 if(varShift != -1){
-                    current->op = OP_LOADD;
+                    current->op = OP_ADD;
                     current->addr2 = *PilhaGeral;
                     current->addr3 = createNumericAddr(varShift);
                 }
@@ -775,7 +775,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     // 2 - Guarda o valor do registrador inseguro
                     insertQuadAfter(current, OP_STORE, *auxTemp, *unsafeReg, createNumericAddr(0));
                     // 1 - Acessa o endereço de &param
-                    insertQuadAfter(current, OP_LOAD, *auxTemp, *PilhaGeral, createNumericAddr(auxOffset));
+                    insertQuadAfter(current, OP_ADD, *auxTemp, *PilhaGeral, createNumericAddr(auxOffset));
                 }
 
                 // Remove os parâmetros na pilha de variáveis da função
@@ -798,7 +798,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         case OP_END_FUN:
             // Ao chegar ao fim, libera todo o espaço alocado na pilha para ela...
             // Incluindo o dos parâmetros que recebeu
-            int stackUp = getFirstVariableShift(scope);
+            int stackUp = getScopeVariableShift(scope);
             Address stackUpAddr = createNumericAddr(stackUp);
 
             // Função main
