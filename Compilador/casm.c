@@ -621,23 +621,25 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             if(current->addr3.kind == INT_CONST){
                 current->op = OP_LOADD;
 
-                char* varNameLoad = current->addr2.name;
-                int varShiftLoad = verifyVariableShift(scope, varNameLoad);
-                // Caso seja uma variável local
-                if(varShiftLoad != -1){
-                    current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
-                    current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
-                }
-                // Caso contrário, busca no global
-                else{
-                    varShiftLoad = verifyVariableShift("global", varNameLoad);
+                if(current->addr2.kind == STRING_VAR){
+                    char* varNameLoad = current->addr2.name;
+                    int varShiftLoad = verifyVariableShift(scope, varNameLoad);
+                    // Caso seja uma variável local
                     if(varShiftLoad != -1){
-                        current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
+                        current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
                         current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                     }
+                    // Caso contrário, busca no global
                     else{
-                        printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameLoad);
-                        perror("");
+                        varShiftLoad = verifyVariableShift("global", varNameLoad);
+                        if(varShiftLoad != -1){
+                            current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
+                            current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
+                        }
+                        else{
+                            printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameLoad);
+                            perror("");
+                        }
                     }
                 }
             }
@@ -648,18 +650,44 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             if(current->addr3.kind == INT_CONST){
                 current->op = OP_STORED;
                 
-                char* varNameStore = current->addr1.name;
+                if(current->addr1.kind == STRING_VAR){
+                    char* varNameStore = current->addr1.name;
+                    int varShiftStore = verifyVariableShift(scope, varNameStore);
+                    // Caso seja uma variável local
+                    if(varShiftStore != -1){
+                        current->addr1 = *PilhaGeral;   // Utiliza a pilha geral
+                        current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
+                    }
+                    // Caso contrário, busca no global
+                    else{
+                        varShiftStore = verifyVariableShift("global", varNameStore);
+                        if(varShiftStore != -1){
+                            current->addr1 = *PilhaGlobal;  // Utiliza a pilha global
+                            current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
+                        }
+                        else{
+                            printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameStore);
+                            perror("");
+                        }
+                    }
+                }   
+            }
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_STOREDR;
+            break;      
+        case OP_MOV:
+            if(current->addr2.kind == STRING_VAR){
+                char* varNameStore = current->addr2.name;
                 int varShiftStore = verifyVariableShift(scope, varNameStore);
                 // Caso seja uma variável local
                 if(varShiftStore != -1){
-                    current->addr1 = *PilhaGeral;   // Utiliza a pilha geral
+                    current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
                     current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                 }
                 // Caso contrário, busca no global
                 else{
                     varShiftStore = verifyVariableShift("global", varNameStore);
                     if(varShiftStore != -1){
-                        current->addr1 = *PilhaGlobal;  // Utiliza a pilha global
+                        current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
                         current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                     }
                     else{
@@ -667,11 +695,10 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                         perror("");
                     }
                 }
+                current->op = OP_MOVI;
             }
-            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_STOREDR;
-            break;      
-        case OP_MOV:
-            if(current->addr2.kind == TEMP_VAR || current->addr2.kind == REGISTER_KIND){
+
+            else if(current->addr2.kind == TEMP_VAR || current->addr2.kind == REGISTER_KIND){
                 current->op = OP_MOVR;
             }
             else if(current->addr2.kind == INT_CONST || current->addr2.kind == LABEL_KIND) current->op = OP_MOVI;
@@ -758,17 +785,19 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 // Identifica, se houver, um registrador inseguro
                 Address* unsafeReg = find_unsafe_active_register(regVector);
 
+                
                 // 7 - Recupera o valor do registrador inseguro, se houver
                 if(is_function_safe(scope, funHead) == -1){
-                    int auxOffset = verifyVariableShift(scope, "&safeReg") - current->addr3.val; // Menos o que vai ser liberado no final
-
-                    // 3 - Libera o espaço do registrador inseguro se não houver mais parâmetros alocados (allocated = 0)
+                    // 2 - Libera o espaço do registrador inseguro se não houver mais parâmetros alocados (allocated = 0)
                     if(update_and_get_allocated_param(scope, 0, funHead) == 0){
                         insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
-                        hasParam = 0;
                     }
-                    // 1 - Carrega o valor para o registrador inseguro
-                    insertQuadAfter(current, OP_LOAD, *unsafeReg, *PilhaGeral, createNumericAddr(auxOffset));
+                    if(unsafeReg != NULL){
+                        int auxOffset = verifyVariableShift(scope, "&safeReg") - current->addr3.val; // Menos o que vai ser liberado no final
+
+                        // 1 - Carrega o valor para o registrador inseguro
+                        insertQuadAfter(current, OP_LOAD, *unsafeReg, *PilhaGeral, createNumericAddr(auxOffset));
+                    }
                 }
                 // 6 - Faz a leitura do valor retornado se houver
                 if(current->addr1.kind == TEMP_VAR){
@@ -792,14 +821,12 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 insertQuadAfter(current, OP_MOV, *tempWithRetAddr, *retAddrs, createEmptyAddr());
 
                 // 0 - Guarda o valor do registrador inseguro
-                if(is_function_safe(scope, funHead) == -1){                  
+                if(is_function_safe(scope, funHead) == -1 && unsafeReg != NULL){                  
                     int auxOffset = verifyVariableShift(scope, "&safeReg");
                     Address* auxTemp = createTempAddr();
 
-                    // 2 - Guarda o valor do registrador inseguro
-                    insertQuadAfter(current, OP_STORE, *auxTemp, *unsafeReg, createNumericAddr(0));
-                    // 1 - Acessa o endereço de &param
-                    insertQuadAfter(current, OP_ADD, *auxTemp, *PilhaGeral, createNumericAddr(auxOffset));
+                    // 1 - Guarda o valor do registrador inseguro
+                    insertQuadAfter(current, OP_STORE, *PilhaGeral, *unsafeReg, createNumericAddr(auxOffset));
                 }
 
                 // Remove os parâmetros na pilha de variáveis da função
@@ -811,6 +838,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 // pode liberar o registrador inseguro
                 if(is_function_safe(scope, funHead) == -1){    
                     if(update_and_get_allocated_param(scope, 0, funHead) == 0){
+                        // 1 - Acessa o endereço de &param
+                        hasParam = 0;
                         removeVariableFromStack(scope);
                     }
                 }

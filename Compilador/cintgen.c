@@ -452,17 +452,20 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         
         if(mode == 0) return(array_access_name);
         else{
-            Address array_access_deslocamento = determineVariableSize(node);
             
+            Address second_parameter_array_scope;
             // Caso seja um ponteiro, faz um novo acesso à memória
             if(st_lookup_is_array_scope(array_access_name.name, scope) == 2){
                 Address array_access_deslocamento_indireto = createNumericAddr(0);
-                makeNewQuad(OP_LOAD, array_access_name, array_access_name, array_access_deslocamento_indireto);
+                second_parameter_array_scope = *createTempAddr();
+                makeNewQuad(OP_LOAD, second_parameter_array_scope, array_access_name, array_access_deslocamento_indireto);
             }
+            else second_parameter_array_scope = array_access_name;
 
             Address *array_access_temp_loaded = createTempAddr();
+            Address array_access_deslocamento = determineVariableSize(node);
 
-            makeNewQuad(OP_LOAD, *array_access_temp_loaded, array_access_name, array_access_deslocamento);
+            makeNewQuad(OP_LOAD, *array_access_temp_loaded, second_parameter_array_scope, array_access_deslocamento);
             return *array_access_temp_loaded;
         }
         break;
@@ -577,13 +580,16 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address assign_expr_deslocamento = determineVariableSize(node->leftChild);
         if(isArray(node->leftChild) == 0) assign_expr_deslocamento.val--; // Se for uma variável, lê a "posição zero"
 
+        Address first_parameter_assign_name;
         // Caso seja um ponteiro, faz um novo acesso à memória
         if(st_lookup_is_array_scope(node_assign_name.name, scope) == 2){
             Address assign_expr_deslocamento_indireto = createNumericAddr(0);
-            makeNewQuad(OP_LOAD, node_assign_name, node_assign_name, assign_expr_deslocamento_indireto);
+            first_parameter_assign_name = *createTempAddr();
+            makeNewQuad(OP_LOAD, first_parameter_assign_name, node_assign_name, assign_expr_deslocamento_indireto);
         }
+        else first_parameter_assign_name = node_assign_name;
 
-        makeNewQuad(OP_STORE, node_assign_name, value_to_store, assign_expr_deslocamento);
+        makeNewQuad(OP_STORE, first_parameter_assign_name, value_to_store, assign_expr_deslocamento);
 
         break;
 
@@ -605,7 +611,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             Address var_temp_addr = *createTempAddr();
             // Caso queira o endereço de um array
             if(st_lookup_is_array_scope(node_name, scope) == 1){
-                return(node_var_name);
+                makeNewQuad(OP_MOV, var_temp_addr, node_var_name, createNumericAddr(0));
             }
             // Caso queira o valor da variável
             else{
