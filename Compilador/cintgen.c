@@ -577,6 +577,12 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         Address node_assign_name = generateCode(node->leftChild, scope, 0);
         Address value_to_store = generateCode(node->rightChild, scope, 1);
     
+        Address value_to_store_temp = value_to_store;
+        if(value_to_store.kind == INT_CONST){
+            value_to_store_temp = *createTempAddr();
+            makeNewQuad(OP_MOV, value_to_store_temp, value_to_store, createEmptyAddr());
+        }
+
         Address assign_expr_deslocamento = determineVariableSize(node->leftChild);
         if(isArray(node->leftChild) == 0) assign_expr_deslocamento.val--; // Se for uma variável, lê a "posição zero"
 
@@ -589,7 +595,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         }
         else first_parameter_assign_name = node_assign_name;
 
-        makeNewQuad(OP_STORE, first_parameter_assign_name, value_to_store, assign_expr_deslocamento);
+        makeNewQuad(OP_STORE, first_parameter_assign_name, value_to_store_temp, assign_expr_deslocamento);
 
         break;
 

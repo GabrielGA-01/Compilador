@@ -1,0 +1,30 @@
+int bla(int b){
+    return b;
+}
+
+int dado(int a, int b, int c){
+    return ((a + b + c)/3);
+}
+
+void passaTempo(){
+    return;
+}
+
+void main(void)
+{
+    int vet[10];
+    int y;
+    vet[0] = bla(y);
+    vet[1] = dado(1, 2, y);
+
+    if(vet[2] == y){
+        y = 2;
+    }
+    else if(y != vet[2]){
+        y = 3;
+    }
+
+    passaTempo();
+
+    return;
+}
