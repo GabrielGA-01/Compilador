@@ -619,7 +619,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         case OP_LOAD:
             // Atualiza a operação de load
             if(current->addr3.kind == INT_CONST){
-                current->op = OP_LOADD;
+                current->op = OP_LOADDI;
 
                 if(current->addr2.kind == STRING_VAR){
                     char* varNameLoad = current->addr2.name;
@@ -648,7 +648,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         case OP_STORE:
             // Atualiza a operação de store
             if(current->addr3.kind == INT_CONST){
-                current->op = OP_STORED;
+                current->op = OP_STOREDI;
                 
                 if(current->addr1.kind == STRING_VAR){
                     char* varNameStore = current->addr1.name;
@@ -695,7 +695,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                         perror("");
                     }
                 }
-                current->op = OP_MOVI;
+                current->op = OP_ADDI;
             }
 
             else if(current->addr2.kind == TEMP_VAR || current->addr2.kind == REGISTER_KIND){
