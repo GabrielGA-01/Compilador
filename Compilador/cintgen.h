@@ -22,7 +22,7 @@ typedef enum {
     OP_BGE,
     OP_BEQ,
     OP_BNE,
-    OP_IFT,
+    OP_IFF,
     OP_JUMP,
     OP_JR,
     OP_LABEL,

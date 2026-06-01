@@ -1,0 +1,37 @@
+int recursao(int a){
+    int b;
+    int c;
+
+    output(a);
+    
+    if(a > 0){
+        a = a - 1;
+        b = recursao(a);
+    }
+
+    c = input();
+    return(a + b + c);
+}
+
+void main(void)
+{
+    int x;
+
+    x = input();
+    x = recursao(x);
+
+    if(x < 10){
+        x = x + 10;
+        output(x);
+    }
+    else if(x < 50){
+        x = x + 20;
+        output(x);
+    }
+    else{
+        x = x + 30;
+        output(x);
+    }
+    
+    return;
+}

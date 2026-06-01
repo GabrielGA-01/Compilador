@@ -4,7 +4,7 @@
 #include "cintgen.h"
 #include "string.h"
 
-#define MEM_SIZE 63
+#define MEM_SIZE 123
 #define PILHA_GLOBAL MEM_SIZE
 #define NUMBER_OF_REGISTERS 4
 
@@ -260,7 +260,7 @@ void addVariableToStack(char* scope, char *varName, int numPositions) {
     // Verifica se há espaço
     if (availableMem - numPositions < -1) {
         printf("Erro: Stack Overflow! Limite posições atingido.\n");
-        return;
+        exit(1);
     }
 
     // Atualiza o topo da pilha
@@ -399,7 +399,7 @@ void removeVariableFromStack(char *scope) {
         availableMem += offsetRemoved;
         if (availableMem > MEM_SIZE) {
             printf("Erro: Stack Underflow! Posição abaixo da mínima.\n");
-            return;
+            exit(1);
         }
     }
 }
@@ -656,7 +656,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                         }
                         else{
                             printf("Deu ruim variável inexistente! %s\n", varNameLoad);
-                            perror("");
                         }
                     }
                 }
@@ -685,7 +684,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                         }
                         else{
                             printf("Deu ruim variável inexistente! %s\n", varNameStore);
-                            perror("");
                         }
                     }
                 }   
@@ -710,7 +708,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     }
                     else{
                         printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameStore);
-                        perror("");
                     }
                 }
                 current->op = OP_ADDI;
@@ -864,7 +861,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     if(retShift != -1) pilha = *PilhaGlobal;
                     else{
                         printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", "&ret");
-                        perror("");
                     }
                 }
 

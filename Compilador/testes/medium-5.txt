@@ -1,0 +1,27 @@
+int aa;
+int bb;
+int cc;
+int f[7];
+
+int a(int a){
+    return a;
+}
+
+int b(int b){
+    return b;
+}
+
+int c(int c){
+    return c;
+}
+
+void main(void)
+{
+    int x;
+    int y;
+
+    x = a(aa) + b(bb) + c(cc) + a(4) + b(5) + c(6) + c(7);
+    y = a(f[0]) + b(f[1]) + c(f[2]) + a(f[3]) + b(f[4]) + c(f[5]) + c(f[6]);
+
+    return;
+}

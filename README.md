@@ -15,6 +15,8 @@ gdb -q --args ./compilador ./testes/sort.txt
 # Orientações para o futuro
 Não declare variáveis dentro de while ou de if
 Tenha certeza que uma função do tipo inteiro irá retornar algum valor
+Cuidado ao escrever expressões e sem atribuir elas para alguma variável
+
 A partir de agora todas as operações terminam em R ou em I
 
 # Próximos passos

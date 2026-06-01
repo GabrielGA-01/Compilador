@@ -1,0 +1,48 @@
+int aa;
+int bb;
+int cc;
+int f[7];
+
+int a(int a[], int abc){
+    return a[0] + abc;
+}
+
+int b(int b[], int abc[]){
+    return(b[0] + abc[1]);
+}
+
+int c(int c, int abc[]){
+    return c;
+}
+
+int var(int a, int b, int c){
+    return a-b-c;
+}
+
+void nada(){
+    return;
+}
+
+int car(int a[], int b[], int c[]){
+    return a[10]/b[7]*c[8];
+}
+
+void main(void)
+{
+    int x;
+    int y;
+    int z;
+
+    int vet1[11];
+    int vet2[11];
+    int vet3[11];
+
+    nada();
+    x = a(vet1, x) + a(vet1, y) + b(vet1, vet2) + b(vet2, vet3) + c(y, vet1) + c (x, vet2);
+    y = var(1,2,3) + var(1,2,3) + var(1,2,3) + car(vet1, vet2, vet3) + car(vet1, vet2, vet3);
+    nada();
+    z = a(vet1, x);
+    nada();
+    
+    return;
+}

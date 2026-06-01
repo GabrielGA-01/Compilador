@@ -225,7 +225,7 @@ const char* opToString(QuadOp op) {
         case OP_BGE:     return "bge";
         case OP_BEQ:     return "beq";
         case OP_BNE:     return "bne";
-        case OP_IFT:     return "ift";
+        case OP_IFF:     return "iff";
         case OP_JUMP:    return "jmp";
         case OP_JR:      return "jr";
         case OP_LABEL:   return "lab";
@@ -384,33 +384,43 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         ASTNode* instruction = node->rightChild;
         while(instruction != NULL){
             generateCode(instruction, scope, 1);
-            if(instruction->type == NODE_IF_STMT && instruction->number == 1 && instruction->number == 1 && instruction->next != NULL) instruction = instruction->next->next;
+
+            // Enquanto houver IFs em sequência
+            while(instruction->type == NODE_IF_STMT && instruction->number == 1 && instruction->next != NULL && instruction->next->type == NODE_IF_STMT){
+                instruction = instruction->next;
+            }
+            // Verifica se há um else
+            if(instruction->type == NODE_IF_STMT && instruction->number == 1 && instruction->next != NULL) instruction = instruction->next->next;
             else instruction = instruction->next;
         }
         break;
 
     case NODE_IF_STMT:
-        Address if_true_label = generateCode(node->leftChild, scope, 1);
-        Address* if_end_label = createLabelAddr();
+        // Verifica a condição
         
-        // Início do caso para falso se tiver else
+        Address label_else = generateCode(node->leftChild, scope, 1);
+        Address label_end = *createLabelAddr();
+
+        // If
+        generateCode(node->rightChild, scope, 1);
+        
+        // Fim do If
+        makeNewQuad(OP_JUMP, label_end, createEmptyAddr(), createEmptyAddr());
+
+        // Else
+        makeNewQuad(OP_LABEL, label_else, createEmptyAddr(), createEmptyAddr());
         if(node->number == 1){
             generateCode(node->next, scope, 1);
         }
-        makeNewQuad(OP_JUMP, *if_end_label, createEmptyAddr(), createEmptyAddr());
 
-        // Início do caso para verdadeiro
-        makeNewQuad(OP_LABEL, if_true_label, createEmptyAddr(), createEmptyAddr());
-        generateCode(node->rightChild, scope, 1);
-
-        // Label indicando o fim do IF
-        makeNewQuad(OP_LABEL, *if_end_label, createEmptyAddr(), createEmptyAddr());
+        // Fim do else
+        makeNewQuad(OP_LABEL, label_end, createEmptyAddr(), createEmptyAddr());
 
         break;
 
     case NODE_WHILE_STMT:
         Address* while_initial_label = createLabelAddr();
-        Address* while_final_label = createLabelAddr();
+        Address while_final_label;
         
         // Declara as variáveis do while antes de entrar nele
         ASTNode* variable_decl = node->rightChild->leftChild; //->NODE_COMPOUND_STMT->Variables declarations
@@ -425,9 +435,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         // Cria label no início do while
         makeNewQuad(OP_LABEL, *while_initial_label, createEmptyAddr(), createEmptyAddr());
         
-        Address while_content = generateCode(node->leftChild, scope, 1);
-        makeNewQuad(OP_JUMP, *while_final_label, createEmptyAddr(), createEmptyAddr());  // Caso falso
-        makeNewQuad(OP_LABEL, while_content, createEmptyAddr(), createEmptyAddr());     // Caso verdade
+        while_final_label = generateCode(node->leftChild, scope, 1);
 
         // Conteúdo do while
         generateCode(node->rightChild, scope, 2);   // Não declara as variáveis de novo
@@ -435,7 +443,7 @@ Address generateCode(ASTNode* node, char* scope, int mode){
 
 
         // Cria label no final do while
-        makeNewQuad(OP_LABEL, *while_final_label, createEmptyAddr(), createEmptyAddr());
+        makeNewQuad(OP_LABEL, while_final_label, createEmptyAddr(), createEmptyAddr());
 
         // Desaloca as variáveos do while
         if(while_variables != 0){
@@ -527,16 +535,18 @@ Address generateCode(ASTNode* node, char* scope, int mode){
             case 261: operation = OP_SUB; break;
             case 262: operation = OP_MUL; break;
             case 263: operation = OP_DIV; break;
-            case 264: operation = OP_BLT; break;
-            case 265: operation = OP_BLE; break;
-            case 266: operation = OP_BGE; break;
-            case 267: operation = OP_BGT; break;
-            case 268: operation = OP_BEQ; break;
-            case 269: operation = OP_BNE; break;
+
+            // Troca para implementar um IFF
+            case 266: operation = OP_BLT; break; // Valor real: 264
+            case 267: operation = OP_BLE; break; // Valor real: 265
+            case 264: operation = OP_BGE; break; // Valor real: 266
+            case 265: operation = OP_BGT; break; // Valor real: 267
+            case 269: operation = OP_BEQ; break; // Valor real: 268
+            case 268: operation = OP_BNE; break; // Valor real: 269
+
             default:  operation = OP_ADD; break;
         }
 
-        createLabelAddr();
         Address left_operator = generateCode(node->leftChild, scope, 1);
         Address right_operator = generateCode(node->rightChild, scope, 1);
 
@@ -559,7 +569,6 @@ Address generateCode(ASTNode* node, char* scope, int mode){
         else{
             // Retorno é uma label
             retorno = createLabelAddr();
-            Address true_left_operator = left_operator;
             Address true_right_operator = right_operator;
 
             // Para operações de branch é esperado que o segundo valor também seja um registrador
