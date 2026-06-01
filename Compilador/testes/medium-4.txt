@@ -1,0 +1,29 @@
+int a;
+int b;
+int c;
+int f[5];
+
+int seguro(){
+    return(f[3]+c);
+}
+
+int supA(int a){
+    return(a);
+}
+
+int supB(int a, int b){
+    return(a + b);
+}
+
+void main(void)
+{
+    int x;
+    int y;
+
+    x = seguro() + supA(a);
+    y = 7;
+    y = x + seguro();
+    x = seguro() + supB(a, b);
+
+    return;
+}

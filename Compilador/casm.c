@@ -615,6 +615,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 i -= 1;
                 removeVariableFromStack(scope);
             }
+            insertQuadAfter(current, OP_ADDI, *PilhaGeral, *PilhaGeral, createNumericAddr(current->addr1.val));
+            current = removeQuad(before, current);
             break;
         case OP_LOAD:
             // Atualiza a operação de load
@@ -637,7 +639,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                             current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                         }
                         else{
-                            printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameLoad);
+                            printf("Deu ruim variável inexistente! %s\n", varNameLoad);
                             perror("");
                         }
                     }
@@ -666,7 +668,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                             current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                         }
                         else{
-                            printf("Deu ruim variável inexistente! %s Antes esse erro do que outro:", varNameStore);
+                            printf("Deu ruim variável inexistente! %s\n", varNameStore);
                             perror("");
                         }
                     }
