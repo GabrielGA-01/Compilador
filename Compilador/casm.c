@@ -583,12 +583,27 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
     
     char *scope = NULL;
     int isAlloc = 1;
-    int hasParam = 0;
+    int safetyControl = 0;
     while(current != NULL){
-        // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
-        if(current->op != OP_ARG && isAlloc == 1 && scope != NULL && strcmp("main", scope) != 0){
-            addVariableToStack(scope, "&ret", 1);
-            isAlloc = 0;
+        // Verificações
+        if(scope != NULL){
+            // Caso seja uma função insegura, aloca um espaço para o registrador inseguro
+            if(safetyControl == 0 && is_function_safe(scope, funHead) == -1){
+                // Aloca um espaço para guardar o valor do registrador inseguro
+                insertQuadAfter(before, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
+                // Adiciona a variável usada para o registrador inseguro na pilha
+                addVariableToStack(scope, "&safeReg", 1);
+
+                current = before;   // Força o atual a estar olhando para a anterior
+                                    // Na próxima execução, o atual será a instrução inserida após before
+            }
+            safetyControl = 1;
+
+            // A primeira instrução que não for argumento após uma função é um retorno (exceção da main)
+            if(current->op != OP_ARG && isAlloc == 1 && strcmp("main", scope) != 0){
+                addVariableToStack(scope, "&ret", 1);
+                isAlloc = 0;
+            }
         }
 
         switch (current->op)
@@ -596,6 +611,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         case OP_FUN:
             scope = current->addr2.name;
             isAlloc = 1;
+            safetyControl = 0;
             current = removeQuad(before, current);
             break;
         case OP_ARG:
@@ -732,18 +748,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             }
             // Caso geral de parâmetro
             else{
-                // Caso não tenha alocado nenhum parâmetro ainda e seja função insegura
-                if(hasParam == 0 && is_function_safe(scope, funHead) == -1){
-                    hasParam = 1;
-                    // Aloca um espaço para guardar o valor do registrador inseguro
-                    insertQuadAfter(before, OP_SUB, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
-                    // Acompanha o número de parâmetros alocados por escopo
-                    addVariableToStack(scope, "&safeReg", 1);
-
-                    current = before;
-                    break;
-                }
-
                 // Aloca um espaço na pilha || Adiciona o parâmetro
                 Address* paramReg = allocate_register(current->addr1.name, tempControlHead, regVector);
 
@@ -789,17 +793,11 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
 
                 
                 // 7 - Recupera o valor do registrador inseguro, se houver
-                if(is_function_safe(scope, funHead) == -1){
-                    // 2 - Libera o espaço do registrador inseguro se não houver mais parâmetros alocados (allocated = 0)
-                    if(update_and_get_allocated_param(scope, 0, funHead) == 0){
-                        insertQuadAfter(current, OP_ADD, *PilhaGeral, *PilhaGeral, createNumericAddr(1));
-                    }
-                    if(unsafeReg != NULL){
-                        int auxOffset = verifyVariableShift(scope, "&safeReg") - current->addr3.val; // Menos o que vai ser liberado no final
+                if(is_function_safe(scope, funHead) == -1 && unsafeReg != NULL){
+                    int auxOffset = verifyVariableShift(scope, "&safeReg") - current->addr3.val; // Menos o que vai ser liberado no final
 
-                        // 1 - Carrega o valor para o registrador inseguro
-                        insertQuadAfter(current, OP_LOAD, *unsafeReg, *PilhaGeral, createNumericAddr(auxOffset));
-                    }
+                    // 1 - Carrega o valor para o registrador inseguro
+                    insertQuadAfter(current, OP_LOAD, *unsafeReg, *PilhaGeral, createNumericAddr(auxOffset));
                 }
                 // 6 - Faz a leitura do valor retornado se houver
                 if(current->addr1.kind == TEMP_VAR){
@@ -822,7 +820,7 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 // 1 - Move o endereço de retorno para um registrador
                 insertQuadAfter(current, OP_MOV, *tempWithRetAddr, *retAddrs, createEmptyAddr());
 
-                // 0 - Guarda o valor do registrador inseguro
+                // 0 - Guarda o valor do registrador inseguro, se houver
                 if(is_function_safe(scope, funHead) == -1 && unsafeReg != NULL){                  
                     int auxOffset = verifyVariableShift(scope, "&safeReg");
                     Address* auxTemp = createTempAddr();
@@ -834,16 +832,6 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                 // Remove os parâmetros na pilha de variáveis da função
                 for(int i = 0; i < current->addr3.val; i++){
                     removeVariableFromStack(scope);
-                }
-
-                // Agora sim, após ter feito o acesso à memória e liberado os parâmetros enviados, 
-                // pode liberar o registrador inseguro
-                if(is_function_safe(scope, funHead) == -1){    
-                    if(update_and_get_allocated_param(scope, 0, funHead) == 0){
-                        // 1 - Acessa o endereço de &param
-                        hasParam = 0;
-                        removeVariableFromStack(scope);
-                    }
                 }
             }
 

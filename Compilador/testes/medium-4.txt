@@ -12,6 +12,13 @@ int supA(int a){
 }
 
 int supB(int a, int b){
+    while(a > b){
+        int val;
+        val = a;
+        a = b - 1;
+        b = 2 * val;
+    }
+
     return(a + b);
 }
 
@@ -24,6 +31,16 @@ void main(void)
     y = 7;
     y = x + seguro();
     x = seguro() + supB(a, b);
+
+    while(x < y){
+        int dado;
+        int cado;
+
+        cado = dado;
+    }
+
+    output(c);
+    output(f[2]);
 
     return;
 }
