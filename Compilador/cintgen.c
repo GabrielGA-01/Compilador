@@ -65,7 +65,7 @@ Address* createTempAddr() {
     char buffer[20];
     sprintf(buffer, "t%d", tempCount);
     a->kind = TEMP_VAR;
-    a->val = tempCount;
+    a->val = -1;
     a->name = strdup(buffer);
     tempCount++;
     

@@ -1,206 +1,145 @@
-(movi, R61, 63, -)
-(subi, R61, R61, 10)
-(movr, R60, R61, -)
-(jmp, L17, -, -)
-(lab, L0, -, -)
-(subi, R60, R60, 1)
-(subi, R60, R60, 1)
-(subi, R60, R60, 1)
-(loadd, R0, R60, 6)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 1)
-(stored, R0, R1, 0)
-(loadd, R0, R60, 6)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(loaddr, R2, R0, R1)
-(loadd, R0, R60, 2)
-(stored, R0, R2, 0)
-(loadd, R0, R60, 6)
-(loadd, R1, R0, 0)
-(addi, R0, R1, 1)
-(loadd, R1, R60, 3)
-(stored, R1, R0, 0)
-(lab, L2, -, -)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 5)
-(loadd, R2, R0, 0)
-(blt, R1, R2, L5)
-(jmp, L3, -, -)
-(lab, L5, -, -)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(loaddr, R2, R0, R1)
-(loadd, R0, R60, 2)
-(loadd, R1, R0, 0)
-(blt, R2, R1, L7)
-(jmp, L8, -, -)
-(lab, L7, -, -)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(loaddr, R2, R0, R1)
-(loadd, R0, R60, 2)
-(stored, R0, R2, 0)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 1)
-(stored, R0, R1, 0)
-(lab, L8, -, -)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(addi, R0, R1, 1)
-(loadd, R1, R60, 3)
-(stored, R1, R0, 0)
-(jmp, L2, -, -)
-(lab, L3, -, -)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 4)
-(addi, R60, R60, 6)
-(stored, R60, R1, 1)
-(jr, R0, -, -)
-(loadd, R0, R60, 4)
-(addi, R60, R60, 7)
-(jr, R0, -, -)
-(lab, L10, -, -)
-(subi, R60, R60, 1)
-(subi, R60, R60, 1)
-(loadd, R0, R60, 5)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 2)
-(stored, R0, R1, 0)
-(subi, R60, R60, 1)
-(lab, L11, -, -)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 5)
-(loadd, R2, R0, 0)
-(subi, R0, R2, 1)
-(blt, R1, R0, L15)
-(jmp, L12, -, -)
-(lab, L15, -, -)
-(loadd, R0, R60, 7)
-(loadd, R1, R0, 0)
-(subi, R60, R60, 1)
-(stored, R60, R1, 1)
-(loadd, R0, R60, 4)
-(loadd, R1, R0, 0)
-(subi, R60, R60, 1)
-(stored, R60, R1, 1)
-(loadd, R0, R60, 7)
-(loadd, R1, R0, 0)
-(subi, R60, R60, 1)
-(stored, R60, R1, 1)
-(movi, R1, L28, -)
-(subi, R60, R60, 1)
-(stored, R60, R1, 1)
-(jmp, L0, -, -)
-(lab, L28, -, -)
-(loadd, R0, R60, 1)
-(addi, R60, R60, 1)
-(loadd, R1, R60, 2)
-(stored, R1, R0, 0)
-(loadd, R0, R60, 2)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(loaddr, R2, R0, R1)
-(loadd, R0, R60, 1)
-(stored, R0, R2, 0)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(loaddr, R2, R0, R1)
-(loadd, R0, R60, 2)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(storedr, R0, R2, R1)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(loadd, R0, R60, 3)
-(loadd, R2, R0, 0)
-(loadd, R0, R60, 7)
-(loadd, R0, R0, 0)
-(storedr, R0, R1, R2)
-(loadd, R0, R60, 3)
-(loadd, R1, R0, 0)
-(addi, R0, R1, 1)
-(loadd, R1, R60, 3)
-(stored, R1, R0, 0)
-(jmp, L11, -, -)
-(lab, L12, -, -)
-(free, 1, -, -)
-(loadd, R0, R60, 3)
-(addi, R60, R60, 6)
-(jr, R0, -, -)
-(lab, L17, -, -)
-(subi, R60, R60, 1)
-(loadd, R0, R60, 1)
-(movi, R1, 0, -)
-(stored, R0, R1, 0)
-(lab, L18, -, -)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(movi, R0, 10, -)
-(blt, R1, R0, L21)
-(jmp, L19, -, -)
-(lab, L21, -, -)
-(in, R0, -, -)
-(loadd, R1, R60, 1)
-(loadd, R2, R1, 0)
-(mov, R1, R61, 1)
-(storedr, R1, R0, R2)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(addi, R0, R1, 1)
-(loadd, R1, R60, 1)
-(stored, R1, R0, 0)
-(jmp, L18, -, -)
-(lab, L19, -, -)
-(mov, R0, R61, 1)
-(subi, R60, R60, 1)
-(stored, R60, R0, 1)
-(movi, R0, 0, -)
-(subi, R60, R60, 1)
-(stored, R60, R0, 1)
-(movi, R0, 10, -)
-(subi, R60, R60, 1)
-(stored, R60, R0, 1)
-(movi, R0, L30, -)
-(subi, R60, R60, 1)
-(stored, R60, R0, 1)
-(jmp, L10, -, -)
-(lab, L30, -, -)
-(loadd, R0, R60, 1)
-(movi, R1, 0, -)
-(stored, R0, R1, 0)
-(lab, L23, -, -)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(movi, R0, 10, -)
-(blt, R1, R0, L26)
-(jmp, L24, -, -)
-(lab, L26, -, -)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(mov, R0, R61, 1)
-(loaddr, R2, R0, R1)
-(out, R2, -, -)
-(loadd, R0, R60, 1)
-(loadd, R1, R0, 0)
-(addi, R0, R1, 1)
-(loadd, R1, R60, 1)
-(stored, R1, R0, 0)
-(jmp, L23, -, -)
-(lab, L24, -, -)
-(addi, R60, R60, 1)
-(halt, -, -, -)
-(halt, -, -, -)
+	movi R61, 123
+	subi R61, R61, 10
+	movr R60, R61
+	jmp L8
+L0:
+	subi R60, R60, 1
+	subi R60, R60, 1
+	subi R60, R60, 1
+	loaddi R0, R60, 6
+	storedi R60, R0, 1
+	loaddi R0, R60, 7
+	loaddi R1, R60, 6
+	loaddr R2, R0, R1
+	storedi R60, R2, 2
+	loaddi R0, R60, 6
+	addi R1, R0, 1
+	storedi R60, R1, 3
+L1:
+	loaddi R0, R60, 3
+	loaddi R1, R60, 5
+	bge R0, R1, L2
+	loaddi R0, R60, 7
+	loaddi R1, R60, 3
+	loaddr R2, R0, R1
+	loaddi R0, R60, 2
+	bge R2, R0, L3
+	loaddi R0, R60, 7
+	loaddi R1, R60, 3
+	loaddr R2, R0, R1
+	storedi R60, R2, 2
+	loaddi R0, R60, 3
+	storedi R60, R0, 1
+	jmp L4
+L3:
+L4:
+	loaddi R0, R60, 3
+	addi R1, R0, 1
+	storedi R60, R1, 3
+	jmp L1
+L2:
+	loaddi R0, R60, 1
+	loaddi R1, R60, 4
+	addi R60, R60, 6
+	storedi R60, R0, 1
+	jr R1
+	loaddi R0, R60, 4
+	addi R60, R60, 7
+	jr R0
+L5:
+	subi R60, R60, 1
+	subi R60, R60, 1
+	loaddi R0, R60, 5
+	storedi R60, R0, 2
+	subi R60, R60, 1
+L6:
+	loaddi R0, R60, 3
+	loaddi R1, R60, 5
+	subi R2, R1, 1
+	bge R0, R2, L7
+	loaddi R0, R60, 7
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	loaddi R0, R60, 4
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	loaddi R0, R60, 7
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	movi R1, L13
+	subi R60, R60, 1
+	storedi R60, R1, 1
+	jmp L0
+L13:
+	loaddi R0, R60, 1
+	addi R60, R60, 1
+	storedi R60, R0, 2
+	loaddi R0, R60, 7
+	loaddi R1, R60, 2
+	loaddr R2, R0, R1
+	storedi R60, R2, 1
+	loaddi R0, R60, 7
+	loaddi R1, R60, 3
+	loaddr R2, R0, R1
+	loaddi R0, R60, 2
+	loaddi R1, R60, 7
+	storedr R1, R2, R0
+	loaddi R0, R60, 1
+	loaddi R1, R60, 3
+	loaddi R2, R60, 7
+	storedr R2, R0, R1
+	loaddi R0, R60, 3
+	addi R1, R0, 1
+	storedi R60, R1, 3
+	jmp L6
+L7:
+	addi R60, R60, 1
+	loaddi R0, R60, 3
+	addi R60, R60, 6
+	jr R0
+L8:
+	subi R60, R60, 1
+	movi R0, 0
+	storedi R60, R0, 1
+L9:
+	loaddi R0, R60, 1
+	movi R1, 10
+	bge R0, R1, L10
+	in R0
+	loaddi R1, R60, 1
+	storedr vet, R0, R1
+	loaddi R0, R60, 1
+	addi R1, R0, 1
+	storedi R60, R1, 1
+	jmp L9
+L10:
+	addi R0, R61, 1
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	movi R0, 0
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	movi R0, 10
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	movi R0, L15
+	subi R60, R60, 1
+	storedi R60, R0, 1
+	jmp L5
+L15:
+	movi R0, 0
+	storedi R60, R0, 1
+L11:
+	loaddi R0, R60, 1
+	movi R1, 10
+	bge R0, R1, L12
+	loaddi R0, R60, 1
+	loaddr R1, vet, R0
+	out R1
+	loaddi R0, R60, 1
+	addi R1, R0, 1
+	storedi R60, R1, 1
+	jmp L11
+L12:
+	addi R60, R60, 1
+	halt

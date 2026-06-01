@@ -102,6 +102,8 @@ void update_or_insert(Address new_temp);
 Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3);
 Address generateCode(ASTNode* tree, char* escopo, int mode);
 
+const char* opToString(QuadOp op);
+void fprintAddr(FILE* out, Address a);
 void fprintCode(FILE* out, Quad* head);
 void generateProgram(ASTNode* tree);
 

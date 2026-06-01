@@ -540,14 +540,64 @@ Quad* removeQuad(Quad* before, Quad* current){
     return NULL;
 }
 
+// Gera o arquivo Assembly no formato final (canônico)
+void fprintRealAssemblyCode(FILE* out, Quad* head) {
+    Quad *current = head;
+    
+    while(current != NULL) {
+        // Tratamento exclusivo para Labels: "L1:\n"
+        if(current->op == OP_LABEL) {
+            fprintAddr(out, current->addr1);
+            fprintf(out, ":\n");
+            current = current->next;
+            continue;
+        }
+
+        // Para instruções normais, inicia com um TAB e o mnemônico
+        fprintf(out, "\t%s", opToString(current->op));
+
+        // Flag para controlar se precisamos imprimir uma vírgula
+        int has_prev_arg = 0;
+
+        // Processa o primeiro operando
+        if(current->addr1.kind != EMPTY) {
+            fprintf(out, " ");
+            fprintAddr(out, current->addr1);
+            has_prev_arg = 1;
+        }
+        
+        // Processa o segundo operando
+        if(current->addr2.kind != EMPTY) {
+            if(has_prev_arg) fprintf(out, ", ");
+            else fprintf(out, " ");
+            
+            fprintAddr(out, current->addr2);
+            has_prev_arg = 1;
+        }
+
+        // Processa o terceiro operando
+        if(current->addr3.kind != EMPTY) {
+            if(has_prev_arg) fprintf(out, ", ");
+            else fprintf(out, " ");
+            
+            fprintAddr(out, current->addr3);
+        }
+
+        fprintf(out, "\n");
+        current = current->next;
+    }
+}
+
 void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead){
     regControl *regVector = populateRegisters(NUMBER_OF_REGISTERS);
 
-    printFuncLabel(funHead);
-    printTempControl(tempControlHead);
-    printRegControl(regVector);
+    // Debug
+    // printFuncLabel(funHead);
+    // printTempControl(tempControlHead);
+    // printRegControl(regVector);
 
     Address* PilhaGlobal = createRegisterAddr(61);
+    int lineNumer = 0;
     
     // Move o valor inicial para a pilha global
     Quad* start = (Quad *)malloc(sizeof(Quad));
@@ -557,17 +607,17 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
     start->addr3 = createEmptyAddr();
     start->next = quadHead;
     quadHead = start;
-
+    lineNumer++;
 
     Quad* current = start->next;
     Quad* before = start; 
-
     // Percorre as variável globais alocando espaço
     while(current != NULL && current->op == OP_ALLOC){
         // Verifica tamanho e reduz a pilha global
         int alloc_size = current->addr2.val;
         addVariableToStack("global", current->addr1.name, alloc_size);
         insertQuadAfter(current, OP_SUBI, *PilhaGlobal, *PilhaGlobal, createNumericAddr(alloc_size));
+        lineNumer++;
         current = removeQuad(before, current);
 
         before = before->next;
@@ -580,7 +630,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
     // Inializa o valor da pilha geral com o espaço que sobrou e faz jump para main (aparece na ordem inversa abaixo)
     insertQuadAfter(before, OP_JUMP, *searchFuncLabel("main", funHead), createEmptyAddr(), createEmptyAddr());
     insertQuadAfter(before, OP_MOVR, *PilhaGeral, *PilhaGlobal, createEmptyAddr());
-    
+    lineNumer += 2;
+
     char *scope = NULL;
     int isAlloc = 1;
     int safetyControl = 0;
@@ -760,6 +811,9 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             
             current = removeQuad(before, current);
             break;
+        case OP_LABEL:
+            current->addr1.val = lineNumer;
+            break;
         case OP_CALL:
             // Adiciona o endereço de retorno à pilha e recebe o retorno da função
             Address* retAddrs = createLabelAddr();
@@ -892,11 +946,13 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
             break;
         }
 
-        if(current != NULL && 1 == 1){
+        if(current != NULL){
             if(current->addr1.kind == TEMP_VAR) current->addr1 = *allocate_register(current->addr1.name, tempControlHead, regVector);
             if(current->addr2.kind == TEMP_VAR) current->addr2 = *allocate_register(current->addr2.name, tempControlHead, regVector);
             if(current->addr3.kind == TEMP_VAR) current->addr3 = *allocate_register(current->addr3.name, tempControlHead, regVector);
         }
+
+        if(current != NULL && current->op != OP_LABEL) lineNumer++;
 
         // Lógica de percorrimento
         if(current == NULL && before != NULL) current = before->next;
@@ -906,12 +962,19 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         }
     }
     // Debug
-    printStack();
-    printRegControl(regVector);
-
+    // printStack();
+    // printRegControl(regVector);
+    
     check_register_leaks(regVector);    // Todos registradores devem ter soma 0 ao final
-
-    FILE* file = fopen("output/assembly_code.txt", "w");
-    fprintCode(file, quadHead);
-    fclose(file);
+    printf("Total number of lines of assembly code: %d\n", lineNumer - 1); // Sempre aponta para a próxima linha
+    
+    // Quadruplas
+    FILE* quadruplesFile = fopen("output/quadruples_assembly_code.txt", "w");
+    fprintCode(quadruplesFile, quadHead);
+    fclose(quadruplesFile);
+    
+    // Assembly
+    FILE* assemblyFile = fopen("output/assembly_code.txt", "w");
+    fprintRealAssemblyCode(assemblyFile, quadHead);
+    fclose(assemblyFile);
 }
