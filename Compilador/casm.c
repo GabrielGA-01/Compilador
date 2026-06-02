@@ -592,9 +592,9 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
     regControl *regVector = populateRegisters(NUMBER_OF_REGISTERS);
 
     // Debug
-    // printFuncLabel(funHead);
-    // printTempControl(tempControlHead);
-    // printRegControl(regVector);
+    printFuncLabel(funHead);
+    printTempControl(tempControlHead);
+    printRegControl(regVector);
 
     Address* PilhaGlobal = createRegisterAddr(61);
     int lineNumer = 0;
@@ -711,7 +711,48 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     }
                 }
             }
-            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_LOADDR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND){
+                current->op = OP_LOADDI;
+
+                // Transforma o terceiro endereço (com o deslocamento) em registrador
+                Address loadThirdAddrs = current->addr3;
+                if(loadThirdAddrs.kind = TEMP_VAR){
+                    loadThirdAddrs = *allocate_register(loadThirdAddrs.name, tempControlHead, regVector);
+                }
+
+                if(current->addr2.kind == STRING_VAR){
+                    Address pilhaload;
+
+                    char* varNameload = current->addr2.name;
+                    int varShiftload = verifyVariableShift(scope, varNameload);
+                    if(varShiftload != -1){
+                        pilhaload = *PilhaGeral;   // Utiliza a pilha geral
+                    }
+                    else{
+                        varShiftload = verifyVariableShift("global", varNameload);
+                        if(varShiftload != -1){
+                            pilhaload = *PilhaGlobal;  // Utiliza a pilha global
+                        }
+                        else{
+                            printf("Deu ruim variável inexistente! %s\n", varNameload);
+                            exit(1);
+                        }
+                    }
+                    insertQuadAfter(before, OP_ADD, loadThirdAddrs, loadThirdAddrs, pilhaload);
+                    current->addr2 = loadThirdAddrs;
+                    // current->addr2 = loadSecondAddrs;
+                    current->addr3 = createNumericAddr(varShiftload);
+                    current = before;
+                }
+                else if(current->addr2.kind == TEMP_VAR){
+                    Address loadFirstAddrs = *allocate_register(current->addr2.name, tempControlHead, regVector);
+                    insertQuadAfter(before, OP_ADD, loadThirdAddrs, loadThirdAddrs, loadFirstAddrs);
+                    current->addr2 = loadThirdAddrs;
+                    // current->addr2 = loadSecondAddrs;
+                    current->addr3 = createNumericAddr(0);
+                    current = before;
+                }
+            }   
             break;
         case OP_STORE:
             // Atualiza a operação de store
@@ -739,7 +780,48 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
                     }
                 }   
             }
-            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND) current->op = OP_STOREDR;
+            else if(current->addr3.kind == TEMP_VAR || current->addr3.kind == REGISTER_KIND){
+                current->op = OP_STOREDI;
+
+                // Transforma o terceiro endereço (com o deslocamento) em registrador
+                Address storeThirdAddrs = current->addr3;
+                if(storeThirdAddrs.kind = TEMP_VAR){
+                    storeThirdAddrs = *allocate_register(storeThirdAddrs.name, tempControlHead, regVector);
+                }
+
+                if(current->addr1.kind == STRING_VAR){
+                    Address pilhaStore;
+
+                    char* varNameStore = current->addr1.name;
+                    int varShiftStore = verifyVariableShift(scope, varNameStore);
+                    if(varShiftStore != -1){
+                        pilhaStore = *PilhaGeral;   // Utiliza a pilha geral
+                    }
+                    else{
+                        varShiftStore = verifyVariableShift("global", varNameStore);
+                        if(varShiftStore != -1){
+                            pilhaStore = *PilhaGlobal;  // Utiliza a pilha global
+                        }
+                        else{
+                            printf("Deu ruim variável inexistente! %s\n", varNameStore);
+                            exit(1);
+                        }
+                    }
+                    insertQuadAfter(before, OP_ADD, storeThirdAddrs, storeThirdAddrs, pilhaStore);
+                    current->addr1 = storeThirdAddrs;
+                    // current->addr2 = storeSecondAddrs;
+                    current->addr3 = createNumericAddr(varShiftStore);
+                    current = before;
+                }
+                else if(current->addr1.kind == TEMP_VAR){
+                    Address storeFirstAddrs = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                    insertQuadAfter(before, OP_ADD, storeThirdAddrs, storeThirdAddrs, storeFirstAddrs);
+                    current->addr1 = storeThirdAddrs;
+                    // current->addr2 = storeSecondAddrs;
+                    current->addr3 = createNumericAddr(0);
+                    current = before;
+                }
+            }   
             break;      
         case OP_MOV:
             if(current->addr2.kind == STRING_VAR){
@@ -962,8 +1044,8 @@ void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempContr
         }
     }
     // Debug
-    // printStack();
-    // printRegControl(regVector);
+    printStack();
+    printRegControl(regVector);
     
     check_register_leaks(regVector);    // Todos registradores devem ter soma 0 ao final
     printf("Total number of lines of assembly code: %d\n", lineNumer - 1); // Sempre aponta para a próxima linha

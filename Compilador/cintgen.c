@@ -240,10 +240,8 @@ const char* opToString(QuadOp op) {
         case OP_ARG:     return "arg";
         case OP_LOAD:    return "load";
         case OP_LOADDI:   return "loaddi";
-        case OP_LOADDR:  return "loaddr";
         case OP_STORE:   return "store";
         case OP_STOREDI:  return "storedi";
-        case OP_STOREDR: return "storedr";
         case OP_MOV:    return "mov";
         case OP_MOVI:    return "movi";
         case OP_MOVR:    return "movr";

@@ -10,8 +10,9 @@ L0:
 	storedi R60, R0, 1
 	loaddi R0, R60, 7
 	loaddi R1, R60, 6
-	loaddr R2, R0, R1
-	storedi R60, R2, 2
+	addr R1, R1, R0
+	loaddi R0, R1, 0
+	storedi R60, R0, 2
 	loaddi R0, R60, 6
 	addi R1, R0, 1
 	storedi R60, R1, 3
@@ -21,13 +22,15 @@ L1:
 	bge R0, R1, L2
 	loaddi R0, R60, 7
 	loaddi R1, R60, 3
-	loaddr R2, R0, R1
-	loaddi R0, R60, 2
-	bge R2, R0, L3
+	addr R1, R1, R0
+	loaddi R0, R1, 0
+	loaddi R1, R60, 2
+	bge R0, R1, L3
 	loaddi R0, R60, 7
 	loaddi R1, R60, 3
-	loaddr R2, R0, R1
-	storedi R60, R2, 2
+	addr R1, R1, R0
+	loaddi R0, R1, 0
+	storedi R60, R0, 2
 	loaddi R0, R60, 3
 	storedi R60, R0, 1
 	jmp L4
@@ -76,18 +79,22 @@ L13:
 	storedi R60, R0, 2
 	loaddi R0, R60, 7
 	loaddi R1, R60, 2
-	loaddr R2, R0, R1
-	storedi R60, R2, 1
+	addr R1, R1, R0
+	loaddi R0, R1, 0
+	storedi R60, R0, 1
 	loaddi R0, R60, 7
 	loaddi R1, R60, 3
-	loaddr R2, R0, R1
-	loaddi R0, R60, 2
-	loaddi R1, R60, 7
-	storedr R1, R2, R0
+	addr R1, R1, R0
+	loaddi R0, R1, 0
+	loaddi R1, R60, 2
+	loaddi R2, R60, 7
+	addr R1, R1, R2
+	storedi R1, R0, 0
 	loaddi R0, R60, 1
 	loaddi R1, R60, 3
 	loaddi R2, R60, 7
-	storedr R2, R0, R1
+	addr R1, R1, R2
+	storedi R1, R0, 0
 	loaddi R0, R60, 3
 	addi R1, R0, 1
 	storedi R60, R1, 3
@@ -107,7 +114,8 @@ L9:
 	bge R0, R1, L10
 	in R0
 	loaddi R1, R60, 1
-	storedr vet, R0, R1
+	addr R1, R1, R61
+	storedi R1, R0, 1
 	loaddi R0, R60, 1
 	addi R1, R0, 1
 	storedi R60, R1, 1
@@ -134,8 +142,9 @@ L11:
 	movi R1, 10
 	bge R0, R1, L12
 	loaddi R0, R60, 1
-	loaddr R1, vet, R0
-	out R1
+	addr R0, R0, R61
+	loaddi R0, R0, 1
+	out R0
 	loaddi R0, R60, 1
 	addi R1, R0, 1
 	storedi R60, R1, 1

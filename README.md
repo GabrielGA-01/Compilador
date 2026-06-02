@@ -29,4 +29,5 @@ Fazer a correção no acesso à variáveis globais - OK
 Atualizar temporários em registradores - Problema de indentificação de temp na chamada de função - Ok - Resolvido
 Fazer verificação de registrador sobrando em func call - OK
 
+Quando atribuir valor as labels, lembre que branch vai para Label + 1
 
