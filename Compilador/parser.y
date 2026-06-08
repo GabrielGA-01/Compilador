@@ -7,6 +7,7 @@
 #include "symtab.h"
 #include "cintgen.h"
 #include "casm.h"
+#include "binary.h"
 
 extern FILE *yyin;
 int error_count = 0;
@@ -342,8 +343,13 @@ int main(int argc, char *argv[])
         extern Quad* head;
         extern FuncLabel* functionsHead;
         extern tempControl* tempControlHead;
-        generateAssembly(head, functionsHead, tempControlHead);
+        head = generateAssembly(head, functionsHead, tempControlHead);
         printf("Assembly code generated successfully!\n");
+
+        // Código binário
+        extern labelControl* labelHead;
+        generateBinary(head, labelHead);
+        printf("Binary code generated successfully!\n");
     } else {
         printf("Intermediate code generation skipped due to errors\n");
     }
