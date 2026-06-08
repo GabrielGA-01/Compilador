@@ -23,6 +23,13 @@ typedef struct regControl {
     int safe;
 } regControl;
 
-void generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead);
+typedef struct labelControl {
+    char *labelName;
+    int lineNumber;
+    struct labelControl* next;
+} labelControl;
+
+int getLineByLabel(labelControl* head, char* name);
+Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead);
 
 #endif
