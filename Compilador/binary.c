@@ -69,6 +69,7 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
 
     Quad* current = quadHead;
 
+    int lineNumber = 0;
     while (current != NULL) {
         if (current->op != OP_LABEL) {
             char* opCode = getOpcodeBinary(current->op);
@@ -92,9 +93,9 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
                 int val = 0;
                 if (current->addr3.kind == LABEL_KIND) {
                     val = getLineByLabel(labelHead, current->addr3.name);
-                    // Regra específica para Branch: (label - 1)
+                    // Regra específica para Branch: (label - (PC + 1))
                     if (isBranch(current->op)) {
-                        val -= 1;
+                        val -= (lineNumber + 1);
                     }
                 } else {
                     val = current->addr3.val;
@@ -123,6 +124,9 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
 
             // Limpeza segura
             free(op1); free(op2); free(op3); free(immed);
+
+            // Incremente a linha
+            lineNumber++;
         }
         current = current->next;
     }
