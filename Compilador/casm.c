@@ -8,6 +8,9 @@
 #define PILHA_GLOBAL MEM_SIZE
 #define NUMBER_OF_REGISTERS 4
 
+#define REG_PILHA_GLOBAL 13
+#define REG_PILHA_GERAL 12
+
 variablesAtStack* scopesHead = NULL;
 labelControl* labelHead = NULL;
 
@@ -69,12 +72,13 @@ regControl* populateRegisters(int n) {
     char buffer[20];
 
     for (int i = 0; i < n; i++) {
-        sprintf(buffer, "R%d", i);
+        // Formata o nome para começar do 1 (R1, R2, ..., Rn)
+        sprintf(buffer, "R%d", i + 1);
 
         // Inicializa o Address interno
         regVector[i].reg.kind = REGISTER_KIND;
         regVector[i].reg.name = strdup(buffer);
-        regVector[i].reg.val = i;
+        regVector[i].reg.val = i + 1; // Valor também passa a refletir o índice a partir do 1
 
         // Nova inicialização: sem nome
         regVector[i].labelName = NULL;
@@ -649,7 +653,7 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
     printTempControl(tempControlHead);
     printRegControl(regVector);
 
-    Address* PilhaGlobal = createRegisterAddr(61);
+    Address* PilhaGlobal = createRegisterAddr(REG_PILHA_GLOBAL);
     int lineNumber = 0;
     
     // Move o valor inicial para a pilha global
@@ -677,8 +681,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
         current = before->next;
     }
 
-    // Cria a pilha geral no regitrador 60
-    Address* PilhaGeral = createRegisterAddr(60);
+    // Cria a pilha geral no regitrador 12
+    Address* PilhaGeral = createRegisterAddr(REG_PILHA_GERAL);
 
     // Inializa o valor da pilha geral com o espaço que sobrou e faz jump para main (aparece na ordem inversa abaixo)
     insertQuadAfter(before, OP_JUMP, *searchFuncLabel("main", funHead), createEmptyAddr(), createEmptyAddr());
