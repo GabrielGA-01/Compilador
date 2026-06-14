@@ -13,9 +13,20 @@ gdb -q --args ./compilador ./testes/sort.txt
 ```
 
 # Orientações para o futuro
-Não declare variáveis dentro de while ou de if
-Tenha certeza que uma função do tipo inteiro irá retornar algum valor
-Cuidado ao escrever expressões e sem atribuir elas para alguma variável
+
+Sobre escrever um código em C-
+1 - Não declare variáveis dentro de while ou de if
+2 - Tenha certeza que uma função do tipo inteiro irá retornar algum valor
+3 - Cuidado ao escrever expressões e sem atribuir elas para alguma variável
+
+Sobre o uso de registradores pelo compilador:
+1 - Registrador R0 será preservado com o valor zero e não pode ser escrito nele (Quartus)
+2 - Registradores usados pelo compilador R1 até R5 para as instruções 
+    -> Se necessário altere NUMBER_OF_REGISTERS(4) em casm.c
+3 - Registradores das pilhas gerais e globais atualmente estão como registradores 12 e 13
+    -> Se necessário altere REG_PILHA_GLOBAL(13) e REG_PILHA_GERAL(12) em casm.c
+4 - Está sendo considerada uma memória de 124 posições
+    -> Se necessário, altere MEM_SIZE em casm.c
 
 A partir de agora todas as operações terminam em R ou em I
 
