@@ -4,7 +4,7 @@
 #include "cintgen.h"
 #include "string.h"
 
-#define MEM_SIZE 123
+#define MEM_SIZE 127
 #define PILHA_GLOBAL MEM_SIZE
 #define NUMBER_OF_REGISTERS 4
 
@@ -263,7 +263,7 @@ void addVariableToStack(char* scope, char *varName, int numPositions) {
     if (numPositions <= 0) return;
 
     // Verifica se há espaço
-    if (availableMem - numPositions < -1) {
+    if (availableMem - numPositions < 0) {
         printf("Erro: Stack Overflow! Limite posições atingido.\n");
         exit(1);
     }
