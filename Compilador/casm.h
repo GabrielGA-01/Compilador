@@ -29,7 +29,10 @@ typedef struct labelControl {
     struct labelControl* next;
 } labelControl;
 
+void fprintRealAssemblyCode(FILE* out, Quad* head);
+Address* createRegisterAddr(int number);
 int getLineByLabel(labelControl* head, char* name);
+void insertLabel(labelControl** head, char* name, int line);
 Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempControlHead);
 
 #endif
