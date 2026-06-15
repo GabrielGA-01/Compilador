@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 #include "cintgen.h"
 #include "casm.h"
 
@@ -29,33 +30,28 @@ char* getOpcodeBinary(QuadOp op) {
         case OP_JR:      return "100010";
         case OP_BLE:     return "100101";
         case OP_BGE:     return "100110";
-        default:         return "000001"; // NOP ou erro
+        default:         return "000001"; // NOP
     }
 }
 
 #include <stdlib.h>
 
+// Converte um valor em decimal para binário
 char* intToBinaryString(int value, int numBits) {
-    // Allocate memory for the string + null terminator
     char* binary = (char*)malloc(numBits + 1);
     
     if (binary == NULL) return NULL;
-
-    // Set the null terminator at the end
     binary[numBits] = '\0';
 
-    // Fill the string from right to left
+    // Prrenche da esquerda para direita
     for (int i = numBits - 1; i >= 0; i--) {
-        // Check if the current bit is 1 or 0
         binary[i] = (value & 1) ? '1' : '0';
-        // Shift value to the right to process the next bit
+        // Faz um shift do valor para o próximo bit
         value >>= 1;
     }
 
     return binary;
 }
-
-#include <stdbool.h>
 
 // Função auxiliar para verificar se é um branch
 bool isBranch(QuadOp op) {
@@ -75,7 +71,7 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
             char* opCode = getOpcodeBinary(current->op);
             char *op1 = NULL, *op2 = NULL, *op3 = NULL, *immed = NULL;
 
-            // Formato 1: R R R 2
+            // Formato 1: R R R 8
             if (current->addr1.kind == REGISTER_KIND && 
                 current->addr2.kind == REGISTER_KIND && 
                 current->addr3.kind == REGISTER_KIND) {
@@ -85,7 +81,7 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
                 op3 = intToBinaryString(current->addr3.val, 6);
                 immed = intToBinaryString(0, 8);
             }
-            // Formatos 2 e 3 (inclui Branches): R R I14
+            // Formatos 2 e 3: R R I14
             else if (current->addr1.kind == REGISTER_KIND && current->addr2.kind == REGISTER_KIND) {
                 op1 = intToBinaryString(current->addr1.val, 6);
                 op2 = intToBinaryString(current->addr2.val, 6);
@@ -114,7 +110,6 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
                 immed = intToBinaryString(val, 26);
             }
 
-            // Escrita unificada
             fprintf(file, "%s", opCode);
             if (op1)   fprintf(file, "%s", op1);
             if (op2)   fprintf(file, "%s", op2);
@@ -122,7 +117,7 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
             if (immed) fprintf(file, "%s", immed);
             fprintf(file, "\n");
 
-            // Limpeza segura
+            // Liberação
             free(op1); free(op2); free(op3); free(immed);
 
             // Incremente a linha

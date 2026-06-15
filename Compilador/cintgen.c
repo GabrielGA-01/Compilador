@@ -72,6 +72,7 @@ Address* createTempAddr() {
     return a;
 }
 
+// Associa uma função a label que marca o início dela
 void createFuncLabel(char* name, Address* label){
     FuncLabel* a = (FuncLabel*)malloc(sizeof(FuncLabel));
     a->name = strdup(name);
@@ -90,7 +91,8 @@ void createFuncLabel(char* name, Address* label){
     }
 }
 
-// Procura e soma ou insere
+// Faz a contagem dos temporários - Procura e soma ou insere
+// Ao modificar um temporário anterior após uma chamada de função, a função e o temporário são marcados como inseguros
 void update_or_insert(Address new_temp) {
     tempControl* current_node = tempControlHead;
     tempControl* previous_node = NULL;
@@ -102,26 +104,24 @@ void update_or_insert(Address new_temp) {
             if (strcmp(current_node->temp.name, new_temp.name) == 0) {
                 found = 1;
                 
-                // Se tentar acessar novamente após um fun call
+                // Se tentar acessar novamente após um fun call, então temp e função inseguros
                 if (current_node->safe == 1) {
                     current_node->safe = -1;
                     printf("Inseguro para %s", new_temp.name);
                     
-                    // A mudança de 1 para -1 ocorreu! 
-                    // Faz a busca na estrutura FuncLabel buscando pelo name == scope
-                    FuncLabel* current_func = functionsHead; // Usando a cabeça global da lista de funções
+                    // Busca e marca a função como insegura
+                    FuncLabel* current_func = functionsHead;
                     while (current_func != NULL) {
                         if (current_func->name != NULL && globalScope != NULL) {
                             if (strcmp(current_func->name, globalScope) == 0) {
                                 current_func->safeCall = -1;
-                                break; // Encontrou o escopo correspondente, pode parar a busca interna
+                                break;
                             }
                         }
                         current_func = current_func->next;
                     }
                 }
                 
-                // Contagem
                 current_node->sum += 1;
                 break;
             }
@@ -130,7 +130,7 @@ void update_or_insert(Address new_temp) {
         current_node = current_node->next;
     }
 
-    // Se não houver, insere ao final
+    // Se não houver, insere o temp ao final
     if (!found) {
         tempControl* new_node = (tempControl*)malloc(sizeof(tempControl));
         if (new_node == NULL) {
@@ -159,7 +159,7 @@ void update_or_insert(Address new_temp) {
     }
 }
 
-// Faz o controle de segurança
+// Marca em todos os temporários que eles não podem mais ser modificados sem causar uma função insegura
 void enable_safe_conditional() {
     tempControl* current_node = tempControlHead;
     
@@ -287,7 +287,7 @@ Address determineVariableSize(ASTNode* node){
     else if(node->type == NODE_ARRAY_DECL || node->type == NODE_ARRAY_ACCESS){
         ASTNode* a_size = node->rightChild;
         if(a_size == NULL) size = createNumericAddr(1); // Caso seja um argumento array
-        else size = generateCode(a_size, " ", 1);    // Identifica e retornar um addr de número ou temp (com load feito). Não usa scope.
+        else size = generateCode(a_size, " ", 1);       // Identifica e retornar um addr de número ou temp (com load feito). Não usa scope.
     }
     return size;
 }

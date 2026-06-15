@@ -7,7 +7,6 @@
 #define MEM_SIZE 127
 #define PILHA_GLOBAL MEM_SIZE
 #define NUMBER_OF_REGISTERS 4
-
 #define REG_PILHA_GLOBAL 13
 #define REG_PILHA_GERAL 12
 
@@ -16,6 +15,7 @@ labelControl* labelHead = NULL;
 
 int availableMem = MEM_SIZE; 
 
+// Busca a label associada à uma função 
 Address* searchFuncLabel(char* name, FuncLabel* funHead){
     FuncLabel* current = funHead;
     while(current != NULL){
@@ -60,6 +60,7 @@ Address* createRegisterAddr(int number) {
     return a;
 }
 
+// Define o número de registradores de uso geral que serão usados ao longo do código (1 a N)
 regControl* populateRegisters(int n) {
     if (n <= 0) return NULL;
 
@@ -75,30 +76,25 @@ regControl* populateRegisters(int n) {
         // Formata o nome para começar do 1 (R1, R2, ..., Rn)
         sprintf(buffer, "R%d", i + 1);
 
-        // Inicializa o Address interno
         regVector[i].reg.kind = REGISTER_KIND;
         regVector[i].reg.name = strdup(buffer);
-        regVector[i].reg.val = i + 1; // Valor também passa a refletir o índice a partir do 1
-
-        // Nova inicialização: sem nome
-        regVector[i].labelName = NULL;
-
-        // Inicializações anteriores mantidas
-        regVector[i].sum = 0;
-        regVector[i].safe = 1;
+        regVector[i].reg.val = i + 1;               // Para facilitar ao transformar em binário              
+        regVector[i].labelName = NULL;              // Não está associado a nenhuma label
+        regVector[i].sum = 0;                       // Não está em uso
+        regVector[i].safe = 1;                      // Não está com temporário inseguro
     }
 
     return regVector;
 }
 
-// Função que gerencia o mapeamento de temporárias para registradores
+// Função que gerencia o mapeamento de temporários para registradores
 Address* allocate_register(char* temp_name, tempControl* tempControlHead, regControl* regVector) {
     if (temp_name == NULL || regVector == NULL) {
         perror("Error: Invalid arguments passed to allocate_register");
         return NULL;
     }
 
-    // 1. Procurar se em algum dos registradores o labelName é o mesmo do temp
+    // 1. Procurar se em algum dos registradores o labelName é o mesmo do temporário
     for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
         if (regVector[i].labelName != NULL) {
             if (strcmp(regVector[i].labelName, temp_name) == 0) {
@@ -111,10 +107,11 @@ Address* allocate_register(char* temp_name, tempControl* tempControlHead, regCon
         }
     }
 
-    // 2. Caso não tenham o labelName correspondente...
-    // Primeiro, precisamos buscar os dados da temporária em tempControlHead
+    // 2. Caso não tenham o labelName correspondente
+
+    // Busca o temporário no tempControl
     tempControl* current_temp = tempControlHead;
-    int temp_sum = 1;  // Valores padrão de contingência
+    int temp_sum = 1;
     int temp_safe = 0;
 
     while (current_temp != NULL) {
@@ -138,7 +135,7 @@ Address* allocate_register(char* temp_name, tempControl* tempControlHead, regCon
             regVector[i].labelName = strdup(temp_name);
             regVector[i].safe = temp_safe;
 
-            // MODIFICAÇÃO AQUI: Inicializa a nova soma como sum(label) - 1
+            // Inicializa a nova soma como sum(label) - 1 (pois essa já é a primeira ocorrência do temp)
             regVector[i].sum = temp_sum - 1;
 
             // Retorna o endereço do registrador escolhido
@@ -162,12 +159,11 @@ Address* allocate_register(char* temp_name, tempControl* tempControlHead, regCon
     return NULL;
 }
 
+// Ao final da geração, não pode haver nenhum registrador ocupado
 void check_register_leaks(regControl* regVector) {
     if (regVector == NULL) return;
 
     int leaks_found = 0;
-
-    // Primeiro passamos verificando se há erros
     for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
         if (regVector[i].sum != 0) {
             leaks_found = 1;
@@ -177,7 +173,7 @@ void check_register_leaks(regControl* regVector) {
 
     // Se houver algum vazamento/erro, detalha o cenário antes de travar
     if (leaks_found) {
-        fprintf(stderr, "\n❌ FATAL COMPILER ERROR: Register allocation leak detected!\n");
+        fprintf(stderr, "\nFATAL COMPILER ERROR: Register allocation leak detected!\n");
         fprintf(stderr, "Some temporaries were not properly released (sum != 0).\n");
         fprintf(stderr, "-------------------------------------------------------\n");
 
@@ -191,7 +187,7 @@ void check_register_leaks(regControl* regVector) {
         }
         fprintf(stderr, "-------------------------------------------------------\n");
         
-        // Finaliza a execução do compilador apontando erro crítico
+        // Finaliza a execução do compilador apontando erro
         exit(EXIT_FAILURE); 
     }
 }
@@ -216,6 +212,8 @@ int is_function_safe(char* scope_name, FuncLabel* funcLabelHead) {
     return -99; 
 }
 
+// Provavelmente não é mais necessária essa função
+// Controle do número de parâmetros que está em uso no código por escopo
 // Adiciona um valor ao allocatedParam do escopo e retorna o novo total
 int update_and_get_allocated_param(char* scope_name, int number, FuncLabel* funcLabelHead) {
     if (scope_name == NULL || funcLabelHead == NULL) {
@@ -238,18 +236,14 @@ int update_and_get_allocated_param(char* scope_name, int number, FuncLabel* func
     return -99;
 }
 
-// Retorna o endereço da estrutura reg ou NULL se não encontrar
+// Identifica o registrador que está inseguro antes de uma chamada de função
 Address* find_unsafe_active_register(regControl* regVector) {
     if (regVector == NULL) {
         return NULL;
     }
 
-    // Percorre o banco de registradores do compilador
     for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
-        // Critério: Inseguro (-1) E ativo/com uso pendente (sum != 0)
         if (regVector[i].safe == -1 && regVector[i].sum != 0) {
-            
-            // Retorna o endereço da estrutura reg do registrador encontrado
             return &regVector[i].reg;
         }
     }
@@ -259,6 +253,7 @@ Address* find_unsafe_active_register(regControl* regVector) {
     return NULL;
 }
 
+// Adiciona uma nova variável em um escopo de função para fazer o controle da pilha geral
 void addVariableToStack(char* scope, char *varName, int numPositions) {
     if (numPositions <= 0) return;
 
@@ -311,6 +306,7 @@ void addVariableToStack(char* scope, char *varName, int numPositions) {
     }
 }
 
+// Retorna o deslocamento dentro da pilha geral de uma variável
 int verifyVariableShift(char* scope, char* varName) {
     variablesAtStack* currentScope = scopesHead;
 
@@ -336,6 +332,7 @@ int verifyVariableShift(char* scope, char* varName) {
     return -1;
 }
 
+// Retorna todo o espaço ocupado por um escopo (usado ao final de um escopo para liberar a pilha)
 int getScopeVariableShift(char* scope) {
     variablesAtStack* currentScope = scopesHead;
 
@@ -354,6 +351,7 @@ int getScopeVariableShift(char* scope) {
     return currentScope->var->offset + currentScope->var->size - 1; // Posição da última variável na pilha + seu tamanho - 1
 }
 
+// Remove a última variável da pilha geral de um determinado escopo
 void removeVariableFromStack(char *scope) {
     variablesAtStack* currentScope = scopesHead;
 
@@ -409,7 +407,7 @@ void removeVariableFromStack(char *scope) {
     }
 }
 
-/* 1. Função para inserir no final da lista */
+// Função para inserir uma nova label e a sua linha na estrutura de controle das labels
 void insertLabel(labelControl** head, char* name, int line) {
     labelControl* newNode = (labelControl*)malloc(sizeof(labelControl));
     newNode->labelName = strdup(name); // Cria uma cópia da string
@@ -428,7 +426,7 @@ void insertLabel(labelControl** head, char* name, int line) {
     current->next = newNode;
 }
 
-/* 2. Função para buscar o número da linha pelo nome */
+// Função para buscar o número da linha a partir do nome da label
 int getLineByLabel(labelControl* head, char* name) {
     labelControl* current = head;
     while (current != NULL) {
@@ -437,10 +435,10 @@ int getLineByLabel(labelControl* head, char* name) {
         }
         current = current->next;
     }
-    return -1; // Não encontrado
+    return -1;
 }
 
-/* 3. Função para printar a estrutura de labels */
+// Função para printar a estrutura de controle das labels
 void printLabels(labelControl* head) {
     printf("\n======================= TABELA DE LABELS =======================\n");
     
@@ -461,6 +459,7 @@ void printLabels(labelControl* head) {
     printf("================================================================\n\n");
 }
 
+// Função para printar os valores finais das pilhas dos escopos (variáveis declaradas dentro de while são perdidas)
 void printStack() {
     variablesAtStack* currentScope = scopesHead;
 
@@ -496,6 +495,7 @@ void printStack() {
     printf("================================================================\n\n");
 }
 
+// Printa a estrutura de controle dos temporários usada
 void printTempControl(tempControl* functionsHead) {
     tempControl* current_node = functionsHead;
 
@@ -512,7 +512,6 @@ void printTempControl(tempControl* functionsHead) {
         // Exibe o nome da variável temporária como o identificador do bloco
         printf("Temporária: [%s]\n", current_node->temp.name ? current_node->temp.name : "NULL");
         
-        // Exibe os atributos alinhados para manter a legibilidade
         printf("  ├── Valor (Val): %-5d | Tipo (Kind): %-3d\n", 
                current_node->temp.val, 
                current_node->temp.kind);
@@ -526,6 +525,7 @@ void printTempControl(tempControl* functionsHead) {
     printf("=======================================================================\n\n");
 }
 
+// Printa a estrutura de controle de label por função
 void printFuncLabel(FuncLabel *current_func) {
 
     printf("\n==================== ESPELHO DOS RÓTULOS DE FUNÇÃO ====================\n");
@@ -541,7 +541,6 @@ void printFuncLabel(FuncLabel *current_func) {
         printf("Função/Escopo: [%s]\n", current_func->name ? current_func->name : "NULL");
         printf("  ├── Chamada Segura (SafeCall): %-3d\n", current_func->safeCall);
         
-        // Verifica se o ponteiro interno Address existe antes de acessar seus dados
         if (current_func->label == NULL) {
             printf("  └── Rótulo (Label): (Nenhum endereço/rótulo associado)\n");
         } else {
@@ -557,6 +556,7 @@ void printFuncLabel(FuncLabel *current_func) {
     printf("=======================================================================\n\n");
 }
 
+// Printa a estrutura de controle dos registradores e os temps para os quais estão alocados
 void printRegControl(regControl* regVector) {
     int n = NUMBER_OF_REGISTERS;
     printf("\n=================== ESPELHO DO CONTROLE DE REGISTRADORES ===================\n");
@@ -567,11 +567,9 @@ void printRegControl(regControl* regVector) {
         return;
     }
 
-    // Percorre o vetor usando índices numéricos
     for (int i = 0; i < n; i++) {
         printf("Registrador: [%s]\n", regVector[i].reg.name ? regVector[i].reg.name : "NULL");
         
-        // Exibe o labelName (mostra "Nenhum" caso seja NULL)
         printf("  ├── Rótulo Associado (LabelName): %s\n", 
                regVector[i].labelName ? regVector[i].labelName : "(Nenhum)");
                
@@ -649,9 +647,9 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
     regControl *regVector = populateRegisters(NUMBER_OF_REGISTERS);
 
     // Debug
-    printFuncLabel(funHead);
-    printTempControl(tempControlHead);
-    printRegControl(regVector);
+    // printFuncLabel(funHead);
+    // printTempControl(tempControlHead);
+    // printRegControl(regVector);
 
     Address* PilhaGlobal = createRegisterAddr(REG_PILHA_GLOBAL);
     int lineNumber = 0;
@@ -681,7 +679,7 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
         current = before->next;
     }
 
-    // Cria a pilha geral no regitrador 12
+    // Cria a pilha geral no regitrador REG_PILHA_GERAL
     Address* PilhaGeral = createRegisterAddr(REG_PILHA_GERAL);
 
     // Inializa o valor da pilha geral com o espaço que sobrou e faz jump para main (aparece na ordem inversa abaixo)
@@ -752,14 +750,14 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                     int varShiftLoad = verifyVariableShift(scope, varNameLoad);
                     // Caso seja uma variável local
                     if(varShiftLoad != -1){
-                        current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
+                        current->addr2 = *PilhaGeral;       // Utiliza a pilha geral
                         current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                     }
                     // Caso contrário, busca no global
                     else{
                         varShiftLoad = verifyVariableShift("global", varNameLoad);
                         if(varShiftLoad != -1){
-                            current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
+                            current->addr2 = *PilhaGlobal;      // Utiliza a pilha global
                             current->addr3.val += varShiftLoad; // Soma a posição da pilha com o índice desejado
                         }
                         else{
@@ -821,14 +819,14 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                     int varShiftStore = verifyVariableShift(scope, varNameStore);
                     // Caso seja uma variável local
                     if(varShiftStore != -1){
-                        current->addr1 = *PilhaGeral;   // Utiliza a pilha geral
+                        current->addr1 = *PilhaGeral;        // Utiliza a pilha geral
                         current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                     }
                     // Caso contrário, busca no global
                     else{
                         varShiftStore = verifyVariableShift("global", varNameStore);
                         if(varShiftStore != -1){
-                            current->addr1 = *PilhaGlobal;  // Utiliza a pilha global
+                            current->addr1 = *PilhaGlobal;       // Utiliza a pilha global
                             current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                         }
                         else{
@@ -886,14 +884,14 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                 int varShiftStore = verifyVariableShift(scope, varNameStore);
                 // Caso seja uma variável local
                 if(varShiftStore != -1){
-                    current->addr2 = *PilhaGeral;   // Utiliza a pilha geral
+                    current->addr2 = *PilhaGeral;        // Utiliza a pilha geral
                     current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                 }
                 // Caso contrário, busca no global
                 else{
                     varShiftStore = verifyVariableShift("global", varNameStore);
                     if(varShiftStore != -1){
-                        current->addr2 = *PilhaGlobal;  // Utiliza a pilha global
+                        current->addr2 = *PilhaGlobal;       // Utiliza a pilha global
                         current->addr3.val += varShiftStore; // Soma a posição da pilha com o índice desejado
                     }
                     else{
@@ -1102,9 +1100,9 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
         }
     }
     // Debug
-    printStack();
-    printRegControl(regVector);
-    printLabels(labelHead);
+    // printStack();
+    // printRegControl(regVector);
+    // printLabels(labelHead);
     
     check_register_leaks(regVector);    // Todos registradores devem ter soma 0 ao final
     printf("Total number of lines of assembly code: %d\n", lineNumber - 1); // Sempre aponta para a próxima linha
