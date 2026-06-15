@@ -1,23 +1,23 @@
-	movi R0, 10
+	movi R11, 10
 	movi R1, 20
 	movi R2, 20
-	addr R3, R1, R0
+	addr R3, R1, R11
 	addi R4, R1, 10
-	subr R5, R1, R0
+	subr R5, R1, R11
 	subi R6, R1, 10
-	mulr R7, R1, R0
+	mulr R7, R1, R11
 	muli R8, R1, 10
-	divr R9, R1, R0
+	divr R9, R1, R11
 	divi R10, R1, 10
 	beq R1, R2, L0
 	halt
 L0:
-	beq R0, R1, L1
+	beq R11, R1, L1
 	jmp L2
 L1:
 	halt
 L2:
-	bne R0, R1, L3
+	bne R11, R1, L3
 	halt
 L3:
 	bne R1, R2, L4
@@ -25,34 +25,34 @@ L3:
 L4:
 	halt
 L5:
-	blt R0, R1, L6
+	blt R11, R1, L6
 	halt
 L6:
-	blt R1, R0, L7
+	blt R1, R11, L7
 	jmp L8
 L7:
 	halt
 L8:
-	bgt R1, R0, L9
+	bgt R1, R11, L9
 	halt
 L9:
-	bgt R0, R1, L10
+	bgt R11, R1, L10
 	jmp L11
 L10:
 	halt
 L11:
-	ble R0, R1, L12
+	ble R11, R1, L12
 	halt
 L12:
-	ble R1, R0, L13
+	ble R1, R11, L13
 	jmp L14
 L13:
 	halt
 L14:
-	bge R1, R0, L15
+	bge R1, R11, L15
 	halt
 L15:
-	bge R0, R1, L16
+	bge R11, R1, L16
 	jmp L17
 L16:
 	halt
@@ -61,7 +61,7 @@ L17:
 	jr R3
 	halt
 L18:
-	movr R4, R0
+	movr R4, R11
 	storedi R4, R1, 5
 	loaddi R5, R4, 5
 	halt
