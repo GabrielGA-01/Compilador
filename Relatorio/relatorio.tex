@@ -130,19 +130,21 @@
 
 
 % Informações de dados para CAPA e FOLHA DE ROSTO
-\titulo{Desenvolvimento de um processador baseado em MIPS com kit FPGA}
+\titulo{Implementação do Compilador C}
 \autor{Gabriel Garcia Almeida\\168857}
 \local{São José dos Campos - Brasil}
-\data{Maio de 2025}
+\data{Junho de 2026}
 \instituicao{
-  Docente: Prof. Dr. Sérgio Ronaldo Barros dos Santos
+  Docente: Prof. Dr. Luiz Eduardo Galvao Martins
   \par
   Universidade Federal de São Paulo - UNIFESP
   \par
   Instituto de Ciência e Tecnologia - Campus São José dos Campos
 }
 \tipotrabalho{Relatório técnico}
-\preambulo{Relatório apresentado à Universidade Federal de São Paulo como parte dos requisitos para aprovação na disciplina de Laboratório de Sistemas Computacionais: Arquitetura e Organização de Computadores.}
+\preambulo{Relatório apresentado à Universidade Federal de São Paulo como parte
+dos requisitos para aprovação na disciplina de Laboratório de Sistemas
+Computacionais: Compiladores.}
 % ---
 
 % Configurações de aparência do PDF final
@@ -216,10 +218,12 @@
 \setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
 \begin{resumo}
  
-Esse documento tem o propósito de apresentar como ocorreu o planejamento para desenvolver um processador baseado no modelo MIPS com o kit FPGA. Serão apresentadas as escolhas de projeto e definidas as instruções utilizadas, os seus formatos e o caminho de dados que cada uma fará. Serão apresentados o desenvolvimento de cada um dos módulos necessários para o processador, bem como os códigos criados, a integração entre eles e os testes desenvolvidos.
+Esse documento tem o propósito de apresentar como ocorreu o desenvolvimento de um compilador escrito em linguagem C para transformar um código da linguagem C- para código intermediário, assembly e binário. 
+Para a validação do compilador, o código binário gerado foi enviado para um processador MIPS simulado utilizando o kit FPGA. 
+Será apresentada a organização do projeto, bem como as estrutura de dados utilizadas em cada uma das etapas.
 
 \noindent
-\textbf{Palavras-chave}: processador MIPS, kit FPGA, instruções.
+\textbf{Palavras-chave}: compilador, processador MIPS, kit FPGA.
 \end{resumo}
 
 % LISTAS
@@ -246,39 +250,42 @@ Esse documento tem o propósito de apresentar como ocorreu o planejamento para d
 \chapter{Introdução}
 No mundo moderno, computadores, celulares, carros modernos, equipamentos médicos, eletrodomésticos e muitos outros aparelhos eletrônicos vêm ganhando cada vez mais espaço na vida das pessoas. Eles realizam as mais diversas tarefas, mas possuem algo em comum: a presença de processadores.
 
-Desse modo, compreender os processadores é uma etapa fundamental para entender o princípio de funcionamento de uma série de objetos do cotidiano. Para isso, é preciso aprender sobre a arquitetura e a organização de computadores, ou seja, como é definida a lógica de funcionamento de um processador e como ela é implementada na prática.
+Um processador é um hardware capaz de executar instruções codificadas, realizando operações lógicas, aritméticas, controle de fluxo e acesso à memória. Ele é o cérebro do sistema computacional, responsável por processar dados e executar programas.
 
-Além disso, uma maneira de se estudar esses conceitos é tomando como referência o MIPS, uma arquitetura de microprocessador, aliado ao kit FPGA. Primeiramente, o MIPS adota um conjunto de instruções mais simples, permitindo uma compreensão mais clara do funcionamento, além de uma implementação mais fácil. Ademais, o kit FPGA é útil para a implementação prática devido à facilidade de testar sinais de entrada e visualizar sinais de saída.
+Todavia, utilizar um processador diretamente é muito complicado para os seres humanos, pois eles lidam exclusivamente com valores binários, o que não é fácil para a comprrensão humana e extremanete suscetíveis à erros ao programar.
 
-Dessa forma, este documento tem o propósito de apresentar esses e outros conceitos necessários para a implementação de um processador, bem como o planejamento necessário e as escolhas de projeto adotadas.
+Assim sendo, a solução para isso é a criação de linguagens de alto nível, mais compreensíveis para os seres humanos e que ao mesmo tempo possam ser traduzidas para o código de máquina, ou seja, o código binário que os processadores conseguem entender. O processo de tradução é realizado por um compilador, que é um software responsável por converter o código-fonte escrito em uma linguagem de alto nível para um código de máquina específico.	
 
+Compreeder os compiladores é uma parte fundamental para a formação de um engenheiro da computação, que deve ser capaz de entender como o código-fonte é transformado em código de máquina, além de ser capaz de desenvolver um compilador simples.
+
+Desse modo, esse relatório busca apresentar o desenvolvimento de um compilador escrito na linguagem C, que tem como objetivo traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. 
+
+Além do mais, o código binário gerado é então enviado para um processador MIPS simulado utilizando o kit FPGA, que foi desenvolvido anteriormente durante a disciplina de Laboratório de Sistemas Computacionais: Arquitetura e Organização de Computadores, a fim de validar o funcionamento do compilador e entender de maneira completa o fluxo de ações desde a escrita do código C- atá a execução das instruções em binário no hardware.
+
+Nas próximas seções serão apresentados os objetivos do projeto, a fundamentação teórica necessária para o desenvolvimento do processador e do compilador utilizados, por fim, o desenvolvimento em si, apresentando a organização do projeto, as estruturas de dados utilizadas e os resultados obtidos.
 
 
 % OBJETIVOS
 \chapter[Objetivos]{Objetivos}
 \section{Geral}
-O objetivo geral é desenvolver um processador RISC na linguagem Verilog, utilizando o software Quartus e implementá-lo no kit FPGA.
+O objetivo geral é desenvolver um compilador escrito na linguagem C para traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. Além disso, validar o funcionamento do compilador enviando o código binário gerado para um processador RISC na linguagem Verilog, utilizando o software Quartus e implementá-lo no kit FPGA.
 \section{Específicos}
  \begin{enumerate}
-   \item Definir quantos registradores serão usados e quantos bits cada um irá armazenar.
-   \item Estabelecer os modos de endereçamento que serão aceitos.
-   \item Decidir quais serão as instruções do processador, incluindo instruções aritméticas, lógicas, desvios condicionais e incondicionais, acesso à memória (imediato, registrador e deslocamento), movimentação de dados, controle da pilha, acesso aos switches, envio de dados para o display e controle de execução.
-   \label{objetivo3}
-   \item Determinar quantos bits serão utilizados para cada campo das instruções.
-   \item Definir os conjuntos de instruções, os formatos, como será a operação de cada uma e os caminhos de dados.
-   \item Desenvolver, usando Verilog, a unidade lógica e aritmética (ULA) e o banco de registradores. Testar a implementação de cada um usando a forma de onda e em seguida, usando esses dois módulos, criar e testar a unidade de processamento.
-   \item Criar a memória principal, a memória de instruções e o program counter (PC) e testar cada um desses módulos.
-   \item Elaborar a unidade de controle.
-   \item Elaborar um conversor de binário para o display de sete segmentos.
-   \item Desenvolver o módulo de entrada e saída.
-   \item Integrar cada um dos elementos que compõem o processador.
-   \item Implementar e testar o processador no kit FPGA.
+   \item Desenvolver um analisador léxico utilizando o flex para os tokens da linguagem C-
+   \item Desenvolver um analisador sintático utilizando o bison para a linguagem C- e gerar uma árvore sintática abstrata (AST)
+   \item Desenvolver a tabela de símbolos para armazenar informações sobre variáveis, funções e outros elementos do código-fonte
+   \item Fazer a ananálise semântica para verificar a consistência do código-fonte e gerar mensagens de erro apropriadas
+   \item Gerar código intermediário a partir da AST, utilizando uma representação adequada para facilitar a tradução para assembly e código binário
+   \item Desenvolver um gerador de código para traduzir o código intermediário para assembly MIPS do processador desenvolvido
+   \item Desenvolver um gerador de código para traduzir o código intermediário para código binário MIPS do processador desenvolvido
+   \item Fazer eventuais correções no processador de modo que ele consiga executar as instruções geradas pelo compilador, caso seja necessário
+   \item Fazer a validação do compilador, enviando o código binário gerado para um processador MIPS simulado utilizando o kit FPGA, e verificar se as instruções são executadas corretamente
    
  \end{enumerate}
 
 
 % FUNDAMENTAÇÃO TEÓRICA
-\chapter{Fundamentação Teórica}
+\chapter{Fundamentação Teórica do Processador}
 \section{Arquitetura e organização}
 Segundo Stallings, o conceito de arquitetura é definido como: ``Arquitetura de computador refere-se aos atributos de um sistema visíveis a um programador ou, em outras palavras, aqueles atributos que possuem um impacto direto sobre a execução lógica de um programa.'' \cite{stallings2010}. Sendo assim, arquitetura são as instruções, tudo aquilo que o programador é capaz de fazer.
 
@@ -397,7 +404,7 @@ Sendo assim, diferente de um circuito esquemático, no qual é desenvolvido usan
 
 
 % DESENVOLVIMENTO
-\chapter{Desenvolvimento}
+\chapter{Desenvolvimento do processador}
 
 \section{Características do projeto}
 Para o desenvolvimento do processador foi escolhido como referência o modelo MIPS, pois simplifica a implementação. Porém também foram feitas algumas modificações para atender melhor aos objetivos propostos, como instruções para controlar a pilha; switches; display; esperar; e parar o processamento. Além do mais, seguirá a organização monociclo por ser mais simples de compreender e implementar.
@@ -450,25 +457,26 @@ A \autoref{opcode_lista_bin_zero} abaixo apresenta as instruções escolhidas e 
 \hline
 Opcode & Instrução & Opcode & Instrução \\
 \hline
-\texttt{000000} & hlt       & \texttt{010011} & sr        \\
-\texttt{000001} & nop       & \texttt{010100} & movr       \\
-\texttt{000010} & jmp       & \texttt{010101} & loadd     \\
-\texttt{000011} & jal       & \texttt{010110} & loadr     \\
-\texttt{000100} & add       & \texttt{010111} & beq       \\
-\texttt{000101} & sub       & \texttt{011000} & bne       \\
-\texttt{000110} & mul       & \texttt{011001} & blt       \\
-\texttt{000111} & div       & \texttt{011010} & bgt       \\
-\texttt{001000} & and       & \texttt{011011} & stored    \\
-\texttt{001001} & or        & \texttt{011100} & storer    \\
-\texttt{001010} & xnor      & \texttt{011101} & movi      \\
-\texttt{001011} & addi      & \texttt{011110} & loadi     \\
-\texttt{001100} & subi      & \texttt{011111} & in        \\
-\texttt{001101} & muli      & \texttt{100000} & pop       \\
-\texttt{001110} & divi      & \texttt{100001} & out       \\
-\texttt{001111} & andi      & \texttt{100010} & jr        \\
-\texttt{010000} & ori       & \texttt{100011} & storei    \\
-\texttt{010001} & not       & \texttt{100100} & push      \\
-\texttt{010010} & sl        &                 &           \\
+\texttt{000000} & halt      & \texttt{010100} & movr     \\
+\texttt{000001} & nop       & \texttt{010101} & loaddi   \\
+\texttt{000010} & jump      & \texttt{010110} & loadr    \\
+\texttt{000011} & jal       & \texttt{010111} & beq      \\
+\texttt{000100} & addr      & \texttt{011000} & bne      \\
+\texttt{000101} & subr      & \texttt{011001} & blt      \\
+\texttt{000110} & mulr      & \texttt{011010} & bgt      \\
+\texttt{000111} & divr      & \texttt{011011} & storedi  \\
+\texttt{001000} & and       & \texttt{011100} & storer   \\
+\texttt{001001} & or        & \texttt{011101} & movi     \\
+\texttt{001010} & xnor      & \texttt{011110} & loadi    \\
+\texttt{001011} & addi      & \texttt{011111} & in       \\
+\texttt{001100} & subi      & \texttt{100000} & pop      \\
+\texttt{001101} & muli      & \texttt{100001} & out      \\
+\texttt{001110} & divi      & \texttt{100010} & jr       \\
+\texttt{001111} & andi      & \texttt{100011} & storei   \\
+\texttt{010000} & ori       & \texttt{100100} & push     \\
+\texttt{010001} & not       & \texttt{100101} & blet     \\
+\texttt{010010} & sl        & \texttt{100110} & lget     \\
+\texttt{010011} & sr        &                  &          \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -488,17 +496,17 @@ A partir das instruções, é possível classificá-las de acordo com \autoref{t
 \hline
 \textbf{Categoria} & \textbf{Instruções} \\
 \hline
-Operações aritméticas & \textit{add}, \textit{addi}, \textit{sub}, \textit{subi}, \textit{mul}, \textit{muli}, \textit{div}, \textit{divi} \\
+Operações aritméticas & \textit{addr}, \textit{addi}, \textit{subr}, \textit{subi}, \textit{mulr}, \textit{muli}, \textit{divr}, \textit{divi} \\
 \hline
 Operações lógicas & \textit{and}, \textit{andi}, \textit{or}, \textit{ori}, \textit{not}, \textit{xnor}, \textit{sl}, \textit{sr} \\
 \hline
-Desvios condicionais & \textit{beq}, \textit{bne}, \textit{blt}, \textit{bgt} \\
+Desvios condicionais & \textit{beq}, \textit{bne}, \textit{blt}, \textit{bgt}, \textit{blet}, \textit{lget} \\
 \hline
-Desvios incondicionais & \textit{jmp}, \textit{jr}, \textit{jal} \\
+Desvios incondicionais & \textit{jump}, \textit{jr}, \textit{jal} \\
 \hline
-Acesso à memória & \textit{storei}, \textit{storer}, \textit{stored}, \textit{loadi}, \textit{loadr}, \textit{loadd} \\
+Acesso à memória & \textit{storei}, \textit{storer}, \textit{storedi}, \textit{loadi}, \textit{loadr}, \textit{loaddi} \\
 \hline
-Movimentação de dados & \textit{mov}, \textit{movi} \\
+Movimentação de dados & \textit{movr}, \textit{movi} \\
 \hline
 Controle da pilha & \textit{push}, \textit{pop} \\
 \hline
@@ -506,7 +514,7 @@ Acesso aos switches & \textit{in} \\
 \hline
 Acesso ao display & \textit{out} \\
 \hline
-Controle de execução & \textit{nop}, \textit{hlt} \\
+Controle de execução & \textit{nop}, \textit{halt} \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -531,10 +539,10 @@ Instrução & Operação\\
 \hline
 \multicolumn{2}{|c|}{Formato 1} \\
 \hline
-add & RD <= RS + RT \\
-sub & RD <= RS - RT \\
-mul & RD <= RS * RT \\
-div & RD <= RS / RT \\
+addr & RD <= RS + RT \\
+subr & RD <= RS - RT \\
+mulr & RD <= RS * RT \\
+divr & RD <= RS / RT \\
 and & RD <= RS and RT \\
 or & RD <= RS or RT \\
 xnor & RD <= RS xnor RT \\
@@ -550,8 +558,8 @@ ori & RD <= RS or IM14 \\
 not & RD <= \textasciitilde RS \\
 sl & RD <= RS deslocado IM14 esq \\
 sr & RD <= RS deslocado IM14 dir \\
-mov & RD <= RS \\
-loadd & RD <= MEM(RS + END14) \\
+movr & RD <= RS \\
+loaddi & RD <= MEM(RS + END14) \\
 loadr & RD <= MEM(RS) \\
 \hline
 \multicolumn{2}{|c|}{Formato 3} \\
@@ -560,7 +568,9 @@ beq & if(RS == RT) PC <= PC+1+END14 \\
 bne & if(RS != RT) PC <= PC+1+END14 \\
 blt & if(RS < RT) PC <= PC+1+END14 \\
 bgt & if(RS > RT) PC <= PC+1+END14 \\
-stored & MEM(RS + END14) <= RT \\
+blet & if(RS <= RT) PC <= PC+1+END14 \\
+lget & if(RS >= RT) PC <= PC+1+END14 \\
+storedi & MEM(RS + END14) <= RT \\
 storer & MEM(RS) <= RT \\
 \hline
 \multicolumn{2}{|c|}{Formato 4} \\
@@ -599,9 +609,9 @@ push & PILHA(+RPI) <= RT \\
 \hline
 \multicolumn{2}{|c|}{Formato 7} \\
 \hline
-hlt & Para o processador \\
+halt & Para o processador \\
 nop & Aguarda um ciclo de clock \\
-jmp & PC <= END26 \\
+jump & PC <= END26 \\
 jal & RAL <= PC; PC <= END26 \\
 \hline
 \end{tabular}
@@ -673,7 +683,7 @@ Formato 1 & \textit{add}, \textit{sub}, \textit{mul}, \textit{div}, \textit{and}
 \hline
 Formato 2 & \textit{addi}, \textit{subi}, \textit{muli}, \textit{divi}, \textit{andi}, \textit{ori}, \textit{not}, \textit{sl}, \textit{sr}, \textit{mov}, \textit{loadd}, \textit{loadr} \\
 \hline
-Formato 3 & \textit{beq}, \textit{bne}, \textit{blt}, \textit{bgt}, , \textit{stored}, \textit{storer} \\
+Formato 3 & \textit{beq}, \textit{bne}, \textit{blt}, \textit{bgt}, \textit{blet}, \textit{lget}, \textit{storedi}, \textit{storer} \\
 \hline
 Formato 4 & \textit{movi}, \textit{loadi}, \textit{in}, \textit{pop} \\
 \hline
@@ -771,7 +781,7 @@ Enquanto isso ocorre, o valor do PC é incrementado em 1 para acessar a próxima
   \label{fig:cmdados-f1}
 \end{figure}
 
-A \autoref{fig:cmdados-f3-desvios} apresenta o caminho de dados para desvios condicionais tomados. Nela, é possível observar o caminho de dados para as instruções beq, bne, blt e bgt.
+A \autoref{fig:cmdados-f3-desvios} apresenta o caminho de dados para desvios condicionais tomados. Nela, é possível observar o caminho de dados para as instruções beq, bne, blt, bgt, blet e lget.
 
 Nela é lida a instrução com base no endereço do PC e definidos dois registradores, RD e RS, para leitura e um imediato usado para o desvio. 
 
