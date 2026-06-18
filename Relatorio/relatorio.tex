@@ -1251,47 +1251,48 @@ Nesse módulo também foi desenvolvido um divisor de frequência de 50MHz para 1
 No \autoref{cod:ULA_verilog} abaixo é apresentado o código desenvolvido para a ULA.
 
 \begin{lstlisting}[language=Verilog, caption={Módulo da ULA em Verilog}, label={cod:ULA_verilog}]
-module ULA (EA, EB, SinalULA, SL, SD);
+module ULA (
+    input wire [31:0] EA,
+    input wire [31:0] EB,
+    input wire [4:0] SinalULA,
+    output reg [31:0] SL,
+    output reg SD
+);
 
-input wire [31:0] EA;        // Entrada A
-input wire [31:0] EB;        // Entrada B
-input wire [4:0] SinalULA;   // Codigo de operacaoo
-output reg [31:0] SL;        // Saida padrao
-output reg SD;               // Saida para desvio
-
-always @(*)
-begin
+// Atribuicao inicial para evitar latches (logica combinacional pura)
+always @(*) begin
+    SL = 32'd0;
     SD = 1'b0;
-    SL = 32'b0;
 
     case(SinalULA)
-        5'b00000: SL = EA + EB;             // add
-        5'b00001: SL = EA - EB;             // sub
-        5'b00010: SL = EA & EB;             // and
-        5'b00011: SL = EA | EB;             // or
-        5'b00100: SL = ~EA;                 // not EA
-        5'b00101: SL = EA ~^ EB;            // xnor
-        5'b00110: SL = EA << EB[4:0];       // sl
-        5'b00111: SL = EA >> EB[4:0];       // sr
-        5'b01000: SD = (EA == EB);          // beq
-        5'b01001: SD = (EA != EB);          // bne
-        5'b01010: SD = (EA < EB);           // blt
-        5'b01011: SD = (EA > EB);           // bgt
-        5'b01100: SL = EA * EB;             // mul
-        5'b01101: SL = EA / EB;             // div
-        5'b01110: SL = EA;                  // Soma zero em EA
-        5'b01111: SL = EB;                  // Soma zero em EB
-        5'b10000: SL = EA + 1;              // Soma um em EA
-        
-        default:
-            begin
-                SD = 1'b0;
-                SL = 32'b0;
-            end
+        5'b00000: SL = EA + EB;
+        5'b00001: SL = EA - EB;
+        5'b00010: SL = EA & EB;
+        5'b00011: SL = EA | EB;
+        5'b00100: SL = ~EA;
+        5'b00101: SL = EA ~^ EB;
+        5'b00110: SL = EA << EB[4:0];
+        5'b00111: SL = EA >> EB[4:0];
+        5'b01000: SD = (EA == EB);
+        5'b01001: SD = (EA != EB);
+        5'b01010: SD = (EA < EB);
+        5'b01011: SD = (EA > EB);
+        5'b01100: SL = EA * EB;
+        5'b01101: SL = EA / EB;
+        5'b01110: SL = EA;
+        5'b01111: SL = EB;
+        5'b10000: SL = EA + 1;
+        5'b10001: SD = (EA <= EB);
+        5'b10010:  SD = (EA >= EB);
+        default: begin
+            SL = 32'd0;
+            SD = 1'b0;
+        end
     endcase
 end
 
 endmodule
+
 \end{lstlisting}
 
 \newpage
@@ -1301,33 +1302,40 @@ endmodule
 No \autoref{cod:banco_reistradores_verilog} abaixo é apresentado o código desenvolvido para o banco de registradores.
 
 \begin{lstlisting}[language=Verilog, caption={Módulo do banco de registradores em Verilog}, label={cod:banco_reistradores_verilog}]
-module Banco_de_Registradores(clock, reg_leitura1, reg_leitura2, reg_escrita, reg_especial, dado_escrita, dado_especial, SinalBanco, saida1, saida2);
+module Banco_de_Registradores
+#(parameter ADDR_WIDTH = 6)			// 2^4 = 16 registradores (mude para 5 para 32, ou 6 para 64)
+(clock, reg_leitura1, reg_leitura2, reg_escrita, reg_especial, dado_escrita, dado_especial, SinalBanco, saida1, saida2);
 
-input clock;						// Clock do processador
+input clock;								// Clock do processador
 input [5:0] reg_leitura1;				// Endereco do registrador 1
 input [5:0] reg_leitura2;				// Endereco do registrador 2
 input [5:0] reg_escrita;				// Endereco de escrita
 input [5:0] reg_especial;				// Endereco de escrita especial
 input [31:0] dado_escrita;				// Dado para escrever
-input [31:0] dado_especial;			        // Dado para escrever especial
+input [31:0] dado_especial;			// Dado para escrever especial
 
-input [1:0] SinalBanco;					// Controla a escrita
+input [1:0] SinalBanco;					// [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos
 
 output [31:0] saida1;					// Dado de saida 1
 output [31:0] saida2;					// Dado de saida 2
 
-reg [31:0] banco [63:0];				// Criacao do banco de registradores
+reg [31:0] banco [2**ADDR_WIDTH-1:0];				// Criacao do banco de registradores
 
 always @(posedge clock)
-	begin
-		if(SinalBanco[0] == 1'b1) banco[reg_escrita] <= dado_escrita;
-		if(SinalBanco[1] == 1'b1) banco[reg_especial] <= dado_especial;
-	end
+begin
+    // Garante que o registrador 0 (6'd0) nunca seja sobrescrito
+    if(SinalBanco[0] == 1'b1 && reg_escrita[ADDR_WIDTH-1:0] != 0) 
+        banco[reg_escrita[ADDR_WIDTH-1:0]] <= dado_escrita;
+        
+    if(SinalBanco[1] == 1'b1 && reg_especial[ADDR_WIDTH-1:0] != 0) 
+        banco[reg_especial[ADDR_WIDTH-1:0]] <= dado_especial;
+end
 
-assign saida1 = banco[reg_leitura1];
-assign saida2 = banco[reg_leitura2];
+// Se a leitura for no Endereco 0, a saida e 0. Caso contrario, le o banco normalmente.
+assign saida1 = (reg_leitura1[ADDR_WIDTH-1:0] == 0) ? 32'd0 : banco[reg_leitura1[ADDR_WIDTH-1:0]];
+assign saida2 = (reg_leitura2[ADDR_WIDTH-1:0] == 0) ? 32'd0 : banco[reg_leitura2[ADDR_WIDTH-1:0]];
 	
-endmodule 
+endmodule
 \end{lstlisting}
 
 \newpage
@@ -1363,7 +1371,7 @@ wire [31:0] EA;
 wire [31:0] EB;
 
 // Envia os dados para o banco
-Banco_de_Registradores(
+Banco_de_Registradores #(.ADDR_WIDTH(6)) banco_inst (
 	.clock(clock), 	
 	.reg_leitura1(reg_leitura1), 
 	.reg_leitura2(reg_leitura2), 
@@ -1407,29 +1415,28 @@ endmodule
 No \autoref{cod:memoria_principal_verilog} abaixo é apresentado o código desenvolvido para a memória principal.
 
 \begin{lstlisting}[language=Verilog, caption={Módulo da memória principal em Verilog}, label={cod:memoria_principal_verilog}]
+// Quartus Prime Verilog Template
+
 module Memoria_Principal
-#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=6) // 32 bits e 2^6 = 64 linhas
+#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=8) // 32 bits e 2^8 = 256 linhas
 (
-	input clock,					        // Sinal de clock
-	input [(ADDR_WIDTH-1):0] END,	  			// Endereco de acesso
-	input [(DATA_WIDTH-1):0] dado_escrita,		        // Dado para escrever
-	input SinalMemoria, 				        // Sinal de escrita
-	output reg [(DATA_WIDTH-1):0] saida			// Dado de saida
+	input clock,										// Sinal de clock
+	input [(ADDR_WIDTH-1):0] END,	  				// Endereco de acesso
+	input [(DATA_WIDTH-1):0] dado_escrita,		// Dado para escrever
+	input SinalMemoria, 								// Sinal de escrita
+	output reg [(DATA_WIDTH-1):0] saida			// Dado de saida				
 );
 	
 	// Criacao da memoria
 	reg [DATA_WIDTH-1:0] ram[2**ADDR_WIDTH-1:0];
 	
-	// Leitura
-	always @ (*)
+	always @ (negedge clock)
 	begin
-		saida <= ram[END];
-	end
-	
-	// Escrita na memoria
-	always @ (posedge clock)
-	begin
+		// Escrita na memoria
 		if (SinalMemoria) ram[END] <= dado_escrita;
+		
+		// Leitura
+		saida <= ram[END];
 	end
 	
 endmodule
@@ -1442,10 +1449,13 @@ endmodule
 No \autoref{cod:memoria_instrucoes_verilog} abaixo é apresentado o código desenvolvido para a memória de instruções.
 
 \begin{lstlisting}[language=Verilog, caption={Módulo da memória de instruções em Verilog}, label={cod:memoria_instrucoes_verilog}]
+// Quartus Prime Verilog Template
+// Single Port ROM
+
 module Memoria_Instrucoes
-#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=6)
-(
-	input clock, 
+#(parameter DATA_WIDTH=32, parameter ADDR_WIDTH=8)
+( 
+	input clock,
 	input [(ADDR_WIDTH-1):0] PC,
 	output reg [5:0] Opcode,
 	output reg [25:0] Operandos
@@ -1470,7 +1480,7 @@ module Memoria_Instrucoes
 	end
 
 
-	always @ (negedge clock)
+	always @ (posedge clock)
 	begin
 		Opcode <= rom[PC][31:26];
 		Operandos <= rom[PC][25:0];
@@ -1488,14 +1498,22 @@ No \autoref{cod:PC_verilog} abaixo é apresentado o código desenvolvido para o 
 \begin{lstlisting}[language=Verilog, caption={Módulo do PC em Verilog}, label={cod:PC_verilog}]
 module PC(clock, Novo_Endereco, HLT, TravaPC, PC);
 
-input clock;				// Sinal de clock
-input [5:0]Novo_Endereco;		// Novo valor do PC
-input HLT;				// Sinal de encerrar
-input TravaPC;				// Sinal para segurar para ler switches
-output reg [5:0]PC;			// Saida do PC
+input clock;						// Sinal de clock
+input [7:0]Novo_Endereco;		// Novo valor do PC
+input HLT;							// Sinal de encerrar
+input TravaPC;						// Sinal para segurar para ler switches
+output reg [7:0]PC;				// Saida do PC
+
+reg aux = 1'b0;
 
 always @(negedge clock)
 begin
+	if(aux == 1'b0)
+	begin
+		PC = 7'd0;
+		aux = 1'b1;
+	end
+
 	if(!HLT & !TravaPC)
 	begin
 		PC = Novo_Endereco;
@@ -2049,6 +2067,37 @@ begin
 			SinalGEN = 3'b101; 		// Num Formato - 1
 			SinalULA = 5'b01110; 
 		end
+		
+		// NOVAS INSTRUCOES 2026
+		
+		// Formato 3 - blet
+		6'b100101:
+		begin
+			HLT = 1'b0;
+			RegULA = 1'b1; 			// Registrador para ULA
+			SinalMemoria = 1'b0; 	// Controla escrita
+			SinalMES = 2'b00;       // [10] = OUT, [01] = IN, [00] = default
+			SinalBanco = 2'b00; 		// [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos
+			SinalMuxE = 2'b00; 		// [00] = Switches, [01] = ULA, [10] = Memoria
+			SinalMuxEE = 2'b00;  	// [00] = RAL, [01] = Push, [10] = Pop
+			SinalMuxPC = 2'b10; 		// [00] = PC, [01] = J, [10] = Desvio, [11] = JR
+			SinalGEN = 3'b010; 		// Num Formato - 1
+			SinalULA = 5'b10001; 
+		end
+		// Formato 3 - bget
+		6'b100110:
+		begin
+			HLT = 1'b0;
+			RegULA = 1'b1; 			// Registrador para ULA
+			SinalMemoria = 1'b0; 	// Controla escrita
+			SinalMES = 2'b00;       // [10] = OUT, [01] = IN, [00] = default
+			SinalBanco = 2'b00; 		// [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos
+			SinalMuxE = 2'b00; 		// [00] = Switches, [01] = ULA, [10] = Memoria
+			SinalMuxEE = 2'b00;  	// [00] = RAL, [01] = Push, [10] = Pop
+			SinalMuxPC = 2'b10; 		// [00] = PC, [01] = J, [10] = Desvio, [11] = JR
+			SinalGEN = 3'b010; 		// Num Formato - 1
+			SinalULA = 5'b10010; 
+		end		
 		// Default - HLT
 		default:
 		begin
@@ -2100,15 +2149,17 @@ output [6:0] Display_5,
 output [6:0] Display_6,
 output [6:0] Display_7
 );
+// Para iterar no for da conversao binario para decimal
+integer i;
 
-// Modulo de entrada
+// Modulo de entrada original com debounce
 reg Controle;
 reg [21:0] Contador;
 
 // Codigo debounce de pulso unico
-always @(posedge clock)
+always @(negedge clock)
 	begin
-		if(Destrava == 1'b1) Contador <= 22'd0;							// Botao solto = 1
+		if(Destrava == 1'b1) Contador <= 22'd0; // Botao solto = 1
 		else if(Contador < 22'd60000) Contador <= Contador + 1;
 		
 		if(Contador == 22'd50000) Controle <= 1'b1;
@@ -2146,41 +2197,39 @@ begin
 end
 
 
+reg [31:0] bcd; 
 
-// Variaveis auxiliares para ficarem com os caracteres
-reg [3:0] d0;
-reg [3:0] d1;
-reg [3:0] d2;
-reg [3:0] d3;
-reg [3:0] d4;
-reg [3:0] d5;
-reg [3:0] d6;
-reg [3:0] d7;
+// Converte de Binario para BCD usando Double Dabble (Shift-and-Add-3)
+always @(*) begin
+    bcd = 0;
+    
+    // Itera por todos os bits da entrada
+    for (i = 31; i >= 0; i = i - 1) begin
+        
+        // Verifica cada nibble (digito de 4 bits). Se for maior igual a 5, soma 3.
+        if (bcd[3:0]   >= 5) bcd[3:0]   = bcd[3:0]   + 3;
+        if (bcd[7:4]   >= 5) bcd[7:4]   = bcd[7:4]   + 3;
+        if (bcd[11:8]  >= 5) bcd[11:8]  = bcd[11:8]  + 3;
+        if (bcd[15:12] >= 5) bcd[15:12] = bcd[15:12] + 3;
+        if (bcd[19:16] >= 5) bcd[19:16] = bcd[19:16] + 3;
+        if (bcd[23:20] >= 5) bcd[23:20] = bcd[23:20] + 3;
+        if (bcd[27:24] >= 5) bcd[27:24] = bcd[27:24] + 3;
+        if (bcd[31:28] >= 5) bcd[31:28] = bcd[31:28] + 3;
+        
+        // Desloca todo o vetor BCD 1 bit para a esquerda e puxa o proximo bit do reg_out
+        bcd = {bcd[30:0], reg_out[i]};
+    end
+end
 
-// Separa o valor de entrada em caracteres
-always @(*) 
-	begin
-		d0 = reg_out % 10;
-		d1 = (reg_out / 10) % 10;
-		d2 = (reg_out / 100) % 10;
-		d3 = (reg_out / 1000) % 10;
-		d4 = (reg_out / 10000) % 10;
-		d5 = (reg_out / 100000) % 10;
-		d6 = (reg_out / 1000000) % 10;
-		d7 = (reg_out / 10000000) % 10;
-	end
-
-
-	
-// Usa o decodificador para escrever os caracteres no display7
-Decodificador_BCD(.bcd(d0), .seg(Display_0));
-Decodificador_BCD(.bcd(d1), .seg(Display_1));
-Decodificador_BCD(.bcd(d2), .seg(Display_2));
-Decodificador_BCD(.bcd(d3), .seg(Display_3));
-Decodificador_BCD(.bcd(d4), .seg(Display_4));
-Decodificador_BCD(.bcd(d5), .seg(Display_5));
-Decodificador_BCD(.bcd(d6), .seg(Display_6));
-Decodificador_BCD(.bcd(d7), .seg(Display_7));
+// Usa os nibbles do registrador BCD diretamente nos decodificadores.
+Decodificador_BCD dec0(.bcd(bcd[3:0]),   .seg(Display_0));
+Decodificador_BCD dec1(.bcd(bcd[7:4]),   .seg(Display_1));
+Decodificador_BCD dec2(.bcd(bcd[11:8]),  .seg(Display_2));
+Decodificador_BCD dec3(.bcd(bcd[15:12]), .seg(Display_3));
+Decodificador_BCD dec4(.bcd(bcd[19:16]), .seg(Display_4));
+Decodificador_BCD dec5(.bcd(bcd[23:20]), .seg(Display_5));
+Decodificador_BCD dec6(.bcd(bcd[27:24]), .seg(Display_6));
+Decodificador_BCD dec7(.bcd(bcd[31:28]), .seg(Display_7));
 
 endmodule
 
@@ -2219,9 +2268,9 @@ No \autoref{cod:integracao_final_verilog} abaixo é apresentado o código desenv
 \begin{lstlisting}[language=Verilog, caption={Integração final em Verilog}, label={cod:integracao_final_verilog}]
 module Processador_Completo (
 // Inputs
-input clock,                             // Clock do processador
-input Destrava,                          // Botao para destravar o PC
-input [17:0] Switches_IN,               // Valor bruto
+input clock,								// Clock do processador
+input Destrava,							// Botao para destravar o PC
+input [17:0] Switches_IN,				// Valor bruto
 
 // Outputs
 output [6:0] Display_0,
@@ -2236,34 +2285,34 @@ output [6:0] Display_7
 
 // Modulo de entrada e saida
 wire TravaPC;
-wire [31:0] Switches;                   // Valor ja extendido   // Entradas e saidas do banco 
-wire [5:0] reg_leitura1;               // Endereco do registrador 1 
-wire [5:0] reg_leitura2;               // Endereco do registrador 2 
-wire [5:0] reg_escrita;                // Endereco de escrita 
-wire [5:0] reg_especial;               // Endereco de escrita especial 
-wire [31:0] saida1;                    // Valor do primeiro registrador lido 
-wire [31:0] saida2;                    // Valor do segundo registrador lido  
+wire [31:0] Switches;					// Valor ja extendido   // Entradas e saidas do banco 
+wire [5:0] reg_leitura1;				// Endereco do registrador 1 
+wire [5:0] reg_leitura2;				// Endereco do registrador 2 
+wire [5:0] reg_escrita;				// Endereco de escrita 
+wire [5:0] reg_especial;				// Endereco de escrita especial 
+wire [31:0] saida1;					// Valor do primeiro registrador lido 
+wire [31:0] saida2;					// Valor do segundo registrador lido  
 
 // Imediato 
-wire [31:0] Imediato;                  // Imediato  
+wire [31:0] Imediato;					// Imediato  
 
 // Entradas e saidas para ULA 
-wire [31:0] SL;                         // Saida padrao 
-wire SD;                                // Saida para desvio  
+wire [31:0] SL;							// Saida padrao 
+wire SD;									// Saida para desvio  
 
 // Atualizacao do PC 
-wire [31:0] Velho_PC;                  // PC atual 
-wire [31:0] PC;                         // PC incrementado 
-wire [31:0] Novo_PC;                   // Valor pelo qual o PC sera atualizado 
-wire [31:0] Desvio;                    // PC + imediato  
+wire [7:0] Velho_PC;					// PC atual 
+wire [7:0] PC;							// PC incrementado 
+wire [7:0] Novo_PC;					// Valor pelo qual o PC sera atualizado 
+wire [7:0] Desvio;					// PC + imediato  
 
 // Escrita padrao 
-wire [31:0] saida_MEM;                // Saida da memoria 
-wire [31:0] SE;                         // Dado escrita  
+wire [31:0] saida_MEM;				// Saida da memoria 
+wire [31:0] SE;							// Dado escrita   
 
 // Escrita especial 
-wire [31:0] RPI_Dec;                   // Usado pelo pop 
-wire [31:0] SEE;                        // Dado especial  
+wire [31:0] RPI_Dec;					// Usado pelo pop 
+wire [31:0] SEE;						// Dado especial  
 
 // Campos da instrucao 
 wire [5:0] Opcode;
@@ -2271,15 +2320,15 @@ wire [25:0] Operandos;
 
 // Sinais de controle 
 wire HLT;
-wire RegULA;                            // Registrador para ULA 
-wire SinalMemoria;                      // Controla escrita 
-wire [1:0] SinalMES;                    // [10] = OUT, [01] = IN, [00] = default 
-wire [1:0] SinalBanco;                 // [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos 
-wire [1:0] SinalMuxE;                   // [00] = Switches, [01] = ULA, [10] = Memoria 
-wire [1:0] SinalMuxEE;                 // [00] = RAL, [01] = Push, [10] = Pop 
-wire [1:0] SinalMuxPC;                 // [00] = PC, [01] = J, [10] = Desvio, [11] = JR 
-wire [2:0] SinalGEN;                   // Numero do formato menos 1 
-wire [4:0] SinalULA;                   // Codigo de operacao da ULA
+wire RegULA;								// Registrador para ULA 
+wire SinalMemoria;						// Controla escrita 
+wire [1:0] SinalMES;					// [10] = OUT, [01] = IN, [00] = default 
+wire [1:0] SinalBanco;				// [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos 
+wire [1:0] SinalMuxE;					// [00] = Switches, [01] = ULA, [10] = Memoria 
+wire [1:0] SinalMuxEE;				// [00] = RAL, [01] = Push, [10] = Pop 
+wire [1:0] SinalMuxPC;				// [00] = PC, [01] = J, [10] = Desvio, [11] = JR 
+wire [2:0] SinalGEN;					// Numero do formato menos 1 
+wire [4:0] SinalULA;					// Codigo de operacao da ULA
 
 // Conexoes com a ULA
 wire [31:0] EA;
@@ -2289,89 +2338,90 @@ reg [24:0] Contador;
 reg clock_slow;
 
 always @(posedge clock)
-    begin
-        if(Contador < 23'd49) Contador <= Contador + 1;
-        else Contador <= 23'd0;
-        
-        if(Contador > 23'd25) clock_slow <= 1'b1;
-        else clock_slow <= 1'b0;
-    end
+	begin
+		if(Contador < 23'd49) Contador <= Contador + 1'b1;
+		else Contador <= 23'd0;
+		
+		if(Contador > 23'd24) clock_slow <= 1'b1;
+		else clock_slow <= 1'b0;
+	end
 
-Unidade_de_Controle(
-    .Opcode(Opcode),
-    .HLT(HLT),
-    .RegULA(RegULA),
-    .SinalMemoria(SinalMemoria),
-    .SinalMES(SinalMES),
-    .SinalBanco(SinalBanco),
-    .SinalMuxE(SinalMuxE),
-    .SinalMuxEE(SinalMuxEE),
-    .SinalMuxPC(SinalMuxPC),
-    .SinalGEN(SinalGEN),
-    .SinalULA(SinalULA)
+Unidade_de_Controle uc_inst(
+	.Opcode(Opcode),
+	.HLT(HLT),
+	.RegULA(RegULA),
+	.SinalMemoria(SinalMemoria),
+	.SinalMES(SinalMES),
+	.SinalBanco(SinalBanco),
+	.SinalMuxE(SinalMuxE),
+	.SinalMuxEE(SinalMuxEE),
+	.SinalMuxPC(SinalMuxPC),
+	.SinalGEN(SinalGEN),
+	.SinalULA(SinalULA)
 );
 
 // Atualizacao do PC
-PC(
-    .clock(clock_slow),
-    .Novo_Endereco(Novo_PC),       // Endereco novo
-    .HLT(HLT),
-    .TravaPC(TravaPC),
-    .PC(Velho_PC)                  // Passa a ser o endereco "velho"
+PC pc_inst(
+	.clock(clock_slow),
+	.Novo_Endereco(Novo_PC),		// Endereco novo
+	.HLT(HLT),
+	.TravaPC(TravaPC),
+	.PC(Velho_PC)						// Passa a ser o endereco "velho"
 );
 
-Memoria_Instrucoes(
-    .PC(Velho_PC),
-    .Opcode(Opcode),
-    .Operandos(Operandos)
+Memoria_Instrucoes mem_inst(
+	.clock(clock_slow),
+	.PC(Velho_PC),
+	.Opcode(Opcode),
+	.Operandos(Operandos)
 );
 
-Gerenciador_de_Entrada(
-    .SinalGEN(SinalGEN),
-    .Operandos(Operandos),
-    .L1(reg_leitura1),
-    .L2(reg_leitura2),
-    .E1(reg_escrita),
-    .E2(reg_especial),
-    .Imediato(Imediato)
+Gerenciador_de_Entrada ger_ent(
+	.SinalGEN(SinalGEN),
+	.Operandos(Operandos),
+	.L1(reg_leitura1),
+	.L2(reg_leitura2),
+	.E1(reg_escrita),
+	.E2(reg_especial),
+	.Imediato(Imediato)
 );
 
 // Incrementa o PC
-Add1(
-    .entrada(Velho_PC),
-    .saida(PC)
+Add1 add1_inst(
+	.entrada(Velho_PC),
+	.saida(PC)
 );
 
 // Calcula o desvio
-Adder(
-    .entrada1(PC),
-    .entrada2(Imediato),
-    .saida(Desvio)
+Adder adder_inst(
+	.entrada1(PC),
+	.entrada2(Imediato[7:0]),
+	.saida(Desvio)
 );
 
 // Mux do PC
-Mux_PC(
-    .SinalMuxPC(SinalMuxPC),       // Sinal de controle
-    .SD(SD),
-    .PC(PC),                       // Caso va fazer PC+1
-    .J(Imediato),                  // Usa o imediato para jmp
-    .Desvio(Desvio),              // Desvio calculado com PC+1+Imediato
-    .JR(saida1),                  // Primeiro registrador lido
-    .Novo_PC(Novo_PC)             // Valor para atualizar o PC
+Mux_PC mux_pc_inst(
+	.SinalMuxPC(SinalMuxPC),	// Sinal de controle
+	.SD(SD),
+	.PC(PC),							// Caso va fazer PC+1
+	.J(Imediato[7:0]),			// Usa o imediato para jmp (8 bits LSB)
+	.Desvio(Desvio),				// Desvio calculado com PC+1+Imediato
+	.JR(saida1[7:0]),				// Primeiro registrador lido (8 bits LSB)
+	.Novo_PC(Novo_PC)				// Valor para atualizar o PC
 );
 
 // Envia os dados para o banco
-Banco_de_Registradores(
-    .clock(clock_slow),     
-    .reg_leitura1(reg_leitura1), 
-    .reg_leitura2(reg_leitura2), 
-    .reg_escrita(reg_escrita), 
-    .reg_especial(reg_especial), 
-    .dado_escrita(SE),                   // Saida do mux de escrita
-    .dado_especial(SEE),                 // Saida do mux de escrita especial
-    .SinalBanco(SinalBanco), 
-    .saida1(saida1), 
-    .saida2(saida2)
+Banco_de_Registradores #(.ADDR_WIDTH(4)) banco_inst(
+	.clock(clock_slow), 	
+	.reg_leitura1(reg_leitura1), 
+	.reg_leitura2(reg_leitura2), 
+	.reg_escrita(reg_escrita), 
+	.reg_especial(reg_especial), 
+	.dado_escrita(SE), 					// Saida do mux de escrita
+	.dado_especial(SEE), 				// Saida do mux de escrita especial
+	.SinalBanco(SinalBanco), 
+	.saida1(saida1), 
+	.saida2(saida2)
 );
 
 // Atribui os valores de entrada para ULA
@@ -2379,73 +2429,74 @@ Banco_de_Registradores(
 assign EA = saida1; 
 
 // Segunda entrada vem ou da saida2 ou do imediato
-Mux2(
-    .E1(saida2), 
-    .E2(Imediato), 
-    .S(EB), 
-    .Sinal(RegULA)
+Mux2 mux_ula_in(
+	.E1(saida2), 
+	.E2(Imediato), 
+	.S(EB), 
+	.Sinal(RegULA)
 );
 
 // Envia os dados para ULA
-ULA(
-    .EA(EA), 
-    .EB(EB), 
-    .SinalULA(SinalULA), 
-    .SL(SL), 
-    .SD(SD)
+ULA ula_inst(
+	.EA(EA), 
+	.EB(EB), 
+	.SinalULA(SinalULA), 
+	.SL(SL), 
+	.SD(SD)
 );
 
 // Decrementa o endereco da pilha
-Sub1(
-    .entrada(SL),
-    .saida(RPI_Dec)
+Sub1 sub1_inst(
+	.entrada(SL),
+	.saida(RPI_Dec)
 );
 
 // Mux de escrita especial
-Mux_Escrita_Especial(
-    .SinalMuxEE(SinalMuxEE),     
-    .RAL(PC),                       // Usado no JAL
-    .Push(SL),                      // Operacoes push. RPI incrementa    
-    .Pop(RPI_Dec),                  // Operacoes pop. RPI Decrementa
-    .SEE(SEE)
+Mux_Escrita_Especial mux_esc_esp(
+	.SinalMuxEE(SinalMuxEE),		
+	.RAL(PC),							// Usado no JAL
+	.Push(SL),							// Operacoes push. RPI incrementa	
+	.Pop(RPI_Dec),						// Operacoes pop. RPI Decrementa
+	.SEE(SEE)
 );
 
 // Memoria principal
-Memoria_Principal(
-    .clock(clock_slow),
-    .END(SL),                       // Saida da ULA - Seleciona apenas os menos significativos
-    .dado_escrita(saida2),         // Segunda leitura do banco
-    .SinalMemoria(SinalMemoria),
-    .saida(saida_MEM)
+Memoria_Principal mem_prin(
+	.clock(clock_slow),
+	.END(SL),							// Saida da ULA - Seleciona apenas os menos significativos
+	.dado_escrita(saida2),			// Segunda leitura do banco
+	.SinalMemoria(SinalMemoria),
+	.saida(saida_MEM)
 );
 
 // Mux de escrita
-Mux_Escrita(
-    .SinalMuxE(SinalMuxE),
-    .Switches(Switches),
-    .ULA(SL),
-    .Memoria(saida_MEM),
-    .SE(SE)
+Mux_Escrita mux_esc(
+	.SinalMuxE(SinalMuxE),
+	.Switches(Switches),
+	.ULA(SL),
+	.Memoria(saida_MEM),
+	.SE(SE)
 );
 
 // Modulo de entrada e saida
-Modulo_Entrada_E_Saida(
-    .clock(clock_slow),
-    .SinalMES(SinalMES),
-    .Display_IN(saida1),
-    .Switches_IN(Switches_IN),
-    .Switches_OUT(Switches),
-    .Destrava(Destrava),
-    .TravaPC(TravaPC),
-    .Display_0(Display_0),
-    .Display_1(Display_1),
-    .Display_2(Display_2),
-    .Display_3(Display_3),
-    .Display_4(Display_4),
-    .Display_5(Display_5),
-    .Display_6(Display_6),
-    .Display_7(Display_7)
+Modulo_Entrada_E_Saida mes_inst(
+	.clock(clock_slow),
+	.SinalMES(SinalMES),
+	.Display_IN(saida1),
+	.Switches_IN(Switches_IN),
+	.Switches_OUT(Switches),
+	.Destrava(Destrava),
+	.TravaPC(TravaPC),
+	.Display_0(Display_0),
+	.Display_1(Display_1),
+	.Display_2(Display_2),
+	.Display_3(Display_3),
+	.Display_4(Display_4),
+	.Display_5(Display_5),
+	.Display_6(Display_6),
+	.Display_7(Display_7)
 );
+
 endmodule
 \end{lstlisting}
 
