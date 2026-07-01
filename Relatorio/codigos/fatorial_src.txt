@@ -1,0 +1,20 @@
+/* Algoritmo de Fatorial utilizando recursao */
+
+int fatorial(int n) {
+    int aux;
+    if (n <= 1) {
+        return 1;
+    } else {
+        aux = fatorial(n - 1);
+        return n * aux;
+    }
+}
+
+void main(void) {
+    int x;
+    int resultado;
+    
+    x = input();
+    resultado = fatorial(x);
+    output(resultado);
+}

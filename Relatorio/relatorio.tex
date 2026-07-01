@@ -96,9 +96,52 @@
   numberstyle=\tiny,
   breaklines=true, 
   backgroundcolor=\color{green!10},
-  breakautoindent=true, 
+  breakautoindent=true,
   captionpos=b,
   xleftmargin=0pt,
+}
+
+% Estilo para os codigos em C do compilador (front-end e back-end)
+\lstdefinestyle{estiloC}{
+  language=C,
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\color{blue},
+  stringstyle=\color{verde},
+  commentstyle=\color{gray},
+  morekeywords={ASTNode, Address, Quad, QuadOp, ExpType, IdKind, BucketList,
+                tempControl, regControl, FuncLabel, Address, bool, uint32_t},
+  extendedchars=true,
+  showspaces=false,
+  showstringspaces=false,
+  numbers=left,
+  numberstyle=\tiny,
+  breaklines=true,
+  backgroundcolor=\color{green!10},
+  breakautoindent=true,
+  captionpos=b,
+  xleftmargin=0pt,
+  literate=%
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {à}{{\`a}}1 {â}{{\^a}}1 {ê}{{\^e}}1 {ô}{{\^o}}1
+    {ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c c}}1
+    {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+    {Â}{{\^A}}1 {Ê}{{\^E}}1 {Ô}{{\^O}}1 {Ã}{{\~A}}1 {Õ}{{\~O}}1 {Ç}{{\c C}}1,
+}
+
+% Estilo para saidas textuais: codigo intermediario, assembly e binario
+\lstdefinestyle{estiloTexto}{
+  basicstyle=\ttfamily\scriptsize,
+  extendedchars=true,
+  showspaces=false,
+  showstringspaces=false,
+  numbers=none,
+  breaklines=true,
+  backgroundcolor=\color{blue!5},
+  captionpos=b,
+  xleftmargin=0pt,
+  literate=%
+    {á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+    {ã}{{\~a}}1 {õ}{{\~o}}1 {ç}{{\c c}}1,
 }
 \renewcommand{\lstlistingname}{Código}
 % -----------------% FIM INSERIR ARQUIVOs DE CODIGO -----------------%
@@ -130,7 +173,7 @@
 
 
 % Informações de dados para CAPA e FOLHA DE ROSTO
-\titulo{Implementação do Compilador C}
+\titulo{Implementação do Compilador C-}
 \autor{Gabriel Garcia Almeida\\168857}
 \local{São José dos Campos - Brasil}
 \data{Junho de 2026}
@@ -248,21 +291,17 @@ Será apresentada a organização do projeto, bem como as estrutura de dados uti
 
 % INTRODUÇÃO
 \chapter{Introdução}
-No mundo moderno, computadores, celulares, carros modernos, equipamentos médicos, eletrodomésticos e muitos outros aparelhos eletrônicos vêm ganhando cada vez mais espaço na vida das pessoas. Eles realizam as mais diversas tarefas, mas possuem algo em comum: a presença de processadores.
+Atualmente, quase todo programa é escrito em uma linguagem de alto nível, mais próxima do raciocínio humano do que da máquina. Todavia, um processador não entende essas linguagens: ele lida exclusivamente com valores binários, que representam as instruções e os dados que ele consegue executar. Existe, portanto, uma distância entre a forma como o programador escreve o código e a forma como o hardware o executa, e é justamente essa distância que um compilador precisa preencher.
 
-Um processador é um hardware capaz de executar instruções codificadas, realizando operações lógicas, aritméticas, controle de fluxo e acesso à memória. Ele é o cérebro do sistema computacional, responsável por processar dados e executar programas.
+Um compilador é um software responsável por converter o código-fonte escrito em uma linguagem de alto nível para o código de máquina de um processador específico. Ele faz essa tradução de maneira automática, sistemática e confiável, verificando ao longo do caminho se o programa está bem escrito e reportando os erros encontrados. Compreender como esse processo funciona é uma parte fundamental da formação de um engenheiro da computação, que deve ser capaz de entender como o código-fonte é transformado em código de máquina e, mais do que isso, de desenvolver um compilador por conta própria.
 
-Todavia, utilizar um processador diretamente é muito complicado para os seres humanos, pois eles lidam exclusivamente com valores binários, o que não é fácil para a comprrensão humana e extremanete suscetíveis à erros ao programar.
+O funcionamento de um compilador é organizado em etapas, que costumam ser agrupadas em duas grandes fases. A fase de análise, também chamada de front-end, é responsável por ler o código-fonte, entender a sua estrutura e verificar a sua consistência, sendo composta pela análise léxica, sintática e semântica. Já a fase de síntese, ou back-end, parte dessa representação já validada e produz o código de saída, passando pelo código intermediário, pelo código assembly e pelo código binário.
 
-Assim sendo, a solução para isso é a criação de linguagens de alto nível, mais compreensíveis para os seres humanos e que ao mesmo tempo possam ser traduzidas para o código de máquina, ou seja, o código binário que os processadores conseguem entender. O processo de tradução é realizado por um compilador, que é um software responsável por converter o código-fonte escrito em uma linguagem de alto nível para um código de máquina específico.	
+Desse modo, esse relatório busca apresentar o desenvolvimento de um compilador escrito na linguagem C, que tem como objetivo traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. A linguagem C- é um subconjunto da linguagem C, com tipos inteiros e vazios, vetores, funções, estruturas de decisão, laços de repetição e recursão, o que a torna simples o suficiente para ser tratada em um projeto de disciplina e, ao mesmo tempo, rica o bastante para exercitar todas as etapas de um compilador.
 
-Compreeder os compiladores é uma parte fundamental para a formação de um engenheiro da computação, que deve ser capaz de entender como o código-fonte é transformado em código de máquina, além de ser capaz de desenvolver um compilador simples.
+Além do mais, para validar o funcionamento do compilador, o código binário gerado é enviado para um processador MIPS monociclo, escrito em Verilog e implementado no kit FPGA, que foi desenvolvido anteriormente durante a disciplina de Laboratório de Sistemas Computacionais: Arquitetura e Organização de Computadores. Por esse motivo, o processador também é retomado ao longo deste relatório, servindo como o alvo do compilador e permitindo acompanhar de maneira completa o fluxo de ações desde a escrita do código C- até a execução das instruções em binário no hardware.
 
-Desse modo, esse relatório busca apresentar o desenvolvimento de um compilador escrito na linguagem C, que tem como objetivo traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. 
-
-Além do mais, o código binário gerado é então enviado para um processador MIPS simulado utilizando o kit FPGA, que foi desenvolvido anteriormente durante a disciplina de Laboratório de Sistemas Computacionais: Arquitetura e Organização de Computadores, a fim de validar o funcionamento do compilador e entender de maneira completa o fluxo de ações desde a escrita do código C- atá a execução das instruções em binário no hardware.
-
-Nas próximas seções serão apresentados os objetivos do projeto, a fundamentação teórica necessária para o desenvolvimento do processador e do compilador utilizados, por fim, o desenvolvimento em si, apresentando a organização do projeto, as estruturas de dados utilizadas e os resultados obtidos.
+Quanto à organização do texto, inicialmente são apresentados os objetivos do projeto. Em seguida, é retomado o processador que serve de alvo para o compilador, com a sua fundamentação teórica, o seu desenvolvimento e os resultados obtidos. Depois disso, entra o foco principal deste trabalho: a fase de análise e a fase de síntese do compilador, cada uma detalhando as suas etapas, as estruturas de dados utilizadas e trechos do código desenvolvido. Por fim, são apresentados exemplos completos de compilação, desde o código-fonte até o binário, seguidos da conclusão do projeto.
 
 
 % OBJETIVOS
@@ -2891,33 +2930,284 @@ Sendo assim, somando os valores 6 + 4 + 7 + 3 = 20, como foram somados 4 termos,
   \label{fig:processador_5}
 \end{figure}
 
+% COMPILADOR: FASE DE ANÁLISE
+\chapter{Compilador: Fase de Análise}
+A fase de análise é o \textit{front-end} do compilador, ou seja, a parte responsável por ler o código-fonte em C-, entender a sua estrutura e verificar se ele está bem escrito. Ao final dessa fase, o programa deixa de ser um simples texto e passa a ser representado internamente por uma árvore sintática abstrata já validada, que serve de base para a fase de síntese. Essa fase é dividida em três etapas: a análise léxica, a análise sintática e a análise semântica \cite{louden2004}.
+
+No projeto, a análise léxica foi construída com o auxílio da ferramenta Flex \cite{flex_manual}, que gera o analisador léxico a partir de um conjunto de expressões regulares, enquanto a análise sintática foi construída com o Bison \cite{bison_manual}, que gera um analisador sintático do tipo LALR a partir da gramática da linguagem. À medida que o analisador sintático reconhece a estrutura do programa, ele vai construindo a árvore sintática abstrata, que depois é percorrida pela análise semântica para montar a tabela de símbolos e verificar os tipos.
+
+\section{Modelagem}
+Antes da implementação, foi feita a modelagem da fase de análise utilizando a linguagem SysML, com o objetivo de organizar as ideias e representar tanto a estrutura quanto o comportamento dessa etapa do compilador.
+
+\subsection{Diagrama de Blocos (SysML)}
+\begin{quote}
+\textit{Observação: o diagrama de blocos SysML referente à fase de análise não pôde ser incluído neste relatório. Devido a um problema pessoal com o meu computador, acabei perdendo os arquivos originais dos diagramas do compilador, não sendo possível recuperá-los a tempo da entrega. O conteúdo que esse diagrama representava está descrito ao longo das seções seguintes deste capítulo.}
+\end{quote}
+
+\subsection{Diagramas de Atividades (SysML)}
+\begin{quote}
+\textit{Observação: os diagramas de atividades SysML referentes à fase de análise também foram perdidos junto com os demais arquivos, pelo mesmo problema pessoal com o computador. O comportamento que esses diagramas descreviam, ou seja, o fluxo de reconhecimento dos tokens, a construção da árvore e as verificações semânticas, está explicado em texto nas seções a seguir.}
+\end{quote}
+
+\subsection{Outros: a Árvore Sintática Abstrata}
+Além dos diagramas, uma estrutura central da fase de análise é a árvore sintática abstrata (AST). Ela representa o programa em forma de árvore, na qual cada nó corresponde a uma construção da linguagem, como uma declaração, uma expressão ou um comando. A definição do nó da árvore é apresentada no Código \ref{cod:ast}, onde é possível observar o tipo do nó, o tipo da expressão, os ponteiros para os filhos e para o próximo nó da lista, além dos campos usados para guardar números e identificadores.
+
+\lstinputlisting[style=estiloC, caption={Definição do nó da árvore sintática abstrata (ast.h)}, label={cod:ast}]{codigos/ast_node.txt}
+
+A escolha de usar um único tipo de nó com campos genéricos, ao invés de um tipo diferente para cada construção, deixa a árvore mais simples de percorrer, já que a fase de síntese pode tratar todos os nós de maneira uniforme, olhando apenas para o campo que indica o tipo do nó.
+
+\section{Análise Léxica}
+A análise léxica é a primeira etapa do compilador. Ela recebe o código-fonte como uma sequência de caracteres e agrupa esses caracteres em unidades com significado, chamadas de tokens, como palavras reservadas, identificadores, números e operadores. Ao mesmo tempo, ela descarta espaços em branco e comentários, e reporta os caracteres que não pertencem à linguagem.
+
+O analisador léxico foi descrito no arquivo \texttt{scanner.l} utilizando o Flex. Cada regra associa uma expressão regular a uma ação, que normalmente devolve o token correspondente para o analisador sintático. O Código \ref{cod:scanner} mostra um trecho dessas regras, incluindo o tratamento das palavras reservadas, dos operadores, dos números, dos identificadores e dos comentários no formato \texttt{/* */}.
+
+\lstinputlisting[style=estiloC, caption={Trecho das regras léxicas (scanner.l)}, label={cod:scanner}]{codigos/scanner_excerpt.txt}
+
+Para os números, a ação converte o texto reconhecido em um valor inteiro com a função \texttt{atoi}, e para os identificadores é feita uma cópia do nome com \texttt{strdup}, de modo que esse nome possa ser usado depois na tabela de símbolos. Além disso, a cada token reconhecido, a linha atual é guardada por meio da macro \texttt{YY\_USER\_ACTION}, o que permite que os erros sejam reportados junto com o número da linha onde ocorreram. Quando o analisador encontra um caractere que não faz parte da linguagem, ele emite uma mensagem de erro léxico.
+
+\section{Análise Sintática}
+A análise sintática recebe a sequência de tokens produzida pela análise léxica e verifica se ela respeita a gramática da linguagem C-. Se a estrutura estiver correta, o analisador constrói a árvore sintática abstrata que representa o programa. Se não estiver, ele reporta um erro sintático.
+
+Esse analisador foi descrito no arquivo \texttt{parser.y} com o Bison, que gera um analisador do tipo LALR. Um ponto importante na definição da gramática é a declaração de precedência e associatividade dos operadores, mostrada no Código \ref{cod:prec}. Nela, os operadores de soma e subtração recebem uma precedência menor do que os de multiplicação e divisão, o que garante que uma expressão como \texttt{a + b * c} seja interpretada da maneira esperada.
+
+\lstinputlisting[style=estiloC, caption={Precedência e associatividade dos operadores (parser.y)}, label={cod:prec}]{codigos/parser_prec.txt}
+
+Ainda sobre a precedência, foi utilizado o recurso de precedência para resolver a ambiguidade do \textit{dangling else}, ou seja, o problema de decidir a qual \texttt{if} um \texttt{else} pertence quando existem estruturas de decisão aninhadas. O Código \ref{cod:gram} apresenta um trecho das regras da gramática, onde é possível observar como as produções são associadas às ações que constroem a árvore. Cada vez que uma regra é reconhecida, um nó é criado e ligado aos seus filhos, montando a árvore de baixo para cima.
+
+\lstinputlisting[style=estiloC, caption={Trecho da gramática e construção da árvore (parser.y)}, label={cod:gram}]{codigos/parser_grammar.txt}
+
+Também foi adicionada uma forma simples de recuperação de erros, por meio de regras que usam o símbolo especial \texttt{error} seguido de \texttt{yyerrok}. Com isso, ao encontrar um erro em um comando, o analisador consegue descartar o trecho problemático e continuar a análise a partir do próximo ponto-e-vírgula, ao invés de parar na primeira falha.
+
+\section{Análise Semântica}
+A análise semântica é a etapa que verifica o significado do programa, indo além da sua estrutura. Nesse ponto, o compilador já sabe que o programa está bem formado do ponto de vista sintático, mas ainda precisa checar se ele faz sentido, como, por exemplo, se as variáveis foram declaradas antes de serem usadas, se as funções são chamadas com o número certo de argumentos e se os tipos são compatíveis.
+
+Para isso, foi construída uma tabela de símbolos, responsável por guardar as informações de cada identificador do programa, como o seu tipo, a sua categoria, o escopo ao qual pertence e as linhas em que aparece. Essa tabela foi implementada como uma tabela \textit{hash}, cuja função de espalhamento é apresentada no Código \ref{cod:hash}.
+
+\lstinputlisting[style=estiloC, caption={Função hash da tabela de símbolos (symtab.c)}, label={cod:hash}]{codigos/symtab_hash.txt}
+
+A tabela de símbolos também trata os diferentes escopos do programa. Existe um escopo global, chamado de \texttt{Global}, e um escopo para cada função. A busca de um identificador é feita primeiro no escopo atual e, caso ele não seja encontrado, a busca continua no escopo global, o que permite que uma função enxergue tanto as suas próprias variáveis quanto as variáveis globais. O Código \ref{cod:insert} mostra a inserção de um símbolo na tabela, considerando o escopo atual.
+
+\lstinputlisting[style=estiloC, caption={Inserção de um símbolo na tabela (symtab.c)}, label={cod:insert}]{codigos/symtab_insert.txt}
+
+A verificação semântica é feita percorrendo a árvore sintática abstrata em duas etapas. Na primeira, a árvore é percorrida para preencher a tabela de símbolos, inserindo as declarações de variáveis e de funções, além das funções predefinidas \texttt{input} e \texttt{output}. Na segunda, a árvore é percorrida novamente para checar os tipos e reportar os erros semânticos. Entre as verificações feitas, estão a declaração de variáveis ou parâmetros do tipo \texttt{void}, a redeclaração de um mesmo identificador no mesmo escopo, o uso de identificadores não declarados, a chamada de funções com número ou tipo de argumentos incorretos, o uso indevido de vetores e a compatibilidade entre o tipo de retorno da função e o valor retornado. O Código \ref{cod:sem} mostra parte dessas verificações, incluindo a checagem dos tipos dos parâmetros em uma chamada de função e a checagem do tipo de retorno.
+
+\lstinputlisting[style=estiloC, caption={Trecho da verificação de tipos (analyze.c)}, label={cod:sem}]{codigos/analyze_check.txt}
+
+Por fim, ainda é verificado se a função \texttt{main} foi declarada, já que ela é o ponto de entrada do programa. Caso alguma dessas verificações falhe, o compilador reporta o erro correspondente junto com a linha em que ele ocorreu, e a compilação não avança para a fase de síntese.
+
+% COMPILADOR: FASE DE SÍNTESE
+\chapter{Compilador: Fase de Síntese}
+A fase de síntese é o \textit{back-end} do compilador. Ela parte da árvore sintática abstrata já validada pela fase de análise e produz o código de saída, passando por três representações cada vez mais próximas do hardware: o código intermediário, o código assembly e o código binário. Além disso, essa fase também é responsável por decidir como as variáveis e os valores temporários serão guardados na memória e nos registradores do processador.
+
+\section{Modelagem}
+Assim como na fase de análise, a fase de síntese também foi modelada em SysML antes da implementação, buscando representar a estrutura das etapas de geração de código e o comportamento de cada uma delas.
+
+\subsection{Diagrama de Blocos (SysML)}
+\begin{quote}
+\textit{Observação: o diagrama de blocos SysML referente à fase de síntese não pôde ser incluído neste relatório. Assim como os demais diagramas do compilador, ele foi perdido devido a um problema pessoal com o meu computador, não sendo possível recuperá-lo a tempo da entrega. A estrutura que esse diagrama representava está descrita ao longo deste capítulo.}
+\end{quote}
+
+\subsection{Diagramas de Atividades (SysML)}
+\begin{quote}
+\textit{Observação: os diagramas de atividades SysML referentes à fase de síntese também foram perdidos pelo mesmo motivo. O fluxo de geração do código intermediário, do assembly e do binário que esses diagramas descreviam está explicado em texto nas seções seguintes.}
+\end{quote}
+
+\section{Geração de Código Intermediário}
+O código intermediário é uma representação que fica entre a linguagem de alto nível e o código de máquina \cite{aho2008}. Ele é independente dos detalhes do processador, o que facilita tanto a geração do código quanto a sua leitura durante os testes. No projeto, essa representação foi feita por meio de quádruplas, que são instruções compostas por uma operação e três endereços.
+
+O Código \ref{cod:quad} apresenta os tipos usados na representação intermediária. A estrutura \texttt{Quad} guarda a operação e os três endereços, além de um ponteiro para a próxima quádrupla, formando uma lista encadeada. Cada endereço, representado pela estrutura \texttt{Address}, possui um campo que indica o seu tipo, que pode ser uma constante inteira, uma variável, um temporário, um rótulo ou um registrador, além do seu valor e do seu nome.
+
+\lstinputlisting[style=estiloC, caption={Tipos da representação intermediária (cintgen.h)}, label={cod:quad}]{codigos/cintgen_types.txt}
+
+As operações possíveis nas quádruplas cobrem as principais construções da linguagem. A Tabela \ref{tab:quad} organiza esses tipos de quádrupla em categorias, mostrando o papel de cada grupo na representação intermediária.
+
+\begin{table}[H]
+\centering
+\caption{Tipos de quádrupla gerados pelo compilador}
+\label{tab:quad}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Categoria} & \textbf{Operações} \\
+\hline
+Aritméticas & \texttt{add}, \texttt{sub}, \texttt{mul}, \texttt{div} (e suas variantes com imediato e registrador) \\
+\hline
+Desvios condicionais & \texttt{blt}, \texttt{ble}, \texttt{bgt}, \texttt{bge}, \texttt{beq}, \texttt{bne} \\
+\hline
+Controle de fluxo & \texttt{iff}, \texttt{jmp}, \texttt{jr}, \texttt{lab} \\
+\hline
+Funções & \texttt{fun}, \texttt{end}, \texttt{arg}, \texttt{param}, \texttt{call}, \texttt{ret} \\
+\hline
+Memória e cópia & \texttt{alloc}, \texttt{free}, \texttt{load}, \texttt{loaddi}, \texttt{store}, \texttt{storedi}, \texttt{mov}, \texttt{movi}, \texttt{movr} \\
+\hline
+Entrada e saída & \texttt{in}, \texttt{out} \\
+\hline
+Encerramento & \texttt{halt} \\
+\hline
+\end{tabular}
+\end{table}
+
+As quádruplas são criadas por meio da função \texttt{makeNewQuad}, mostrada no Código \ref{cod:makequad}. Essa função aloca uma nova quádrupla, preenche a operação e os endereços e a adiciona ao final da lista encadeada. Além disso, sempre que um dos endereços é um temporário, ela atualiza uma lista de controle que acompanha o uso dos temporários, informação que é importante depois, na alocação de registradores.
+
+\lstinputlisting[style=estiloC, caption={Criação de uma quádrupla (cintgen.c)}, label={cod:makequad}]{codigos/cintgen_makequad.txt}
+
+A geração do código intermediário é feita percorrendo a árvore sintática abstrata por meio de uma grande estrutura de decisão, na qual cada tipo de nó gera as quádruplas correspondentes. O Código \ref{cod:if} mostra o tratamento de uma estrutura de decisão \texttt{if/else}, no qual são criados os rótulos para o desvio e para o fim da estrutura, e são gerados os saltos que ligam o teste da condição, o bloco do \texttt{if} e o bloco do \texttt{else}.
+
+\lstinputlisting[style=estiloC, caption={Geração de código para o if/else (cintgen.c)}, label={cod:if}]{codigos/cintgen_if.txt}
+
+\section{Geração de Código Assembly}
+A geração de código assembly transforma as quádruplas em instruções da linguagem de montagem do processador. Nessa etapa, dois problemas principais precisam ser resolvidos: decidir em quais registradores os valores serão guardados e traduzir cada quádrupla para a instrução correta.
+
+O processador possui um número limitado de registradores de uso geral, então a alocação de registradores precisa reaproveitá-los ao longo do programa. O Código \ref{cod:alloc} mostra a função responsável por essa alocação. Ela primeiro verifica se o temporário já está em algum registrador e, caso esteja, apenas o reutiliza. Caso contrário, ela procura um registrador livre, identificado por uma soma de usos igual a zero, e o associa ao novo temporário.
+
+\lstinputlisting[style=estiloC, caption={Alocação de registradores (casm.c)}, label={cod:alloc}]{codigos/casm_alloc.txt}
+
+Outro ponto importante dessa etapa é que algumas operações da representação intermediária são genéricas e precisam ser especializadas de acordo com o tipo dos seus operandos. O Código \ref{cod:conv} mostra essa conversão para as operações aritméticas. Uma operação de soma, por exemplo, é transformada em uma instrução com imediato quando o terceiro operando é uma constante, ou em uma instrução entre registradores quando o operando é um temporário ou um registrador.
+
+\lstinputlisting[style=estiloC, caption={Especialização das operações aritméticas (casm.c)}, label={cod:conv}]{codigos/casm_conv.txt}
+
+\section{Geração de Código Executável}
+A última etapa da fase de síntese é a geração do código executável, ou seja, o código binário que o processador consegue interpretar diretamente. Cada instrução assembly é convertida em uma palavra de 32 bits, na qual os primeiros 6 bits representam o \textit{opcode}, que identifica a operação, e os bits restantes representam os operandos, de acordo com o formato da instrução.
+
+O Código \ref{cod:opcode} mostra a função que associa cada operação ao seu \textit{opcode} de 6 bits. Esses valores seguem exatamente os códigos definidos no processador desenvolvido anteriormente, garantindo que o binário gerado pelo compilador seja compatível com o hardware.
+
+\lstinputlisting[style=estiloC, caption={Opcodes das instruções (binary.c)}, label={cod:opcode}]{codigos/binary_opcode.txt}
+
+A montagem final da palavra de 32 bits leva em conta o formato de cada instrução, distribuindo os bits entre os registradores e os valores imediatos. Um cuidado especial é necessário nos desvios, cujo destino é calculado como um deslocamento relativo em relação à próxima instrução, ou seja, o rótulo de destino menos a posição do \texttt{PC} somada de um. O Código \ref{cod:bingen} mostra parte dessa montagem.
+
+\lstinputlisting[style=estiloC, caption={Montagem das instruções binárias (binary.c)}, label={cod:bingen}]{codigos/binary_gen.txt}
+
+\section{Gerenciamento de Memória}
+Como o processador tem uma quantidade pequena de registradores, boa parte das variáveis e dos parâmetros das funções precisa ser guardada na memória. Para organizar esse uso, o gerenciamento de memória foi feito com base em duas pilhas, que crescem em sentido decrescente a partir do topo da memória.
+
+A memória disponível é definida por uma constante de tamanho igual a 127. A partir desse valor, o registrador \texttt{R13} funciona como ponteiro da pilha global, onde ficam as variáveis globais, e o registrador \texttt{R12} funciona como ponteiro da pilha geral, usada durante a execução das funções para guardar variáveis locais, parâmetros e valores temporários. No início do programa, o ponteiro global é inicializado com o topo da memória, por meio da instrução \texttt{movi R13, 127}, e o ponteiro geral é inicializado com o mesmo valor, por meio da instrução \texttt{movr R12, R13}.
+
+Para alocar espaço em uma pilha, o ponteiro correspondente é decrementado com a instrução \texttt{subi}, e para liberar esse espaço, o ponteiro é incrementado de volta com a instrução \texttt{addi}. Dessa forma, cada função aloca o espaço de que precisa ao ser chamada e libera esse espaço ao retornar, o que permite inclusive o funcionamento correto da recursão, já que cada chamada trabalha com a sua própria região da pilha.
+
+% EXEMPLOS
+\chapter{Exemplos}
+Para demonstrar o funcionamento completo do compilador, esta seção apresenta três exemplos de programas escritos em C-, com complexidade crescente. Para cada exemplo, são mostrados o código-fonte, o código intermediário, o código assembly e o código binário gerados pelo compilador. No final do capítulo, são apresentadas as correspondências entre essas representações, usando o exemplo mais simples para facilitar o acompanhamento.
+
+\section{Exemplo 1: Programa Simples}
+O primeiro exemplo é um programa curto, que declara um vetor e uma variável, chama uma função que apenas devolve o seu parâmetro e usa o resultado em uma soma. Apesar de simples, ele já exercita a declaração de vetores, a chamada de função com parâmetro e o uso de variáveis locais.
+
+\lstinputlisting[style=estiloC, caption={Exemplo 1: código-fonte (simples.txt)}]{codigos/simples_src.txt}
+
+O código intermediário correspondente é mostrado a seguir. Nele, é possível observar as quádruplas de declaração das funções, de alocação das variáveis, de carga dos valores, de passagem de parâmetro, de chamada e de soma.
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 1: código intermediário}]{codigos/simples_int.txt}
+
+O código assembly gerado, já com os registradores alocados e as instruções especializadas, é apresentado a seguir.
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 1: código assembly}]{codigos/simples_asm.txt}
+
+Por fim, o código binário, com cada instrução representada por uma palavra de 32 bits, é mostrado a seguir.
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 1: código binário}]{codigos/simples_bin.txt}
+
+\section{Exemplo 2: Fatorial com Recursão}
+O segundo exemplo calcula o fatorial de um número utilizando recursão. Ele exercita a estrutura de decisão \texttt{if/else}, a chamada recursiva de uma função e o uso da entrada e da saída por meio das funções \texttt{input} e \texttt{output}.
+
+\lstinputlisting[style=estiloC, caption={Exemplo 2: código-fonte (fatorial.txt)}]{codigos/fatorial_src.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 2: código intermediário}]{codigos/fatorial_int.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 2: código assembly}]{codigos/fatorial_asm.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 2: código binário}]{codigos/fatorial_bin.txt}
+
+\section{Exemplo 3: Máximo Divisor Comum}
+O terceiro exemplo calcula o máximo divisor comum de dois números pelo algoritmo de Euclides. Ele combina recursão, estrutura de decisão e várias operações aritméticas em uma mesma expressão, sendo o exemplo mais completo dos três.
+
+\lstinputlisting[style=estiloC, caption={Exemplo 3: código-fonte (gcd.txt)}]{codigos/gcd_src.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 3: código intermediário}]{codigos/gcd_int.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 3: código assembly}]{codigos/gcd_asm.txt}
+
+\lstinputlisting[style=estiloTexto, caption={Exemplo 3: código binário}]{codigos/gcd_bin.txt}
+
+\section{Correspondência entre as Representações}
+Para tornar mais clara a relação entre as diferentes saídas do compilador, esta seção usa o primeiro exemplo para mostrar como cada trecho do programa é traduzido de uma representação para a outra.
+
+\subsection{Correspondência entre o Código-Fonte e o Código Intermediário}
+A Tabela \ref{tab:corr1} relaciona cada trecho do código-fonte do primeiro exemplo com as quádruplas geradas para ele. É possível observar como uma única linha de código de alto nível pode dar origem a várias quádruplas, especialmente quando envolve chamadas de função e operações aritméticas.
+
+\begin{table}[H]
+\centering
+\caption{Correspondência entre o código-fonte e o código intermediário (Exemplo 1)}
+\label{tab:corr1}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Código-fonte} & \textbf{Código intermediário} \\
+\hline
+\texttt{int bla(int b)} & \texttt{(fun, int, bla, -)} e \texttt{(arg, b, 1, bla)} \\
+\hline
+\texttt{return b;} & \texttt{(load, t0, b, 0)} e \texttt{(ret, t0, -, -)} \\
+\hline
+\texttt{int vet[10];} & \texttt{(alloc, vet, 10, main)} \\
+\hline
+\texttt{int y;} & \texttt{(alloc, y, 1, main)} \\
+\hline
+\texttt{y = y + bla(y);} & \texttt{(load, t1, y, 0)}, \texttt{(load, t2, y, 0)}, \texttt{(param, t2, -, -)}, \\
+ & \texttt{(call, t3, bla, 1)}, \texttt{(add, t4, t1, t3)}, \texttt{(store, y, t4, 0)} \\
+\hline
+\texttt{return;} & \texttt{(ret, -, -, -)} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Correspondência entre o Código Intermediário e o Código Assembly}
+A Tabela \ref{tab:corr2} relaciona algumas quádruplas do primeiro exemplo com as instruções assembly geradas para elas. Nessa tradução, é possível notar a alocação dos registradores e a especialização das operações, como a soma que se torna uma instrução entre registradores.
+
+\begin{table}[H]
+\centering
+\caption{Correspondência entre o código intermediário e o código assembly (Exemplo 1)}
+\label{tab:corr2}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Código intermediário} & \textbf{Código assembly} \\
+\hline
+\texttt{(alloc, y, 1, main)} & \texttt{subi R12, R12, 1} \\
+\hline
+\texttt{(load, t1, y, 0)} & \texttt{loaddi R1, R12, 1} \\
+\hline
+\texttt{(param, t2, -, -)} & \texttt{subi R12, R12, 1} e \texttt{storedi R12, R2, 1} \\
+\hline
+\texttt{(call, t3, bla, 1)} & \texttt{movi R3, L2}, \texttt{subi R12, R12, 1}, \texttt{storedi R12, R3, 1}, \texttt{jmp L0} \\
+\hline
+\texttt{(add, t4, t1, t3)} & \texttt{addr R3, R1, R2} \\
+\hline
+\end{tabular}
+\end{table}
+
+Com esses exemplos, é possível acompanhar o caminho completo percorrido por um programa, desde o código escrito em C- até as instruções em binário que serão executadas pelo processador, passando por cada uma das representações intermediárias geradas pelo compilador.
+
 % CONSIDERAÇÕES FINAIS
-\chapter{Considerações Finais}
-Primeiramente, referente ao planejamento, foi apresentada a fundamentação teórica necessária para se compreender o projeto. Ademais, no desenvolvimento, está presente a escolha da arquitetura MIPS monociclo como referência, os modos de endereçamento, o tamanho das instruções, o total de registradores, os registradores específicos, as instruções que serão implementadas, as operações que cada uma realizará, os nove formatos de instruções, bem como o caminho de dados.
+\chapter{Conclusão}
+Ao longo deste relatório, foi apresentado o desenvolvimento de um compilador para a linguagem C-, capaz de traduzir um programa de alto nível até o código binário, além do processador MIPS monociclo que serve de alvo para esse código e que foi desenvolvido anteriormente. Com isso, tornou-se possível acompanhar todo o caminho de um programa, desde a sua escrita em C- até a execução das instruções em binário no hardware, passando pela análise léxica, sintática e semântica e, em seguida, pela geração do código intermediário, do assembly e do executável.
 
-Durante essa etapa, foram encontradas algumas contradições entre a operação realizada pelas instruções storer e storei e o caminho de dados. Além disso, o salto condicional a princípio não estava considerando a posição atual do PC. Ambos os erros já foram corrigidos.
+\section{Dificuldades Encontradas}
+Durante o desenvolvimento do compilador, uma das maiores dificuldades foi a alocação de registradores, já que o processador possui uma quantidade pequena de registradores de uso geral. Foi preciso criar uma forma de reaproveitá-los ao longo do programa e de decidir quando um valor deveria ser guardado na memória para liberar espaço, o que exigiu bastante atenção para não sobrescrever um valor que ainda seria utilizado.
 
-Desse modo, essa etapa foi responsável por guiar os próximos passos com segurança e garantindo que todos os objetivos sejam contemplados.
+Ligada a essa questão, também foi trabalhosa a situação dos valores temporários que precisam sobreviver a uma chamada de função, pois eles não podem simplesmente ficar em um registrador que a função chamada pode alterar. Para tratar esse caso, foi necessário acompanhar o uso de cada temporário e proteger aqueles que atravessam uma chamada.
 
-Em sequência, para o início da implementação, foram desenvolvidos os códigos, bem como a explicação da lógica do funcionamento dos módulos: ULA, banco de registradores, integração ULA com o banco de registradores, memória principal, memória de instruções e PC.
+Outro ponto que gerou dificuldade foi o gerenciamento de memória com as duas pilhas, principalmente para garantir o funcionamento correto da recursão, na qual cada chamada precisa da sua própria região de memória. Além disso, na geração do código binário, foi preciso ter cuidado no cálculo do destino dos desvios, que é feito de forma relativa em relação à próxima instrução, e na conversão das quádruplas genéricas para o formato de instrução correto de acordo com o tipo dos operandos.
 
-Inicialmente, estava planejado executar as operações de multiplicação e divisão utilizando dois registradores especiais para armazenar o resultado, RH, para a parte alta da multiplicação e RL, para a parte baixa da multiplicação. Porém, constatou-se que isso iria fazer a utilização do processador ser consideravelmente mais complicada. Isso levou a uma mudança para permitir que a parte baixa do resultado pudesse ser escrita em qualquer registrador.
+Em relação ao processador, durante o seu desenvolvimento, foram encontradas algumas contradições entre a operação realizada pelas instruções storer e storei e o caminho de dados. Além disso, o salto condicional a princípio não estava considerando a posição atual do PC. Ambos os erros já foram corrigidos.
 
-Ainda sobre esse tópico, foi abandonada a ideia de utilizar o registrador específico RH, pois, durante o desenvolvimento da integração entre a ULA e o banco de registradores, foi observado que o tempo de compilação aumentava de cerca de 11 minutos para meia hora ao utilizar duas conexões entre a ULA e o banco de registradores. Sendo assim, o projeto passou a utilizar somente a saída padrão, SL, para essas instruções.
+Ainda sobre o processador, inicialmente estava planejado executar as operações de multiplicação e divisão utilizando dois registradores especiais para armazenar o resultado, RH, para a parte alta da multiplicação e RL, para a parte baixa da multiplicação. Porém, constatou-se que isso iria fazer a utilização do processador ser consideravelmente mais complicada. Isso levou a uma mudança para permitir que a parte baixa do resultado pudesse ser escrita em qualquer registrador. Foi também abandonada a ideia de utilizar o registrador específico RH, pois, durante o desenvolvimento da integração entre a ULA e o banco de registradores, foi observado que o tempo de compilação aumentava de cerca de 11 minutos para meia hora ao utilizar duas conexões entre a ULA e o banco de registradores. Sendo assim, o projeto passou a utilizar somente a saída padrão, SL, para essas instruções.
 
-Além disso, para receber e enviar dados para o módulo de entrada e saída, a princípio, seriam utilizados exclusivamente dois registradores especiais, RIN, para receber os dados, e ROUT para enviar. Todavia, isso também poderia dificultar a utilização do processador futuramente, então passou a ser permitido que qualquer registrador desempenhe essas funções.
+Além disso, para receber e enviar dados para o módulo de entrada e saída, a princípio, seriam utilizados exclusivamente dois registradores especiais, RIN, para receber os dados, e ROUT para enviar. Todavia, isso também poderia dificultar a utilização do processador futuramente, então passou a ser permitido que qualquer registrador desempenhe essas funções. Um outro desafio encontrado foi o caminho de dados, que originalmente havia sido desenvolvido de um modo muito ineficiente. Desse modo, foi preciso corrigi-lo, tanto para ser mais fácil de compreendê-lo quanto para ser mais simples de implementá-lo. Por fim, na etapa de testes no kit FPGA, foram encontradas grandes dificuldades para escrever corretamente os valores no display, já que o valor era escrito em um ciclo de clock e perdido no ciclo seguinte. Após muitos testes, a solução encontrada foi escrever no display somente durante a borda de descida do clock.
 
-Um outro desafio encontrado foi o caminho de dados, que originalmente havia sido desenvolvido de um modo muito ineficiente. Desse modo, foi preciso corrigi-lo, tanto para ser mais fácil de compreendê-lo quanto para ser mais simples de implementá-lo.
+\section{Destaques}
+Um dos principais destaques do projeto é o fato de o compilador funcionar de ponta a ponta, ou seja, ele recebe um programa em C- e produz, de forma automática, o código intermediário, o código assembly e o código binário correspondente. Além disso, o binário gerado utiliza exatamente os mesmos opcodes e formatos do processador desenvolvido anteriormente, o que permite que o código produzido pelo compilador seja de fato executado no hardware implementado no kit FPGA.
 
-Além do mais, foram feitos os testes dos módulos desenvolvidos utilizando a forma de onda. Todos os testes feitos têm o funcionamento de acordo com o que foi planejado durante o desenvolvimento, portanto, os códigos desenvolvidos estão funcionando corretamente.
+Outro ponto de destaque é o suporte à recursão, que pôde ser demonstrado nos exemplos do fatorial e do máximo divisor comum. Poder acompanhar um mesmo programa em todas as suas representações, desde o código-fonte até o binário, ajuda bastante a entender de maneira concreta como um compilador transforma um programa de alto nível em algo que a máquina consegue executar. Em relação ao processador, vale destacar que todos os módulos desenvolvidos foram testados e apresentaram o funcionamento de acordo com o planejado, e a integração entre eles foi feita aos poucos, sem grandes problemas.
 
-Após essa fase, foram implementados o módulo de controle e feito o início e teste da integração dos módulos. Durante essa etapa, não foram encontradas muitas dificuldades, pois, fazendo a integração aos poucos, tudo funcionou sem problemas.
+\section{Trabalhos Futuros}
+No compilador, muitas melhorias ainda poderiam ser feitas. Seria interessante aplicar otimizações ao código gerado, de modo a reduzir a quantidade de instruções produzidas, além de aprimorar a alocação de registradores e o controle dos valores temporários. Também seria possível ampliar o conjunto de construções da linguagem tratadas pelo compilador e melhorar as mensagens de erro apresentadas ao usuário.
 
-Para a última etapa, foi desenvolvido o módulo de entrada e saída, integrado todos os módulos e feitos testes no kit FPGA. Durante essa etapa, foram encontradas grandes dificuldades, especialmente para escrever corretamente os valores no display.
-
-Inicialmente foi feita uma tentativa de escrever no display durante todo o tempo da instrução out, porém não estava funcionando e o valor era escrito em um ciclo de clock e perdido no ciclo seguinte. Após muitos testes, a solução encontrada foi escrever no clock somente durante a borda de descida.
-
-Muitas melhorias poderiam ser feitas, incluindo: uma melhor organização do caminho de dados, que poderia ser mais simples e direto; ao invés de escrever em dois registradores ao mesmo tempo no banco, transformar os registradores especiais em buffers que ficariam dentro do módulo onde são usados; teste de mais instruções para garantir ainda mais solidamente o correto funcionamento.
+Já no processador, muitas melhorias poderiam ser feitas, incluindo: uma melhor organização do caminho de dados, que poderia ser mais simples e direto; ao invés de escrever em dois registradores ao mesmo tempo no banco, transformar os registradores especiais em buffers que ficariam dentro do módulo onde são usados; teste de mais instruções para garantir ainda mais solidamente o correto funcionamento.
 
 % ---
 % Finaliza a parte no bookmark do PDF

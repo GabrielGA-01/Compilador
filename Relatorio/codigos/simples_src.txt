@@ -1,0 +1,12 @@
+int bla(int b){
+    return b;
+}
+
+void main(void)
+{
+    int vet[10];
+    int y;
+    y = y + bla(y);
+    
+    return;
+}

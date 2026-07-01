@@ -1,0 +1,25 @@
+%start programa
+
+%left ADD SUB
+%left MUL DIV
+
+%nonassoc IFX
+%nonassoc ELSE
+
+%define parse.error verbose
+%locations
+
+%token ERRO
+%token ADD SUB MUL DIV
+%token LT LET GET GT EQ DIF
+%token ASSIGN SEMICOLON COMMA
+%token OPENPAR CLOSEPAR OPENCOL CLOSECOL OPENCHA CLOSECHA
+%token IF ELSE INT RETURN VOID WHILE
+
+%token <ival> NUM
+%token <sval> ID
+
+%type <node> programa declaracao_lista declaracao var_declaracao tipo_especificador fun_declaracao
+%type <node> params param_lista param composto_decl local_declaracoes statement_lista statement
+%type <node> expressao_decl selecao_decl iteracao_decl retorno_decl expressao var simples_expressao
+%type <node> relacional soma_expressao termo fator ativacao args arg_lista

@@ -1,0 +1,28 @@
+char* getOpcodeBinary(QuadOp op) {
+    switch(op) {
+        case OP_HALT:    return "000000";
+        case OP_JUMP:    return "000010";
+        case OP_ADDR:    return "000100";
+        case OP_SUBR:    return "000101";
+        case OP_MULR:    return "000110";
+        case OP_DIVR:    return "000111";
+        case OP_ADDI:    return "001011";
+        case OP_SUBI:    return "001100";
+        case OP_MULI:    return "001101";
+        case OP_DIVI:    return "001110";
+        case OP_MOVR:    return "010100";
+        case OP_LOADDI:  return "010101";
+        case OP_BEQ:     return "010111";
+        case OP_BNE:     return "011000";
+        case OP_BLT:     return "011001";
+        case OP_BGT:     return "011010";
+        case OP_STOREDI: return "011011";
+        case OP_MOVI:    return "011101";
+        case OP_IN:      return "011111";
+        case OP_OUT:     return "100001";
+        case OP_JR:      return "100010";
+        case OP_BLE:     return "100101";
+        case OP_BGE:     return "100110";
+        default:         return "000001"; // NOP
+    }
+}

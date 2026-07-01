@@ -1,0 +1,21 @@
+typedef enum {
+    NODE_VAR_DECL,   NODE_FUN_DECL,     NODE_COMPOUND_STMT,
+    NODE_IF_STMT,    NODE_WHILE_STMT,   NODE_RETURN_STMT,
+    NODE_ASSIGN_EXPR,NODE_BINARY_OP,    NODE_NUM,
+    NODE_VAR,        NODE_FUN_CALL,     NODE_ARRAY_DECL,
+    NODE_ARRAY_ACCESS, NODE_PARAM,      NODE_PARAM_LIST,
+    NODE_TYPE,       NODE_OPERATOR,     NODE_FUN_BODY
+} NodeType;
+
+typedef enum { Void, Integer, Boolean } ExpType;
+
+typedef struct ASTNode {
+    NodeType type;
+    ExpType expType;
+    struct ASTNode *leftChild;
+    struct ASTNode *rightChild;
+    struct ASTNode *next;
+    int number;
+    char* identifier;
+    int lineno;
+} ASTNode;

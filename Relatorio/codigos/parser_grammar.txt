@@ -1,0 +1,37 @@
+var_declaracao: tipo_especificador ID SEMICOLON
+              {
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+                  $$ = create_node(NODE_VAR_DECL, $1, id_node);
+                  $$->lineno = @2.first_line;
+              }
+              | tipo_especificador ID OPENCOL NUM CLOSECOL SEMICOLON
+              {
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+                  ASTNode* num_node = create_leaf_num($4);
+                  num_node->lineno = @4.first_line;
+                  ASTNode* array_decl = create_node(NODE_ARRAY_DECL, id_node, num_node);
+                  $$ = create_node(NODE_VAR_DECL, $1, array_decl);
+              }
+              | error SEMICOLON
+              { yyerrok; $$ = NULL; }
+              ;
+
+tipo_especificador: INT
+                  { $$ = create_leaf_type(INT); }
+                  | VOID
+                  { $$ = create_leaf_type(VOID); }
+                  ;
+
+fun_declaracao: tipo_especificador ID OPENPAR params CLOSEPAR composto_decl
+              {
+                  ASTNode* id_node = create_leaf_id($2);
+                  id_node->lineno = @2.first_line;
+                  ASTNode* func_node = create_node(NODE_FUN_DECL, $1, id_node);
+                  func_node->lineno = @2.first_line;
+                  ASTNode* body_node = create_node(NODE_FUN_BODY, $4, $6);
+                  func_node->next = body_node;
+                  $$ = func_node;
+              }
+              ;

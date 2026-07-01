@@ -1,0 +1,57 @@
+void generateBinary(Quad* quadHead, labelControl* labelHead) {
+    FILE* file = fopen("output/binary.txt", "w");
+    if (!file) return;
+
+    Quad* current = quadHead;
+
+    int lineNumber = 0;
+    while (current != NULL) {
+        if (current->op != OP_LABEL) {
+            char* opCode = getOpcodeBinary(current->op);
+            char *op1 = NULL, *op2 = NULL, *op3 = NULL, *immed = NULL;
+
+            // Formato 1: R R R 8
+            if (current->addr1.kind == REGISTER_KIND && 
+                current->addr2.kind == REGISTER_KIND && 
+                current->addr3.kind == REGISTER_KIND) {
+                
+                op1 = intToBinaryString(current->addr1.val, 6);
+                op2 = intToBinaryString(current->addr2.val, 6);
+                op3 = intToBinaryString(current->addr3.val, 6);
+                immed = intToBinaryString(0, 8);
+            }
+            // Formatos 2 e 3: R R I14
+            else if (current->addr1.kind == REGISTER_KIND && current->addr2.kind == REGISTER_KIND) {
+                op1 = intToBinaryString(current->addr1.val, 6);
+                op2 = intToBinaryString(current->addr2.val, 6);
+                
+                int val = 0;
+                if (current->addr3.kind == LABEL_KIND) {
+                    val = getLineByLabel(labelHead, current->addr3.name);
+                    // Regra específica para Branch: (label - (PC + 1))
+                    if (isBranch(current->op)) {
+                        val -= (lineNumber + 1);
+                    }
+                } else {
+                    val = current->addr3.val;
+                }
+                immed = intToBinaryString(val, 14);
+            }
+            // Formatos 4, 5 e 6: R I20
+            else if (current->addr1.kind == REGISTER_KIND) {
+                op1 = intToBinaryString(current->addr1.val, 6);
+                int val = (current->addr2.kind == LABEL_KIND) ? getLineByLabel(labelHead, current->addr2.name) : current->addr2.val;
+                immed = intToBinaryString(val, 20);
+            }
+            // Formato 7: I26
+            else {
+                int val = (current->addr1.kind == LABEL_KIND) ? getLineByLabel(labelHead, current->addr1.name) : current->addr1.val;
+                immed = intToBinaryString(val, 26);
+            }
+
+            fprintf(file, "%s", opCode);
+            if (op1)   fprintf(file, "%s", op1);
+            if (op2)   fprintf(file, "%s", op2);
+            if (op3)   fprintf(file, "%s", op3);
+            if (immed) fprintf(file, "%s", immed);
+            fprintf(file, "\n");

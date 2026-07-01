@@ -1,0 +1,22 @@
+    case NODE_IF_STMT:
+        // Verifica a condição
+        
+        Address label_else = generateCode(node->leftChild, scope, 1);
+        Address label_end = *createLabelAddr();
+
+        // If
+        generateCode(node->rightChild, scope, 1);
+        
+        // Fim do If
+        makeNewQuad(OP_JUMP, label_end, createEmptyAddr(), createEmptyAddr());
+
+        // Else
+        makeNewQuad(OP_LABEL, label_else, createEmptyAddr(), createEmptyAddr());
+        if(node->number == 1){
+            generateCode(node->next, scope, 1);
+        }
+
+        // Fim do else
+        makeNewQuad(OP_LABEL, label_end, createEmptyAddr(), createEmptyAddr());
+
+        break;

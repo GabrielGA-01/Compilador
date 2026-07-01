@@ -1,0 +1,54 @@
+Address* allocate_register(char* temp_name, tempControl* tempControlHead, regControl* regVector) {
+    if (temp_name == NULL || regVector == NULL) {
+        perror("Error: Invalid arguments passed to allocate_register");
+        return NULL;
+    }
+
+    // 1. Procurar se em algum dos registradores o labelName é o mesmo do temporário
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        if (regVector[i].labelName != NULL) {
+            if (strcmp(regVector[i].labelName, temp_name) == 0) {
+                // 1.1. Caso seja, reduz em 1 o valor da soma
+                regVector[i].sum -= 1;
+                
+                // Retorna o endereço do registrador encontrado
+                return &(regVector[i].reg);
+            }
+        }
+    }
+
+    // 2. Caso não tenham o labelName correspondente
+
+    // Busca o temporário no tempControl
+    tempControl* current_temp = tempControlHead;
+    int temp_sum = 1;
+    int temp_safe = 0;
+
+    while (current_temp != NULL) {
+        if (current_temp->temp.name != NULL && strcmp(current_temp->temp.name, temp_name) == 0) {
+            temp_sum = current_temp->sum;
+            temp_safe = current_temp->safe;
+            break;
+        }
+        current_temp = current_temp->next;
+    }
+
+    // 2.1. Procurar o primeiro registrador cuja soma é zero
+    for (int i = 0; i < NUMBER_OF_REGISTERS; i++) {
+        if (regVector[i].sum == 0) {
+            // Se o labelName antigo existia (está sendo substituído), limpa a memória dele
+            if (regVector[i].labelName != NULL) {
+                free(regVector[i].labelName);
+            }
+
+            // Atualiza o labelName e o safe
+            regVector[i].labelName = strdup(temp_name);
+            regVector[i].safe = temp_safe;
+
+            // Inicializa a nova soma como sum(label) - 1 (pois essa já é a primeira ocorrência do temp)
+            regVector[i].sum = temp_sum - 1;
+
+            // Retorna o endereço do registrador escolhido
+            return &(regVector[i].reg);
+        }
+    }

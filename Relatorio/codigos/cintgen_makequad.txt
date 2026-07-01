@@ -1,0 +1,23 @@
+Quad* makeNewQuad(QuadOp op, Address a1, Address a2, Address a3) {
+    Quad *q = (Quad *)malloc(sizeof(Quad));
+    q->op = op;
+    q->addr1 = a1;
+    q->addr2 = a2;
+    q->addr3 = a3;
+
+    // Adiciona na lista de controle
+    if(a1.kind == TEMP_VAR) update_or_insert(a1);
+    if(a2.kind == TEMP_VAR) update_or_insert(a2); // Provavelmente nem precisa
+    if(a3.kind == TEMP_VAR) update_or_insert(a3);
+
+    q->next = NULL;
+
+    if (head == NULL) {
+        head = tail = q;
+    } else {
+        tail->next = q;
+        tail = q;
+    }
+
+    return q;
+}

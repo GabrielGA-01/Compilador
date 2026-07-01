@@ -1,0 +1,34 @@
+void st_insert( char * name, int lineno, int loc, ExpType type, IdKind kind, int isArray, int numParams, ExpType *paramTypes )
+{ 
+  int h = hash(name);
+  BucketList l =  hashTable[h];
+  
+  initScopeStack();
+  char * currentScopeName = scopeNameStack[scopeStackTop-1];
+  
+  while ((l != NULL) && ((strcmp(name,l->name) != 0) || (strcmp(l->scopeName, currentScopeName) != 0)))
+    l = l->next;
+    
+  if (l == NULL)
+  { 
+    l = (BucketList) malloc(sizeof(struct BucketListRec));
+    l->name = name;
+    l->lines = (LineList) malloc(sizeof(struct LineListRec));
+    l->lines->lineno = lineno;
+    l->lines->next = NULL;
+    l->memloc = loc;
+    l->type = type;
+    l->kind = kind;
+    l->isArray = isArray;
+    l->numParams = numParams;
+    
+    if (paramTypes != NULL) {
+        for (int i = 0; i < numParams && i < MAX_PARAMS; i++) {
+            l->paramTypes[i] = paramTypes[i];
+        }
+    }
+    
+    l->scopeName = currentScopeName;
+    l->next = hashTable[h];
+    hashTable[h] = l; 
+  }

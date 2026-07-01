@@ -1,0 +1,12 @@
+// funcao hash simples
+static int hash ( char * key )
+{ 
+  int temp = 0;
+  int i = 0;
+  while (key[i] != '\0')
+  { 
+    temp = ((temp << SHIFT) + key[i]) % SIZE;
+    ++i;
+  }
+  return temp;
+}

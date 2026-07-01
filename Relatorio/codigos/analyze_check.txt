@@ -1,0 +1,52 @@
+    case NODE_VAR:
+      if (st_lookup(t->identifier) == -1)
+          t->expType = Integer;
+      else
+          t->expType = st_lookup_type(t->identifier);
+      break;
+      
+    case NODE_FUN_CALL:
+      if (t->leftChild != NULL && t->leftChild->type == NODE_VAR) {
+          t->expType = st_lookup_type(t->leftChild->identifier);
+          
+          int expectedParams = st_lookup_num_params(t->leftChild->identifier);
+          ASTNode *arg = t->rightChild;
+          int i = 0;
+          while (arg != NULL && i < expectedParams) {
+              ExpType expectedType = st_lookup_param_type(t->leftChild->identifier, i);
+              if (arg->expType != expectedType) {
+                  char buf[256];
+                  sprintf(buf, "Invalid parameter type in call to '%s'", t->leftChild->identifier);
+                  typeError(t, buf);
+              }
+              arg = arg->next;
+              i++;
+          }
+      }
+      break;
+      
+    case NODE_ARRAY_ACCESS:
+      t->expType = Integer;
+      break;
+      
+    case NODE_RETURN_STMT:
+      {
+          ExpType funcType = st_lookup_type(currentFuncName);
+          
+          if (funcType == Void) {
+              if (t->leftChild != NULL) {
+                  typeError(t, "Void function cannot return a value");
+              }
+          } else {
+              if (t->leftChild == NULL) {
+                  typeError(t, "Function expected to return a value");
+              } else if (t->leftChild->expType != funcType) {
+                  typeError(t, "Invalid return type");
+              }
+          }
+      }
+      break;
+      
+    default:
+      break;
+  }
