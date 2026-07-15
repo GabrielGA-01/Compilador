@@ -1,0 +1,232 @@
+module Processador_Completo (
+// Inputs
+input clock,								// Clock do processador
+input Destrava,							// Botão para destravar o PC
+input [17:0] Switches_IN,				// Valor bruto
+
+// Outputs
+output [6:0] Display_0,
+output [6:0] Display_1,
+output [6:0] Display_2,
+output [6:0] Display_3,
+output [6:0] Display_4,
+output [6:0] Display_5,
+output [6:0] Display_6,
+output [6:0] Display_7
+);
+
+// Módulo de entrada e saída
+wire TravaPC;
+wire [31:0] Switches;					// Valor já extendido   // Entradas e saídas do banco 
+wire [5:0] reg_leitura1;				// Endereço do registrador 1 
+wire [5:0] reg_leitura2;				// Endereço do registrador 2 
+wire [5:0] reg_escrita;				// Endereço de escrita 
+wire [5:0] reg_especial;				// Endereço de escrita especial 
+wire [31:0] saida1;					// Valor do primeiro registrador lido 
+wire [31:0] saida2;					// Valor do segundo registrador lido  
+
+// Imediato 
+wire [31:0] Imediato;					// Imediato  
+
+// Entradas e saídas para ULA 
+wire [31:0] SL;							// Saida padrão 
+wire SD;									// Saida para desvio  
+
+// Atualização do PC 
+wire [31:0] Velho_PC;					// PC atual 
+wire [31:0] PC;							// PC incrementado 
+wire [31:0] Novo_PC;					// Valor pelo qual o PC será atualizado 
+wire [31:0] Desvio;					// PC + imediato  
+
+// Escrita padrão 
+wire [31:0] saida_MEM;				// Saída da memória 
+wire [31:0] SE;							// Dado escrita  
+
+// Escrita especial 
+wire [31:0] RPI_Dec;					// Usado pelo pop 
+wire [31:0] SEE;						// Dado especial  
+
+// Campos da instrução 
+wire [5:0] Opcode;
+wire [25:0] Operandos;  
+
+// Sinais de controle 
+wire HLT;
+wire RegULA;								// Registrador para ULA 
+wire SinalMemoria;						// Controla escrita 
+wire [1:0] SinalMES;					// [10] = OUT, [01] = IN, [00] = default 
+wire [1:0] SinalBanco;				// [00] = sem escrita, [01] = escrita padrao, [10] = escrita especial, [11] = ambos 
+wire [1:0] SinalMuxE;					// [00] = Switches, [01] = ULA, [10] = Memoria 
+wire [1:0] SinalMuxEE;				// [00] = RAL, [01] = Push, [10] = Pop 
+wire [1:0] SinalMuxPC;				// [00] = PC, [01] = J, [10] = Desvio, [11] = JR 
+wire [2:0] SinalGEN;					// Numero do formato menos 1 
+wire [4:0] SinalULA;					// Código de operacao da ULA
+
+// Conexões com a ULA
+wire [31:0] EA;
+wire [31:0] EB;
+
+reg [24:0] Contador;
+reg clock_slow;
+
+always @(posedge clock)
+	begin
+		if(Contador < 23'd49) Contador <= Contador + 1;
+		else Contador <= 23'd0;
+		
+		if(Contador > 23'd25) clock_slow <= 1'b1;
+		else clock_slow <= 1'b0;
+	end
+
+Unidade_de_Controle(
+	.Opcode(Opcode),
+	.HLT(HLT),
+	.RegULA(RegULA),
+	.SinalMemoria(SinalMemoria),
+	.SinalMES(SinalMES),
+	.SinalBanco(SinalBanco),
+	.SinalMuxE(SinalMuxE),
+	.SinalMuxEE(SinalMuxEE),
+	.SinalMuxPC(SinalMuxPC),
+	.SinalGEN(SinalGEN),
+	.SinalULA(SinalULA)
+);
+
+// Atualização do PC
+PC(
+	.clock(clock_slow),
+	.Novo_Endereco(Novo_PC),		// Endereço novo
+	.HLT(HLT),
+	.TravaPC(TravaPC),
+	.PC(Velho_PC)						// Passa a ser o endereço "velho"
+);
+
+Memoria_Instrucoes(
+	.clock(clock_slow),
+	.PC(Velho_PC),
+	.Opcode(Opcode),
+	.Operandos(Operandos)
+);
+
+Gerenciador_de_Entrada(
+	.SinalGEN(SinalGEN),
+	.Operandos(Operandos),
+	.L1(reg_leitura1),
+	.L2(reg_leitura2),
+	.E1(reg_escrita),
+	.E2(reg_especial),
+	.Imediato(Imediato)
+);
+
+// Incrementa o PC
+Add1(
+	.entrada(Velho_PC),
+	.saida(PC)
+);
+
+// Calcula o desvio
+Adder(
+	.entrada1(PC),
+	.entrada2(Imediato),
+	.saida(Desvio)
+);
+
+// Mux do PC
+Mux_PC(
+	.SinalMuxPC(SinalMuxPC),	// Sinal de controle
+	.SD(SD),
+	.PC(PC),							// Caso vá fazer PC+1
+	.J(Imediato),					// Usa o imediato para jmp
+	.Desvio(Desvio),				// Desvio calculado com PC+1+Imediato
+	.JR(saida1),					// Primeiro registrador lido
+	.Novo_PC(Novo_PC)				// Valor para atualizar o PC
+);
+
+// Envia os dados para o banco
+Banco_de_Registradores #(.N(4)) (
+	.clock(clock_slow), 	
+	.reg_leitura1(reg_leitura1), 
+	.reg_leitura2(reg_leitura2), 
+	.reg_escrita(reg_escrita), 
+	.reg_especial(reg_especial), 
+	.dado_escrita(SE), 					// Saída do mux de escrita
+	.dado_especial(SEE), 				// Saída do mux de escrita especial
+	.SinalBanco(SinalBanco), 
+	.saida1(saida1), 
+	.saida2(saida2)
+);
+
+// Atribui os valores de entrada para ULA
+// Primeira entreada da ULA vem da saida1 do banco
+assign EA = saida1; 
+
+// Segunda entrada vem ou da saida2 ou do imediato
+Mux2(
+	.E1(saida2), 
+	.E2(Imediato), 
+	.S(EB), 
+	.Sinal(RegULA)
+);
+
+// Envia os dados para ULA
+ULA(
+	.EA(EA), 
+	.EB(EB), 
+	.SinalULA(SinalULA), 
+	.SL(SL), 
+	.SD(SD)
+);
+
+// Decrementa o endereço da pilha
+Sub1(
+	.entrada(SL),
+	.saida(RPI_Dec)
+);
+
+// Mux de escrita especial
+Mux_Escrita_Especial(
+	.SinalMuxEE(SinalMuxEE),		
+	.RAL(PC),							// Usado no JAL
+	.Push(SL),							// Operações push. RPI incrementa	
+	.Pop(RPI_Dec),						// Operações pop. RPI Decrementa
+	.SEE(SEE)
+);
+
+// Memoria principal
+Memoria_Principal(
+	.clock(clock_slow),
+	.END(SL),							// Saída da ULA - Seleciona apenas os menos significativos
+	.dado_escrita(saida2),			// Segunda leitura do banco
+	.SinalMemoria(SinalMemoria),
+	.saida(saida_MEM)
+);
+
+// Mux de escrita
+Mux_Escrita(
+	.SinalMuxE(SinalMuxE),
+	.Switches(Switches),
+	.ULA(SL),
+	.Memoria(saida_MEM),
+	.SE(SE)
+);
+
+// Módulo de entrada e saída
+Modulo_Entrada_E_Saida(
+	.clock(clock_slow),
+	.SinalMES(SinalMES),
+	.Display_IN(saida1),
+	.Switches_IN(Switches_IN),
+	.Switches_OUT(Switches),
+	.Destrava(Destrava),
+	.TravaPC(TravaPC),
+	.Display_0(Display_0),
+	.Display_1(Display_1),
+	.Display_2(Display_2),
+	.Display_3(Display_3),
+	.Display_4(Display_4),
+	.Display_5(Display_5),
+	.Display_6(Display_6),
+	.Display_7(Display_7)
+);
+
+endmodule 

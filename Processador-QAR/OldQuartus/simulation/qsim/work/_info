@@ -1,0 +1,82 @@
+m255
+K4
+z2
+!s11f vlog 2020.1 2020.02, Feb 28 2020
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 d/home/gabriel/Documents/Projects/Compiler/Processador-QAR/OldQuartus/simulation/qsim
+vhard_block
+Z1 !s110 1784145987
+!i10b 1
+!s100 Y:8aOY]3bl@8P`Z?WHc>=0
+Z2 !s11b Dg1SIo80bB@j0V0VzS_@n1
+IOEi70V:?3]SdHjY@HDXP`2
+Z3 VDg1SIo80bB@j0V0VzS_@n1
+R0
+Z4 w1784145985
+Z5 8Processador_Completo.vo
+Z6 FProcessador_Completo.vo
+!i122 8
+L0 204257 34
+Z7 OV;L;2020.1;71
+r1
+!s85 0
+31
+Z8 !s108 1784145986.000000
+Z9 !s107 Processador_Completo.vo|
+Z10 !s90 -work|work|Processador_Completo.vo|
+!i113 1
+Z11 o-work work
+Z12 tCvgOpt 0
+vProcessador_Completo
+R1
+!i10b 1
+!s100 [aoW6eeFZW_JPK:_SJW9b0
+R2
+I5SS<k<fBRVh]maD9EZZ1^1
+R3
+R0
+R4
+R5
+R6
+!i122 8
+L0 32 204224
+R7
+r1
+!s85 0
+31
+R8
+R9
+R10
+!i113 1
+R11
+R12
+n@processador_@completo
+vProcessador_Completo_vlg_vec_tst
+R1
+!i10b 1
+!s100 k_M50]ndjd]FMNYGDBeE60
+R2
+INVPBGDHVZYYoA1=kCHd>h2
+R3
+R0
+w1784145983
+8Waveform.vwf.vt
+FWaveform.vwf.vt
+!i122 9
+L0 30 111
+R7
+r1
+!s85 0
+31
+!s108 1784145987.000000
+!s107 Waveform.vwf.vt|
+!s90 -work|work|Waveform.vwf.vt|
+!i113 1
+R11
+R12
+n@processador_@completo_vlg_vec_tst
