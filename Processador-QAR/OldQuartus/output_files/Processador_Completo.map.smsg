@@ -1,1 +1,0 @@
-Warning (10268): Verilog HDL information at Banco_de_Registradores.v(20): always construct contains both blocking and non-blocking assignments File: /home/gabriel/Documents/Projects/Compiler/Processador-QAR/OldQuartus/Banco_de_Registradores.v Line: 20
