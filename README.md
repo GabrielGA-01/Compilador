@@ -1,3 +1,10 @@
+# Instale o flex, bison para o compilador (linux)
+sudo apt update
+sudo apt install flex bison 
+
+# Instale o gdb para debugar
+sudo apt install gdb
+
 # Execução
 Para executar o compilador, entre na pasta "Compilador":
 ```bash
