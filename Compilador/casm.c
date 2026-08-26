@@ -647,9 +647,9 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
     regControl *regVector = populateRegisters(NUMBER_OF_REGISTERS);
 
     // Debug
-    // printFuncLabel(funHead);
-    // printTempControl(tempControlHead);
-    // printRegControl(regVector);
+    printFuncLabel(funHead);
+    printTempControl(tempControlHead);
+    printRegControl(regVector);
 
     Address* PilhaGlobal = createRegisterAddr(REG_PILHA_GLOBAL);
     int lineNumber = 0;
@@ -1100,9 +1100,9 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
         }
     }
     // Debug
-    // printStack();
-    // printRegControl(regVector);
-    // printLabels(labelHead);
+    printStack();
+    printRegControl(regVector);
+    printLabels(labelHead);
     
     check_register_leaks(regVector);    // Todos registradores devem ter soma 0 ao final
     printf("Total number of lines of assembly code: %d\n", lineNumber - 1); // Sempre aponta para a próxima linha
