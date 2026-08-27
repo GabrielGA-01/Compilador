@@ -1,0 +1,15 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+10              resultado       Integer         Var             main              36   49   52 
+15              calcular        Integer         Func            Global             3   49 
+24              main            Void            Func            Global            32 
+27              aux             Integer         Var             main              37   46 
+77              input           Integer         Func            Global             0   40   42   44   46 
+97              opcao           Integer         Var             main              33   40   41   49 
+97              a               Integer         Var             calcular           3    9   13   17   22 
+98              b               Integer         Var             calcular           3    9   13   17   21   22 
+109             res             Integer         Var             calcular           4    6    9   13   17   22   29 
+117             output          Void            Func            Global             0   41   43   45   52 
+170             num1            Integer         Var             main              34   42   43   49 
+171             num2            Integer         Var             main              35   44   45   49 
+200             op              Integer         Var             calcular           3    8   12   16   20 

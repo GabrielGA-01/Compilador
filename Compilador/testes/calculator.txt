@@ -1,0 +1,53 @@
+/* Programa em C- (C Minus) para calculadora básica */
+
+int calcular(int op, int a, int b) {
+    int res;
+
+    res = 0;
+
+    if (op == 0) {
+        res = a + b;
+    }
+    else {
+        if (op == 1) {
+            res = a - b;
+        }
+        else {
+            if (op == 2) {
+                res = a * b;
+            }
+            else {
+                if (op == 3) {
+                    if (b != 0) {
+                        res = a / b;
+                    }
+                }
+            }
+        }
+    }
+
+    return res;
+}
+
+void main(void) {
+    int opcao;
+    int num1;
+    int num2;
+    int resultado;
+    int aux;
+
+    /* Leitura da opção e dos dois números */
+    opcao = input();
+    output(opcao);
+    num1 = input();
+    output(num1);
+    num2 = input();
+    output(num2);
+    aux = input();
+
+    /* Chamada da função atribuindo o retorno a uma variável */
+    resultado = calcular(opcao, num1, num2);
+
+    /* Exibição do resultado */
+    output(resultado);
+}

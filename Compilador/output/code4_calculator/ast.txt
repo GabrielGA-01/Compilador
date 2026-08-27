@@ -1,0 +1,125 @@
+FUN_DECL
+  TYPE: INT
+  VAR: calcular
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: op
+  PARAM
+    TYPE: INT
+    VAR: a
+  PARAM
+    TYPE: INT
+    VAR: b
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: res
+    ASSIGN_EXPR
+      VAR: res
+      NUM: 0
+    IF_STMT
+      OP: EQ
+        VAR: op
+        NUM: 0
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: res
+          BINARY_OP: ADD
+            VAR: a
+            VAR: b
+    COMPOUND_STMT
+      IF_STMT
+        OP: EQ
+          VAR: op
+          NUM: 1
+        COMPOUND_STMT
+          ASSIGN_EXPR
+            VAR: res
+            BINARY_OP: SUB
+              VAR: a
+              VAR: b
+      COMPOUND_STMT
+        IF_STMT
+          OP: EQ
+            VAR: op
+            NUM: 2
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: res
+              BINARY_OP: MUL
+                VAR: a
+                VAR: b
+        COMPOUND_STMT
+          IF_STMT
+            OP: EQ
+              VAR: op
+              NUM: 3
+            COMPOUND_STMT
+              IF_STMT
+                OP: DIF
+                  VAR: b
+                  NUM: 0
+                COMPOUND_STMT
+                  ASSIGN_EXPR
+                    VAR: res
+                    BINARY_OP: DIV
+                      VAR: a
+                      VAR: b
+    RETURN_STMT
+      VAR: res
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: opcao
+    VAR_DECL
+      TYPE: INT
+      VAR: num1
+    VAR_DECL
+      TYPE: INT
+      VAR: num2
+    VAR_DECL
+      TYPE: INT
+      VAR: resultado
+    VAR_DECL
+      TYPE: INT
+      VAR: aux
+    ASSIGN_EXPR
+      VAR: opcao
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: opcao
+    ASSIGN_EXPR
+      VAR: num1
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: num1
+    ASSIGN_EXPR
+      VAR: num2
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: num2
+    ASSIGN_EXPR
+      VAR: aux
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: resultado
+      FUN_CALL: calcular
+        VAR: calcular
+        VAR: opcao
+        VAR: num1
+        VAR: num2
+    FUN_CALL: output
+      VAR: output
+      VAR: resultado
