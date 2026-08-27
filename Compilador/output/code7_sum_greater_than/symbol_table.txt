@@ -1,0 +1,25 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+19              somarMaiores    Integer         Func            Global             8   76 
+24              main            Void            Func            Global            53 
+30              valorAtual      Integer         Var             contarMenoresOuIguais   34   40   43 
+30              valorAtual      Integer         Var             somarMaiores      11   17   20   21 
+42              limite          Integer         Var             main              55   63   64   76   77 
+42              limite          Integer         Var             contarMenoresOuIguais   31   43 
+42              limite          Integer         Var             somarMaiores       8   20 
+62              vec             Integer         Var             contarMenoresOuIguais   31   40 
+62              vec             Integer         Var             somarMaiores       8   17 
+77              input           Integer         Func            Global             0   63   69   73   83 
+78              qtd             Integer         Var             contarMenoresOuIguais   33   36   44   44   50 
+105             i               Integer         Var             main              57   67   68   69   70   71   71 
+105             i               Integer         Var             contarMenoresOuIguais   32   37   39   40   47   47 
+105             i               Integer         Var             somarMaiores       9   14   16   17   24   24 
+117             output          Void            Func            Global             0   64   70   80   86 
+143             leitorAuxiliar  Integer         Var             main              60   73   83 
+162             somaMaiores     Integer         Var             main              58   76   80 
+171             numeros         Integer         Var             main              56   69   70   76   77 
+172             soma            Integer         Var             somarMaiores      10   13   21   21   27 
+190             tamanho         Integer         Var             contarMenoresOuIguais   31   39 
+190             tamanho         Integer         Var             somarMaiores       8   16 
+191             qtdMenoresIguais Integer         Var             main              59   77   86 
+206             contarMenoresOuIguais Integer         Func            Global            31   77 

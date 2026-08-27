@@ -1,0 +1,58 @@
+/* 
+ * Program in C- (C Minus)
+ * Objective: Read a target value first, then read 10 numbers into an array.
+ * Uses a function to count occurrences of the target in the array.
+ */
+
+/* Function to count occurrences of 'target' inside the array 'vec' */
+int contarOcorrencias(int vec[], int tamanho, int target) {
+    /* Variables declared at the beginning of the function */
+    int i;
+    int contador;
+    int elementoAtual;
+
+    contador = 0;
+    i = 0;
+
+    while (i < tamanho) {
+        elementoAtual = vec[i];
+
+        if (elementoAtual == target) {
+            contador = contador + 1;
+        }
+
+        i = i + 1;
+    }
+
+    return contador;
+}
+
+void main(void) {
+    /* Variables declared at the beginning of main */
+    int valorBusca;
+    int numeros[10];
+    int i;
+    int totalEncontrado;
+    int leitorAuxiliar;
+
+    /* 1. Read the target value first and print it */
+    valorBusca = input();
+    output(valorBusca);
+
+    /* 2. Read, print, and store the 10 numbers in the array */
+    i = 0;
+    while (i < 10) {
+        numeros[i] = input();
+        output(numeros[i]);
+        i = i + 1;
+    }
+
+    /* Auxiliary read step after vector reading */
+    leitorAuxiliar = input();
+
+    /* 3. Call the function and assign return value to a variable */
+    totalEncontrado = contarOcorrencias(numeros, 10, valorBusca);
+
+    /* 4. Output the final count */
+    output(totalEncontrado);
+}

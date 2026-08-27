@@ -1,0 +1,87 @@
+/* 
+ * Programa em C- (C Minus)
+ * Objetivo: Ler um limite, preencher um vetor com 10 números, 
+ * calcular estatísticas com funções e realizar uma leitura auxiliar entre as saídas.
+ */
+
+/* Função para somar valores acima do limite */
+int somarMaiores(int vec[], int tamanho, int limite) {
+    int i;
+    int soma;
+    int valorAtual;
+
+    soma = 0;
+    i = 0;
+
+    while (i < tamanho) {
+        valorAtual = vec[i];
+
+        /* 'If' para selecionar valores estritamente maiores que o limite */
+        if (valorAtual > limite) {
+            soma = soma + valorAtual;
+        }
+
+        i = i + 1;
+    }
+
+    return soma;
+}
+
+/* Função para contar valores menores ou iguais ao limite */
+int contarMenoresOuIguais(int vec[], int tamanho, int limite) {
+    int i;
+    int qtd;
+    int valorAtual;
+
+    qtd = 0;
+    i = 0;
+
+    while (i < tamanho) {
+        valorAtual = vec[i];
+
+        /* 'If' para selecionar valores <= limite */
+        if (valorAtual <= limite) {
+            qtd = qtd + 1;
+        }
+
+        i = i + 1;
+    }
+
+    return qtd;
+}
+
+void main(void) {
+    /* Variáveis declaradas no início da função main */
+    int limite;
+    int numeros[10];
+    int i;
+    int somaMaiores;
+    int qtdMenoresIguais;
+    int leitorAuxiliar;
+
+    /* 1. Lê o valor limite primeiro e exibe */
+    limite = input();
+    output(limite);
+
+    /* 2. Lê, exibe e armazena os 10 números no vetor */
+    i = 0;
+    while (i < 10) {
+        numeros[i] = input();
+        output(numeros[i]);
+        i = i + 1;
+    }
+    leitorAuxiliar = input();
+
+    /* 3. Chamada das funções atribuindo os retornos a variáveis */
+    somaMaiores = somarMaiores(numeros, 10, limite);
+    qtdMenoresIguais = contarMenoresOuIguais(numeros, 10, limite);
+
+    /* 4. Exibe a soma dos elementos maiores que o limite */
+    output(somaMaiores);
+
+    /* 5. Leitura utilizando a variável leitorAuxiliar logo após a saída de somaMaiores */
+    leitorAuxiliar = input();
+
+    /* 6. Exibe a quantidade de elementos menores ou iguais ao limite */
+    output(qtdMenoresIguais);
+}

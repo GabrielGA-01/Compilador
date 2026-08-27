@@ -1,0 +1,17 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+24              main            Void            Func            Global            30 
+62              vec             Integer         Var             contarOcorrencias    8   18 
+77              input           Integer         Func            Global             0   39   45   51 
+90              target          Integer         Var             contarOcorrencias    8   20 
+102             elementoAtual   Integer         Var             contarOcorrencias   12   18   20 
+105             i               Integer         Var             main              34   43   44   45   46   47   47 
+105             i               Integer         Var             contarOcorrencias   10   15   17   18   24   24 
+117             output          Void            Func            Global             0   40   46   57 
+137             contador        Integer         Var             contarOcorrencias   11   14   21   21   27 
+143             leitorAuxiliar  Integer         Var             main              36   51 
+168             contarOcorrencias Integer         Func            Global             8   54 
+171             numeros         Integer         Var             main              33   45   46   54 
+174             valorBusca      Integer         Var             main              32   39   40   54 
+178             totalEncontrado Integer         Var             main              35   54   57 
+190             tamanho         Integer         Var             contarOcorrencias    8   17 

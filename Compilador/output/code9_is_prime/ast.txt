@@ -1,0 +1,108 @@
+FUN_DECL
+  TYPE: INT
+  VAR: ehPrimo
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: n
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: resultado
+    VAR_DECL
+      TYPE: INT
+      VAR: quociente
+    VAR_DECL
+      TYPE: INT
+      VAR: produto
+    VAR_DECL
+      TYPE: INT
+      VAR: resto
+    ASSIGN_EXPR
+      VAR: resultado
+      NUM: 1
+    IF_STMT
+      OP: LET
+        VAR: n
+        NUM: 1
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: resultado
+          NUM: 0
+    COMPOUND_STMT
+      ASSIGN_EXPR
+        VAR: i
+        NUM: 2
+      WHILE_STMT
+        OP: LET
+          BINARY_OP: MUL
+            VAR: i
+            VAR: i
+          VAR: n
+        COMPOUND_STMT
+          ASSIGN_EXPR
+            VAR: quociente
+            BINARY_OP: DIV
+              VAR: n
+              VAR: i
+          ASSIGN_EXPR
+            VAR: produto
+            BINARY_OP: MUL
+              VAR: quociente
+              VAR: i
+          ASSIGN_EXPR
+            VAR: resto
+            BINARY_OP: SUB
+              VAR: n
+              VAR: produto
+          IF_STMT
+            OP: EQ
+              VAR: resto
+              NUM: 0
+            COMPOUND_STMT
+              ASSIGN_EXPR
+                VAR: resultado
+                NUM: 0
+          ASSIGN_EXPR
+            VAR: i
+            BINARY_OP: ADD
+              VAR: i
+              NUM: 1
+    RETURN_STMT
+      VAR: resultado
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: numero
+    VAR_DECL
+      TYPE: INT
+      VAR: statusPrimo
+    VAR_DECL
+      TYPE: INT
+      VAR: leitorAuxiliar
+    ASSIGN_EXPR
+      VAR: numero
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: numero
+    ASSIGN_EXPR
+      VAR: leitorAuxiliar
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: statusPrimo
+      FUN_CALL: ehPrimo
+        VAR: ehPrimo
+        VAR: numero
+    FUN_CALL: output
+      VAR: output
+      VAR: statusPrimo

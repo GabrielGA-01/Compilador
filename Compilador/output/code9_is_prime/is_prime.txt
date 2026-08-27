@@ -1,0 +1,60 @@
+/* 
+ * Program in C- (C Minus)
+ * Objective: Read a number N and check if it is prime using trial division.
+ * Output: 1 if Prime, 0 if Not Prime.
+ */
+
+/* Function to check if a number is prime */
+int ehPrimo(int n) {
+    int i;
+    int resultado;
+    int quociente;
+    int produto;
+    int resto;
+
+    resultado = 1;
+
+    /* Numbers less than or equal to 1 are not prime */
+    if (n <= 1) {
+        resultado = 0;
+    }
+    else {
+        i = 2;
+        /* Check divisibility up to i * i <= n */
+        while ((i * i) <= n) {
+            /* Compute remainder without % operator: resto = n - ((n / i) * i) */
+            quociente = n / i;
+            produto = quociente * i;
+            resto = n - produto;
+
+            /* If remainder is 0, n is divisible by i */
+            if (resto == 0) {
+                resultado = 0;
+            }
+
+            i = i + 1;
+        }
+    }
+
+    return resultado;
+}
+
+void main(void) {
+    /* Variables declared strictly at the beginning of main */
+    int numero;
+    int statusPrimo;
+    int leitorAuxiliar;
+
+    /* 1. Read input number N and echo it */
+    numero = input();
+    output(numero);
+
+    /* 2. Auxiliary read at the end */
+    leitorAuxiliar = input();
+
+    /* 3. Call function and store return value in a variable */
+    statusPrimo = ehPrimo(numero);
+
+    /* 4. Output the result (1 = Prime, 0 = Not Prime) */
+    output(statusPrimo);
+}

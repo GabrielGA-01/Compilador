@@ -1,0 +1,15 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+10              resultado       Integer         Var             ehPrimo           10   15   19   32   39 
+24              main            Void            Func            Global            42 
+30              statusPrimo     Integer         Var             main              45   56   59 
+77              input           Integer         Func            Global             0   49   53 
+105             i               Integer         Var             ehPrimo            9   22   24   24   26   27   35   35 
+109             numero          Integer         Var             main              44   49   50   56 
+110             n               Integer         Var             ehPrimo            8   18   24   26   28 
+114             quociente       Integer         Var             ehPrimo           11   26   27 
+117             output          Void            Func            Global             0   50   59 
+120             resto           Integer         Var             ehPrimo           13   28   31 
+142             produto         Integer         Var             ehPrimo           12   27   28 
+143             leitorAuxiliar  Integer         Var             main              46   53 
+149             ehPrimo         Integer         Func            Global             8   56 
