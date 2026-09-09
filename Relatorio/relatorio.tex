@@ -173,12 +173,12 @@
 
 
 % Informações de dados para CAPA e FOLHA DE ROSTO
-\titulo{Implementação do Compilador C-}
+\titulo{Implementação de um sistema operacional simplificado}
 \autor{Gabriel Garcia Almeida\\168857}
 \local{São José dos Campos - Brasil}
-\data{Junho de 2026}
+\data{Setembro de 2026}
 \instituicao{
-  Docente: Prof. Dr. Luiz Eduardo Galvao Martins
+  Docente: Prof. Dr. Tiago de Oliveira
   \par
   Universidade Federal de São Paulo - UNIFESP
   \par
@@ -187,7 +187,7 @@
 \tipotrabalho{Relatório técnico}
 \preambulo{Relatório apresentado à Universidade Federal de São Paulo como parte
 dos requisitos para aprovação na disciplina de Laboratório de Sistemas
-Computacionais: Compiladores.}
+Computacionais: Sistemas Operacionais.}
 % ---
 
 % Configurações de aparência do PDF final
@@ -261,12 +261,10 @@ Computacionais: Compiladores.}
 \setlength{\absparsep}{18pt} % ajusta o espaçamento dos parágrafos do resumo
 \begin{resumo}
  
-Esse documento tem o propósito de apresentar como ocorreu o desenvolvimento de um compilador escrito em linguagem C para transformar um código da linguagem C- para código intermediário, assembly e binário. 
-Para a validação do compilador, o código binário gerado foi enviado para um processador MIPS simulado utilizando o kit FPGA. 
-Será apresentada a organização do projeto, bem como as estrutura de dados utilizadas em cada uma das etapas.
+Esse documento tem o propósito de apresentar o planejamento e a implementação de um sistema operacional simplificado utilizando aspectos de software e de hardware. Para a compilação do código foi utilizado um compilador escrito na linguagem C, que traduz o código-fonte escrito em C- para código intermediário, assembly e código binário. O código binário gerado é enviado para um processador MIPS monociclo, escrito em Verilog e implementado em kit FPGA. O sistema operacional desenvolvido gerencia a execução de dez programas desenvolvidos, podendo ser executados de maneira sequencial ou concorrente.
 
 \noindent
-\textbf{Palavras-chave}: compilador, processador MIPS, kit FPGA.
+\textbf{Palavras-chave}: sistema operacional, compilador, processador MIPS, kit FPGA.
 \end{resumo}
 
 % LISTAS
@@ -291,18 +289,17 @@ Será apresentada a organização do projeto, bem como as estrutura de dados uti
 
 % INTRODUÇÃO
 \chapter{Introdução}
-Atualmente, quase todo programa é escrito em uma linguagem de alto nível, mais próxima do raciocínio humano do que da máquina. Todavia, um processador não entende essas linguagens: ele lida exclusivamente com valores binários, que representam as instruções e os dados que ele consegue executar. Existe, portanto, uma distância entre a forma como o programador escreve o código e a forma como o hardware o executa, e é justamente essa distância que um compilador precisa preencher.
+Conforme o tempo passa, mais a tecnologia utilizadas nos computadores aumenta e cada vez mais os usuários desejam executar atividades de maneira concorrente: utilizar um determinado programa, enquanto deixa um navegador em aberto e uma música tocando. Para que isso seja possível, é necessário que o computador possua uma maneira de lidar com vários programas sendo executados de forma concorrente, de modo que a execução pareça ser simultânea para o usuário.
 
-Um compilador é um software responsável por converter o código-fonte escrito em uma linguagem de alto nível para o código de máquina de um processador específico. Ele faz essa tradução de maneira automática, sistemática e confiável, verificando ao longo do caminho se o programa está bem escrito e reportando os erros encontrados. Compreender como esse processo funciona é uma parte fundamental da formação de um engenheiro da computação, que deve ser capaz de entender como o código-fonte é transformado em código de máquina e, mais do que isso, de desenvolver um compilador por conta própria.
+Além disso, da perspectiva de um programador, é essencial que haja uma maneira de se preocupar apenas com os detalhes de alto nível da aplicação, sem se preocupar em como exatamente cada um dos recursos é utilizado pela máquina. Isso permite que o programador se concentre em desenvolver a aplicação, sem se preocupar com os detalhes de implementação do hardware.
 
-O funcionamento de um compilador é organizado em etapas, que costumam ser agrupadas em duas grandes fases. A fase de análise, também chamada de front-end, é responsável por ler o código-fonte, entender a sua estrutura e verificar a sua consistência, sendo composta pela análise léxica, sintática e semântica. Já a fase de síntese, ou back-end, parte dessa representação já validada e produz o código de saída, passando pelo código intermediário, pelo código assembly e pelo código binário.
+De modo a lidar com essas necessidades, surgiu o conceito de sistema operacional, que é um software responsável por gerenciar os recursos de hardware e software do computador, que, dentre outras coisas, permite com que vários programas sejam executados de maneira concorrente e que o programador possa se concentrar em desenvolver a aplicação sem se preocupar com os detalhes de implementação do hardware.
 
-Desse modo, esse relatório busca apresentar o desenvolvimento de um compilador escrito na linguagem C, que tem como objetivo traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. A linguagem C- é um subconjunto da linguagem C, com tipos inteiros e vazios, vetores, funções, estruturas de decisão, laços de repetição e recursão, o que a torna simples o suficiente para ser tratada em um projeto de disciplina e, ao mesmo tempo, rica o bastante para exercitar todas as etapas de um compilador.
+Entender o funcionamento de um sistema operacional é uma parte fundamental para a formação de um engenheiro da computação, que deve ser capaz de compreender como o sistema operacional gerencia os recursos do computador e, mais do que isso, de desenvolver um sistema operacional simplificado por conta própria. 
 
-Além do mais, para validar o funcionamento do compilador, o código binário gerado é enviado para um processador MIPS monociclo, escrito em Verilog e implementado no kit FPGA, que foi desenvolvido anteriormente durante a disciplina de Laboratório de Sistemas Computacionais: Arquitetura e Organização de Computadores. Por esse motivo, o processador também é retomado ao longo deste relatório, servindo como o alvo do compilador e permitindo acompanhar de maneira completa o fluxo de ações desde a escrita do código C- até a execução das instruções em binário no hardware.
+Além do mais, para validar o funcionamento do sistema operacional desenvolvido, serão utitlizadas ferramentas de projetos anteriores: um processador MIPS escrito em Verilog eimplementado em FPGA e um compilador da linguagem C- para esse processador em questão.
 
-Quanto à organização do texto, inicialmente são apresentados os objetivos do projeto. Em seguida, é retomado o processador que serve de alvo para o compilador, com a sua fundamentação teórica, o seu desenvolvimento e os resultados obtidos. Depois disso, entra o foco principal deste trabalho: a fase de análise e a fase de síntese do compilador, cada uma detalhando as suas etapas, as estruturas de dados utilizadas e trechos do código desenvolvido. Por fim, são apresentados exemplos completos de compilação, desde o código-fonte até o binário, seguidos da conclusão do projeto.
-
+Quanto à organização do texto, inicialmente são apresentados os objetivos do projeto. Em seguida, é retomado o processador que serve de alvo para o compilador, com a sua fundamentação teórica, o seu desenvolvimento e os resultados obtidos. Após isso será apresentado o compilador desenvolvido anteriormente, a fase de análise e a fase de síntese do compilador e exemplos de códigos compilados. Em sequência é apresentado.
 
 % OBJETIVOS
 \chapter[Objetivos]{Objetivos}
