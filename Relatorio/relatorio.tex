@@ -2536,32 +2536,34 @@ endmodule
 % ----------------------------------------------------------------------
 
 % COMPILADOR: FASE DE ANÁLISE
-\chapter{Compilador: Fase de Análise}
+\chapter{Desenvolvimento do Compilador}
+
+\section{Fase de Análise}
 A fase de análise é o \textit{front-end} do compilador, ou seja, a parte responsável por ler o código-fonte em C-, entender a sua estrutura e verificar se ele está bem escrito. Ao final dessa fase, o programa deixa de ser um simples texto e passa a ser representado internamente por uma árvore sintática abstrata já validada, que serve de base para a fase de síntese. Essa fase é dividida em três etapas: a análise léxica, a análise sintática e a análise semântica \cite{louden2004}.
 
 No projeto, a análise léxica foi construída com o auxílio da ferramenta Flex \cite{flex_manual}, que gera o analisador léxico a partir de um conjunto de expressões regulares, enquanto a análise sintática foi construída com o Bison \cite{bison_manual}, que gera um analisador sintático do tipo LALR a partir da gramática da linguagem. À medida que o analisador sintático reconhece a estrutura do programa, ele vai construindo a árvore sintática abstrata, que depois é percorrida pela análise semântica para montar a tabela de símbolos e verificar os tipos.
 
-\section{Modelagem}
+\subsection{Modelagem}
 Antes da implementação, foi feita a modelagem da fase de análise utilizando a linguagem SysML, com o objetivo de organizar as ideias e representar tanto a estrutura quanto o comportamento dessa etapa do compilador.
 
-\subsection{Diagrama de Blocos (SysML)}
+\subsubsection{Diagrama de Blocos (SysML)}
 \begin{quote}
 \textit{Observação: o diagrama de blocos SysML referente à fase de análise não pôde ser incluído neste relatório. Devido a um problema pessoal com o meu computador, acabei perdendo os arquivos originais dos diagramas do compilador, não sendo possível recuperá-los a tempo da entrega. O conteúdo que esse diagrama representava está descrito ao longo das seções seguintes deste capítulo.}
 \end{quote}
 
-\subsection{Diagramas de Atividades (SysML)}
+\subsubsection{Diagramas de Atividades (SysML)}
 \begin{quote}
 \textit{Observação: os diagramas de atividades SysML referentes à fase de análise também foram perdidos junto com os demais arquivos, pelo mesmo problema pessoal com o computador. O comportamento que esses diagramas descreviam, ou seja, o fluxo de reconhecimento dos tokens, a construção da árvore e as verificações semânticas, está explicado em texto nas seções a seguir.}
 \end{quote}
 
-\subsection{Outros: a Árvore Sintática Abstrata}
+\subsubsection{Outros: a Árvore Sintática Abstrata}
 Além dos diagramas, uma estrutura central da fase de análise é a árvore sintática abstrata (AST). Ela representa o programa em forma de árvore, na qual cada nó corresponde a uma construção da linguagem, como uma declaração, uma expressão ou um comando. A definição do nó da árvore é apresentada no Código \ref{cod:ast}, onde é possível observar o tipo do nó, o tipo da expressão, os ponteiros para os filhos e para o próximo nó da lista, além dos campos usados para guardar números e identificadores.
 
 \lstinputlisting[style=estiloC, caption={Definição do nó da árvore sintática abstrata (ast.h)}, label={cod:ast}]{codigos/ast_node.txt}
 
 A escolha de usar um único tipo de nó com campos genéricos, ao invés de um tipo diferente para cada construção, deixa a árvore mais simples de percorrer, já que a fase de síntese pode tratar todos os nós de maneira uniforme, olhando apenas para o campo que indica o tipo do nó.
 
-\section{Análise Léxica}
+\subsection{Análise Léxica}
 A análise léxica é a primeira etapa do compilador. Ela recebe o código-fonte como uma sequência de caracteres e agrupa esses caracteres em unidades com significado, chamadas de tokens, como palavras reservadas, identificadores, números e operadores. Ao mesmo tempo, ela descarta espaços em branco e comentários, e reporta os caracteres que não pertencem à linguagem.
 
 O analisador léxico foi descrito no arquivo \texttt{scanner.l} utilizando o Flex. Cada regra associa uma expressão regular a uma ação, que normalmente devolve o token correspondente para o analisador sintático. O Código \ref{cod:scanner} mostra um trecho dessas regras, incluindo o tratamento das palavras reservadas, dos operadores, dos números, dos identificadores e dos comentários no formato \texttt{/* */}.
@@ -2570,7 +2572,7 @@ O analisador léxico foi descrito no arquivo \texttt{scanner.l} utilizando o Fle
 
 Para os números, a ação converte o texto reconhecido em um valor inteiro com a função \texttt{atoi}, e para os identificadores é feita uma cópia do nome com \texttt{strdup}, de modo que esse nome possa ser usado depois na tabela de símbolos. Além disso, a cada token reconhecido, a linha atual é guardada por meio da macro \texttt{YY\_USER\_ACTION}, o que permite que os erros sejam reportados junto com o número da linha onde ocorreram. Quando o analisador encontra um caractere que não faz parte da linguagem, ele emite uma mensagem de erro léxico.
 
-\section{Análise Sintática}
+\subsection{Análise Sintática}
 A análise sintática recebe a sequência de tokens produzida pela análise léxica e verifica se ela respeita a gramática da linguagem C-. Se a estrutura estiver correta, o analisador constrói a árvore sintática abstrata que representa o programa. Se não estiver, ele reporta um erro sintático.
 
 Esse analisador foi descrito no arquivo \texttt{parser.y} com o Bison, que gera um analisador do tipo LALR. Um ponto importante na definição da gramática é a declaração de precedência e associatividade dos operadores, mostrada no Código \ref{cod:prec}. Nela, os operadores de soma e subtração recebem uma precedência menor do que os de multiplicação e divisão, o que garante que uma expressão como \texttt{a + b * c} seja interpretada da maneira esperada.
@@ -2583,7 +2585,7 @@ Ainda sobre a precedência, foi utilizado o recurso de precedência para resolve
 
 Também foi adicionada uma forma simples de recuperação de erros, por meio de regras que usam o símbolo especial \texttt{error} seguido de \texttt{yyerrok}. Com isso, ao encontrar um erro em um comando, o analisador consegue descartar o trecho problemático e continuar a análise a partir do próximo ponto-e-vírgula, ao invés de parar na primeira falha.
 
-\section{Análise Semântica}
+\subsection{Análise Semântica}
 A análise semântica é a etapa que verifica o significado do programa, indo além da sua estrutura. Nesse ponto, o compilador já sabe que o programa está bem formado do ponto de vista sintático, mas ainda precisa checar se ele faz sentido, como, por exemplo, se as variáveis foram declaradas antes de serem usadas, se as funções são chamadas com o número certo de argumentos e se os tipos são compatíveis.
 
 Para isso, foi construída uma tabela de símbolos, responsável por guardar as informações de cada identificador do programa, como o seu tipo, a sua categoria, o escopo ao qual pertence e as linhas em que aparece. Essa tabela foi implementada como uma tabela \textit{hash}, cuja função de espalhamento é apresentada no Código \ref{cod:hash}.
@@ -2601,23 +2603,23 @@ A verificação semântica é feita percorrendo a árvore sintática abstrata em
 Por fim, ainda é verificado se a função \texttt{main} foi declarada, já que ela é o ponto de entrada do programa. Caso alguma dessas verificações falhe, o compilador reporta o erro correspondente junto com a linha em que ele ocorreu, e a compilação não avança para a fase de síntese.
 
 % COMPILADOR: FASE DE SÍNTESE
-\chapter{Compilador: Fase de Síntese}
+\section{Fase de Síntese}
 A fase de síntese é o \textit{back-end} do compilador. Ela parte da árvore sintática abstrata já validada pela fase de análise e produz o código de saída, passando por três representações cada vez mais próximas do hardware: o código intermediário, o código assembly e o código binário. Além disso, essa fase também é responsável por decidir como as variáveis e os valores temporários serão guardados na memória e nos registradores do processador.
 
-\section{Modelagem}
+\subsection{Modelagem}
 Assim como na fase de análise, a fase de síntese também foi modelada em SysML antes da implementação, buscando representar a estrutura das etapas de geração de código e o comportamento de cada uma delas.
 
-\subsection{Diagrama de Blocos (SysML)}
+\subsubsection{Diagrama de Blocos (SysML)}
 \begin{quote}
 \textit{Observação: o diagrama de blocos SysML referente à fase de síntese não pôde ser incluído neste relatório. Assim como os demais diagramas do compilador, ele foi perdido devido a um problema pessoal com o meu computador, não sendo possível recuperá-lo a tempo da entrega. A estrutura que esse diagrama representava está descrita ao longo deste capítulo.}
 \end{quote}
 
-\subsection{Diagramas de Atividades (SysML)}
+\subsubsection{Diagramas de Atividades (SysML)}
 \begin{quote}
 \textit{Observação: os diagramas de atividades SysML referentes à fase de síntese também foram perdidos pelo mesmo motivo. O fluxo de geração do código intermediário, do assembly e do binário que esses diagramas descreviam está explicado em texto nas seções seguintes.}
 \end{quote}
 
-\section{Geração de Código Intermediário}
+\subsection{Geração de Código Intermediário}
 O código intermediário é uma representação que fica entre a linguagem de alto nível e o código de máquina \cite{aho2008}. Ele é independente dos detalhes do processador, o que facilita tanto a geração do código quanto a sua leitura durante os testes. No projeto, essa representação foi feita por meio de quádruplas, que são instruções compostas por uma operação e três endereços.
 
 O Código \ref{cod:quad} apresenta os tipos usados na representação intermediária. A estrutura \texttt{Quad} guarda a operação e os três endereços, além de um ponteiro para a próxima quádrupla, formando uma lista encadeada. Cada endereço, representado pela estrutura \texttt{Address}, possui um campo que indica o seu tipo, que pode ser uma constante inteira, uma variável, um temporário, um rótulo ou um registrador, além do seu valor e do seu nome.
@@ -2659,7 +2661,7 @@ A geração do código intermediário é feita percorrendo a árvore sintática 
 
 \lstinputlisting[style=estiloC, caption={Geração de código para o if/else (cintgen.c)}, label={cod:if}]{codigos/cintgen_if.txt}
 
-\section{Geração de Código Assembly}
+\subsection{Geração de Código Assembly}
 A geração de código assembly transforma as quádruplas em instruções da linguagem de montagem do processador. Nessa etapa, dois problemas principais precisam ser resolvidos: decidir em quais registradores os valores serão guardados e traduzir cada quádrupla para a instrução correta.
 
 O processador possui um número limitado de registradores de uso geral, então a alocação de registradores precisa reaproveitá-los ao longo do programa. O Código \ref{cod:alloc} mostra a função responsável por essa alocação. Ela primeiro verifica se o temporário já está em algum registrador e, caso esteja, apenas o reutiliza. Caso contrário, ela procura um registrador livre, identificado por uma soma de usos igual a zero, e o associa ao novo temporário.
@@ -2670,7 +2672,7 @@ Outro ponto importante dessa etapa é que algumas operações da representação
 
 \lstinputlisting[style=estiloC, caption={Especialização das operações aritméticas (casm.c)}, label={cod:conv}]{codigos/casm_conv.txt}
 
-\section{Geração de Código Executável}
+\subsection{Geração de Código Executável}
 A última etapa da fase de síntese é a geração do código executável, ou seja, o código binário que o processador consegue interpretar diretamente. Cada instrução assembly é convertida em uma palavra de 32 bits, na qual os primeiros 6 bits representam o \textit{opcode}, que identifica a operação, e os bits restantes representam os operandos, de acordo com o formato da instrução.
 
 O Código \ref{cod:opcode} mostra a função que associa cada operação ao seu \textit{opcode} de 6 bits. Esses valores seguem exatamente os códigos definidos no processador desenvolvido anteriormente, garantindo que o binário gerado pelo compilador seja compatível com o hardware.
@@ -2681,7 +2683,7 @@ A montagem final da palavra de 32 bits leva em conta o formato de cada instruç�
 
 \lstinputlisting[style=estiloC, caption={Montagem das instruções binárias (binary.c)}, label={cod:bingen}]{codigos/binary_gen.txt}
 
-\section{Gerenciamento de Memória}
+\subsection{Gerenciamento de Memória}
 Como o processador tem uma quantidade pequena de registradores, boa parte das variáveis e dos parâmetros das funções precisa ser guardada na memória. Para organizar esse uso, o gerenciamento de memória foi feito com base em duas pilhas, que crescem em sentido decrescente a partir do topo da memória.
 
 A memória disponível é definida por uma constante de tamanho igual a 127. A partir desse valor, o registrador \texttt{R13} funciona como ponteiro da pilha global, onde ficam as variáveis globais, e o registrador \texttt{R12} funciona como ponteiro da pilha geral, usada durante a execução das funções para guardar variáveis locais, parâmetros e valores temporários. No início do programa, o ponteiro global é inicializado com o topo da memória, por meio da instrução \texttt{movi R13, 127}, e o ponteiro geral é inicializado com o mesmo valor, por meio da instrução \texttt{movr R12, R13}.
