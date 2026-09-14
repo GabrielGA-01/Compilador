@@ -304,18 +304,15 @@ Quanto à organização do texto, inicialmente são apresentados os objetivos do
 % OBJETIVOS
 \chapter[Objetivos]{Objetivos}
 \section{Geral}
-O objetivo geral é desenvolver um compilador escrito na linguagem C para traduzir um código-fonte escrito em C- para código intermediário, assembly e código binário. Além disso, validar o funcionamento do compilador enviando o código binário gerado para um processador RISC na linguagem Verilog, utilizando o software Quartus e implementá-lo no kit FPGA.
+O objetivo geral é desenvolver um sistema operacional simplificado capaz de lidar com a execução de um único programa ou múltiplos programas de maneira concorrente. Além disso, validar o funcionamento do sistema operacional utilizando um compilador para C- e usando o código binário gerado em um processador RISC implementado na linguagem Verilog utilizando o software Quartus e implementá-lo no kit FPGA.
 \section{Específicos}
  \begin{enumerate}
-   \item Desenvolver um analisador léxico utilizando o flex para os tokens da linguagem C-
-   \item Desenvolver um analisador sintático utilizando o bison para a linguagem C- e gerar uma árvore sintática abstrata (AST)
-   \item Desenvolver a tabela de símbolos para armazenar informações sobre variáveis, funções e outros elementos do código-fonte
-   \item Fazer a ananálise semântica para verificar a consistência do código-fonte e gerar mensagens de erro apropriadas
-   \item Gerar código intermediário a partir da AST, utilizando uma representação adequada para facilitar a tradução para assembly e código binário
-   \item Desenvolver um gerador de código para traduzir o código intermediário para assembly MIPS do processador desenvolvido
-   \item Desenvolver um gerador de código para traduzir o código intermediário para código binário MIPS do processador desenvolvido
-   \item Fazer eventuais correções no processador de modo que ele consiga executar as instruções geradas pelo compilador, caso seja necessário
-   \item Fazer a validação do compilador, enviando o código binário gerado para um processador MIPS simulado utilizando o kit FPGA, e verificar se as instruções são executadas corretamente
+   	\item Desenvolver 10 códigos em C-, compilar e testar no kit FPGA, para que possam ser utilizados como programas de teste do sistema operacional;
+	\item Fazer o planejamento da implementação de um sistema operacional simplificado;
+	\item Implementar o módulo de interrupção, responsável por definir o quantum de cada programa e por alternar entre os programas em execução;
+	\item Implementar o controle de acesso dinâmico à memória principal e à memória de instruções de acordo com o programa que é executado;
+	\item Desenvolver o código do sistema operacional em C- para fazer o escalonamento entre os processos utilizando Round Robin e implementar a interface;
+	\item Compilar o código do sistema operacional junto com os outros 10 códigos em C- e testar no kit FPGA, para verificar se o sistema operacional é capaz de gerenciar a execução dos programas corretamente;
    
  \end{enumerate}
 
