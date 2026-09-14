@@ -306,7 +306,7 @@ Quanto à organização do texto, inicialmente são apresentados os objetivos do
 \section{Geral}
 O objetivo geral é desenvolver um sistema operacional simplificado capaz de lidar com a execução de um único programa ou múltiplos programas de maneira concorrente. Além disso, validar o funcionamento do sistema operacional utilizando um compilador para C- e usando o código binário gerado em um processador RISC implementado na linguagem Verilog utilizando o software Quartus e implementá-lo no kit FPGA.
 \section{Específicos}
- \begin{enumerate}
+\begin{enumerate}
    	\item Desenvolver 10 códigos em C-, compilar e testar no kit FPGA, para que possam ser utilizados como programas de teste do sistema operacional;
 	\item Fazer o planejamento da implementação de um sistema operacional simplificado;
 	\item Implementar o módulo de interrupção, responsável por definir o quantum de cada programa e por alternar entre os programas em execução;
@@ -318,108 +318,11 @@ O objetivo geral é desenvolver um sistema operacional simplificado capaz de lid
 
 
 % FUNDAMENTAÇÃO TEÓRICA
-\chapter{Fundamentação Teórica do Processador}
-\section{Arquitetura e organização}
-Segundo Stallings, o conceito de arquitetura é definido como: ``Arquitetura de computador refere-se aos atributos de um sistema visíveis a um programador ou, em outras palavras, aqueles atributos que possuem um impacto direto sobre a execução lógica de um programa.'' \cite{stallings2010}. Sendo assim, arquitetura são as instruções, tudo aquilo que o programador é capaz de fazer.
-
-Por outro lado, organização é definida por Stallings como: ``Organização de computador refere-se às unidades operacionais e suas interconexões que realizam as especificações arquiteturais.''
-\cite{stallings2010}. Desse modo, se refere a toda a parte de hardware necessária para que a arquitetura possa ser implementada.
-
-\section{MIPS}
-MIPS é uma sigla para ``Microprocessor without Interlocked Pipeline Stages''. É uma arquitetura de microprocessador cujo intuito é alcançar alto desempenho usando um conjunto de instruções simplificadas e de uma estrutura de pipeline mais eficiente e sem intertravamentos por hardware \cite{mips1982}. Ou seja, as instruções não ficam dependendo de resultados de instruções futuras, simplificando o processamento em paralelo de instruções. Todavia, esse paralelismo não será feito nesse projeto. 
-
-A filosofia do MIPS consiste em expor ao programador uma representação direta e compacta da microarquitetura, ou seja, as instruções de máquina refletem diretamente as operações internas do processador. Esse modelo exige que sejam usadas várias instruções simples ao invés de poucas instruções complexas, o que reduz a necessidade de decodificação e permite um uso mais eficiente dos recursos da microengenharia. \cite{mips1982}.
-
-\section{Arquitetura Von Neumann e Harvard}
-A arquitetura de Von Neumann foi criada na década de 1940 e é composta por três componentes principais: a memória; o processador; e os dispositivo de entrada e saída \cite{arq_von_neumann_harvard}.
-
-Nesse modelo, tanto as instruções, ou seja, o programa em si, quanto os dados, são armazenados utilizando a mesma memória. Essa abordagem possui a desvantagem de ser mais lenta, pois acessa múltiplas vezes a mesma memória, porém faz com que ela seja simples e versátil, o que, junto com algumas modificações para melhorar o desempenho, faz com que ainda seja amplamente utilizada nos computadores modernos \cite{arq_von_neumann_harvard}.
-
-Por outro lado, a arquitetura de Harvard foi desenvolvida na Universidade de Harvard na década de 1940. Assim como a arquitetura de Von Neumann, há a presença do processador e dos dispositivos de entrada e saída. Todavia, difere ao dividir a memória em duas partes: uma exclusiva para as instruções e a outra para os dados \cite{arq_von_neumann_harvard}.
-
-Essa abordagem permite com que seja possível ler as instruções e simultaneamente, de modo independente, acessar a memória de dados para poder executá-las. Isso faz com que ela possa ser mais eficiente devido à capacidade de executar operações em paralelo. A arquitetura de Harvard é usada em microcontroladores, sistemas integrados e supercomputadores \cite{arq_von_neumann_harvard}.
-
-A \autoref{fig:arquiteturas} abaixo apresenta visualmente a diferença entre as duas arquiteturas apresentadas acima.
-
-\begin{figure}[H]
-  \centering
-  \caption{Arquiteturas de Von Neumann e Harvard}
-  \includegraphics[width=0.8\textwidth]{Arquiteturas.png} \\
-  Fonte: \cite{ifsc_figura_arquiteturas}
-  \label{fig:arquiteturas}
-\end{figure}
-
-
-\section{Monociclo e caminho de dados}
-A organização monociclo é uma das abordagens utilizadas para a implementação de um processador. Nela todas as instruções são lidas, codificadas e executadas durante um único ciclo de clock. Dessa forma, o ciclo de clock precisa durar, no mínimo, o tempo necessário para concluir a instrução mais demorada.
-
-Por um lado, não é muito eficiente, pois há instruções que poderiam ser realizadas de modo mais rápido usando outras abordagens e em razão disso, é um modelo que não é mais implementado em aplicações práticas \cite{cin_monociclo}. Por outro lado, o monociclo possui a vantagem de ser mais simples de compreender e de implementar, o que o torna útil em aplicações didáticas.
-
-Ademais, o caminho de dados compreende o hardware responsável pela execução das instruções. Nele estão presentes registradores, a Unidade Lógica e Aritmética (ULA), barramentos e multiplexadores. Esses componentes trabalham em conjunto para realizar operações como busca da instrução, decodificação, execução e armazenamento de resultados \cite{caminho_dados}. 
-
-A \autoref{fig:cmdados-mips} abaixo apresenta o caminho de dados para um processador MIPS monociclo tradicional.
-
-\begin{figure}[H]
-  \centering
-  \caption{Caminho de dados MIPS monociclo}
-  \includegraphics[width=0.8\textwidth]{Imagens/Caminho_dados_mips.jpg} \\
-  Fonte: \cite{cda_proc}
-  \label{fig:cmdados-mips}
-\end{figure}
-
-\section{Modos de endereçamento}
-Os modos de endereçamento são responsáveis por especificar como um operando é determinado pelas as instruções. Abaixo, a \autoref{fig:enderecamento} apresenta alguns dos modos de endereçamento. Em seguida são explicados cada um deles de acordo com \cite{stallings2010}.
-
-\begin{figure}[H]
-  \centering
-  \caption{Tipos de endereçamento}
-  \includegraphics[width=0.8\textwidth]{Imagens/Tipos de endereçamento.png} \\
-  Fonte: \cite{stallings2010}
-  \label{fig:enderecamento}
-\end{figure}
-
-\begin{itemize}
-    \item \textbf{Imediato} – O valor do operando é especificado diretamente por meio da instrução.
-    \item \textbf{Direto} - A instrução contém o endereço da memória de onde está o operando.
-    \item \textbf{Indireto} - Contém um endereço na memória, que por sua vez contém o endereço com o valor operando.
-    \item \textbf{Registrador} - A instrução contém o endereço de um registrador com o valor do operando.
-    \item \textbf{Indireto de registrador} - É passado o endereço de um registrador, que por sua vez contém um endereço da memória com o valor operando.
-    \item \textbf{Deslocamento} - É passado o endereço de um registrador e um imediato. Soma-se o endereço contido no registrador com o valor do imediato para acessar a posição da memória com o operando.
-    \item \textbf{Pilha} - O acesso ao operando se dá por meio do acesso à pilha.
-\end{itemize}
-
-\section{Formato de instruções}
-Para um processador MIPS monociclo, as instruções são compostas por 32 bits. Além disso, contém um Opcode, responsável por identificar qual operação deve ser realizada, além dos operandos. Há uma quantidade variável de operandos de acordo com cada instrução particular. Desse modo, é preciso utilizar mais de um formato de instruções \cite{stallings2010}.
-
-A \autoref{formato_mips} apresenta quais são os formatos de instruções uitlizadas em um modelo MIPS tradicional. Nele, há 3 formatos de instruções: tipo R, tipo I e tipo J. As operações do tipo R envolvem operações de lógica, aritmética e deslocamento, usando três registradores como operandos, sendo dois deles para fornecer os dados e o terceiro para receber.
-
-As instruções do tipo I envolvem operações aritméticas, lógicas, comparação, e acesso à memória. Dois registradores e um imediato são usados como operandos. Por fim, as instruções do tipo J realizam desvios, atualizando o PC para um novo endereço, podendo ser apenas um salto ou um salto com salvamento de retorno.
-
-O campo OP indica Opcode; RS, RT e RD são registradores; shamt é usado para fazer deslocamento de bits e funct é usado para definir a operação a ser realizada pela ULA.
-
-\setlength{\tabcolsep}{15pt} % Define o tamanho das colunas
-\begin{table}[H]
-\centering
-\caption{Formatos de instruções MIPS tradicional}
-\label{formato_mips}
-\begin{tabular}{|c|c|c|c|c|c|c|}
-\hline
-Instrução & 6 bits & 5 bits & 5 bits & 5 bits & 5 bits & 6 bits \\
-\hline
-Tipo R & OP & RS & RT & rd & shamt & funct \\
-\hline
-Tipo I & OP & RS & RT & \multicolumn{3}{|c|}{Endereço/Imediato} \\
-\hline
-Tipo J & OP & \multicolumn{5}{|c|}{Endereço de Destino} \\
-\hline
-\end{tabular}
-\vspace{-0.5em}
-\begin{center}
-Fonte: o Autor.
-\end{center}
-\end{table}
-
-Note que a quantidade de bits de cada campo é importante para definir certas características do processador. Ao utilizar 6 bits para o Opcode, isso implica que podem haver até \begin{math}2^6 = 64\end{math} operações. Da mesma forma, ao definir 5 bits para os registradores, podem haver até \begin{math}2^5 = 32\end{math} registradores.
+\chapter{Fundamentação Teórica}
+\section{Gerenciamento de processos}
+\section{Gerenciamento de memória}
+\section{Gerenciamento de sistemas de arquivos}
+\section{Gerenciamento de dispositivos de E/S}
 
 \section{FPGA}
 Primeiramente, FPGA significa ``Field Programmable Gate Array''. Ele é um circuito integrado, no qual é possível modificar muitas das funcionalidades  por meio de como as portas lógicas e os flip-flop se conectam \cite{intel_fpga}. Ou seja, um componente que, de acordo com os sinais de entrada, permite definir quais devem ser os sinais de saída por meio da programação.
