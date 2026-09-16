@@ -319,8 +319,37 @@ O objetivo geral é desenvolver um sistema operacional simplificado capaz de lid
 
 % FUNDAMENTAÇÃO TEÓRICA
 \chapter{Fundamentação Teórica}
+
 \section{Gerenciamento de processos}
+
+Primeiramente, Um processo é um programa computacional que está em execução \cite{tanenbaum2016sistemas}. Sendo assim, como o projeto desenvolvido possui um único processador, apenas um processo pode ser executador por vez. Quando há um único programa na memória de instruções, não há nenhum problema, porém, quando há múltiplos programas na memória de instruções, ou seja, quando é um sistema multiprogramado, se torna um desafio, pois apenas um programa pode ser executado por vez. Isso gera a necessidade de fazer um controle de qual processo será executado de cada vez, uma responsabilidade atribuída ao sistema operacional. \cite{tanenbaum2016sistemas}.
+
+Para lidar com isso, existe uma parte do sistema operacional chamada escalonador, que junto à um algoritmo de escalonamento, decide qual deve ser o próximo programa a ser executado \cite{tanenbaum2016sistemas}. Esse processo depende, dentre outras coisas, do estado de cada um dos processos, que varia ao longo da sua execução. Os principais estados dos processos podem ser observados na \autoref{fig:estados_processos}.
+
+\begin{figure}[H]
+  \centering
+  \caption{Estados assumidos por um processo}
+  \includegraphics[width=0.8\textwidth]{Imagens/Estados_dos_Processos.png} \\
+  Fonte: Sistemas Operacionais Modernos \cite{tanenbaum2016sistemas}.
+  \label{fig:estados_processos}
+\end{figure}
+
+Um processo está: em execução quando ele está utilizando a CPU para executar as instruções do programa; pronto quando pode começar a ser executado a qualquer momento, porém está esperando outro terminaar a sua execução; bloqueado quando está esperando por algum evento externo, como a entrada de dados do usuário ou a finalização de uma operação de entrada e saída \cite{tanenbaum2016sistemas}.
+
+Os algoritmos de escalonamento se dividem em dois grupos principais: os não preemptivos e os preemptivos. O primeiro grupo escolhe um processo e deixa com que ele execute até chegar ao final da sua execução, ou até que ele seja bloqueado. O segundo grupo escolhe um processo e permite que ele execute por um determinado período de tempo, chamado quantum, e depois o interrompe para que outro processo possa ser executado \cite{tanenbaum2016sistemas}. 
+
+\subsection{Algoritmo Round-Robin}
+
+Round-Robin é um dos algoritmos de escalonamento preemptivo, ou seja, ele troca o processo que está execução a cada um determinado tempo. Além disso, utiliza uma lista, na qual o primeiro processo é o próximo a ser executado e todo processo interrompido é colocado ao final da lista \cite{tanenbaum2016sistemas}.
+
 \section{Gerenciamento de memória}
+
+Idealmente, haveria uma memória ilimitada, rápida e não volátil, porém, na realidade, não existe esse tipo de tecnologia. Desse modo, para lidar com  essa quesão, é utilizada a hierarquia de memória: pouca memória de alta velocidade volátil (registradores e cache), média quantidade de memória de velocidade média volátil (memória principal) e grande quantidade de memória de baixa velocidade não volátil(memória secundária) \cite{tanenbaum2016sistemas}.
+
+Como a memória é um recurso limitado, cabe ao sistema operacional gerenciar o acesso à memória entre os processos, sem que um comprometa os dados dos outros. Isso é feito em todos os níveis da memória, desde os registradores até a memória secundária. 
+
+Em nível dos registradores, é preciso que o sistema operacional preserve o conteúdo deles quando um processo é interrrompido e retorne o conteúdo correto quando o processo for retomado. Em nível dos demais níveis da memória, é preciso garantir que um processo não acesse indevidamente a memória pertencente a outro processo.
+
 \section{Gerenciamento de sistemas de arquivos}
 \section{Gerenciamento de dispositivos de E/S}
 
