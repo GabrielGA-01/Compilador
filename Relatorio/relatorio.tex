@@ -348,10 +348,40 @@ Idealmente, haveria uma memória ilimitada, rápida e não volátil, porém, na 
 
 Como a memória é um recurso limitado, cabe ao sistema operacional gerenciar o acesso à memória entre os processos, sem que um comprometa os dados dos outros. Isso é feito em todos os níveis da memória, desde os registradores até a memória secundária. 
 
-Em nível dos registradores, é preciso que o sistema operacional preserve o conteúdo deles quando um processo é interrrompido e retorne o conteúdo correto quando o processo for retomado. Em nível dos demais níveis da memória, é preciso garantir que um processo não acesse indevidamente a memória pertencente a outro processo.
+Em nível dos registradores, é preciso que o sistema operacional preserve o conteúdo deles quando um processo é interrrompido e retorne o conteúdo correto quando o processo for retomado. Em nível dos demais níveis da memória, é preciso garantir que um processo não acesse indevidamente a memória pertencente a outro processo por meio do conceito de espaço de endereçamento.
+
+O espaço de endereçamento é uma espécie de abstração do memória que define quais são as posições que um determinado processo pode acessar na memória \cite{tanenbaum2016sistemas}. Isso é utilizado para fazer com que o endereço lógico seja distinto do endereço físico, por exemplo, o endereço 47 utilizado para acessar a uma determinada instrução, não necessariamente estará na posição 47 da memória. Como todo programa pressupõe que ele próprio começa na linha zero, o gerenciamento da memória é uma parte fundamental para o sistema operacional coordenar a execução dos processos para que acessem o conteúdo que de fato precissam.
+
+A partir do ponto que nem todos os programas caibam na memória principal ao mesmo tempo, pode ser utiliza a estratégia de \textit{swapping}, que retira um programa da memória principal e o coloca na memória secundária, liberando espaço para outro programa. Quando o programa que foi retirado da memória principal precisa ser executado novamente, ele é colocado de volta na memória principal, substituindo outro programa que não está sendo utilizado no momento \cite{tanenbaum2016sistemas}.
+
+Outras estratégias de gerenciamento de memória podem ser utilizadas, como a paginação e a segmentação. A paginação consiste em dividir a memória em blocos de tamanho fixo, chamados páginas, e alocar as páginas de acordo com a necessidade dos processos. A segmentação, por outro lado, divide a memória em segmentos de tamanho variável, que podem ser alocados de acordo com as necessidades específicas dos processos. Essas abordagens permitem com que não seja necessário mover o programa como um todo para dentro ou para fora da memória principal \cite{tanenbaum2016sistemas}.
 
 \section{Gerenciamento de sistemas de arquivos}
+
+O sistema operacional também é responsável por gerenciar o acesso aos sistemas de arquivos, que são responsáveis por armazenar e organizar os dados em dispositivos de armazenamento, como discos rígidos e unidades de estado sólido. Isso inclui a criação, leitura, escrita e exclusão de arquivos, bem como a organização dos arquivos em diretórios e subdiretórios \cite{tanenbaum2016sistemas}.	
+
+\subsection{Formas de armazenar os arquivos}
+
+Existem várias abordagens utilizadas para armazenar os arquivos na memória, abaixo são apresentadas algumas delas \cite{tanenbaum2016sistemas}:
+
+\begin{itemize}
+    \item Alocação contígua - Os arquivos são separados em blocos contíguos na memória, ou seja, os blocos de um arquivo estão localizados em posições adjacentes. Isso permite um acesso rápido aos arquivos, porém pode levar a fragmentação da memória e dificuldade em encontrar espaço contíguo para novos arquivos.
+    \item Alocação por lista encadeada - Cada arquivo é armazenado em blocos que podem estar espalhados pela memória, e cada bloco contém um ponteiro para o próximo bloco do arquivo. Isso permite uma utilização mais eficiente da memória, mas pode levar a um acesso mais lento aos arquivos, pois é necessário seguir os ponteiros para acessar todos os blocos de um arquivo.
+    \item Alocação com lista encadeata e tabela - Cada arquivo é armazenado em blocos que podem estar espalhados pela memória, e uma tabela de alocação é utilizada para mapear os blocos de cada arquivo. Isso permite uma utilização eficiente da memória e um acesso rápido aos arquivos, mas pode levar a uma sobrecarga de gerenciamento da tabela de alocação.
+    \item \textit{I-nodes} - Cada arquivo é representado por um \textit{i-node}, que contém informações sobre o arquivo, como seu tamanho, permissões e localização dos blocos de dados. Os \textit{i-nodes} são armazenados em uma tabela separada da memória, permitindo uma utilização eficiente da memória e um acesso rápido aos arquivos.
+\end{itemize}
+
 \section{Gerenciamento de dispositivos de E/S}
+
+Os processos são capazes de interagir com o mundo externo por meio de dispositivos de entrada e saída, como teclados, mouses, monitores e impressoras. Todavia, esses dispositivos são limitados e precisam ser compartilhados entre todos os processos simultaneamente. Desse modo, cabe ao sistema operacional gerenciar o acesso a esses dispositivos, garantindo que todos os processos possam utilizá-los \cite{tanenbaum2016sistemas}.
+
+\subsection{Entrada e saída mapeadas na memória}
+
+A comunicação entre a CPU e os controladores de dispositivos ocorre por meio de registradores de controle e buffers de dados, podendo ser estruturada de duas formas principais: via espaços de endereçamento separados com instruções de E/S dedicadasou por E/S mapeada na memória, na qual os dispositivos compartilham o mesmo espaço de endereçamento da RAM. \cite{tanenbaum2016sistemas}
+
+\subsection{Acesso direto à memória (DMA)}
+
+O Acesso Direto à Memória (DMA) é uma técnica que libera a CPU do trabalho custoso de copiar dados palavra por palavra entre os dispositivos de E/S e a memória principal, delegando essa tarefa a um controlador dedicado que gerencia as transferências diretamente pelo barramento. Ao ser programado pela CPU com o endereço de memória, a contagem de bytes e a direção do fluxo, o controlador de DMA executa a transferência — que pode operar por "roubo de ciclo" (uma palavra por vez) ou no modo "surto" (blocos inteiros) — e emite uma interrupção ao final do processo. Embora exija mecanismos como o uso de buffers internos nos controladores de dispositivos (para validação de dados via checksum e prevenção de erros de temporização) e apresente desvantagens como o custo adicional de hardware ou o bloqueio temporário do barramento, o DMA simplifica o software do sistema operacional e otimiza drasticamente o desempenho do sistema em operações intensivas de E/S \cite{tanenbaum2016sistemas}.
 
 \section{FPGA}
 Primeiramente, FPGA significa ``Field Programmable Gate Array''. Ele é um circuito integrado, no qual é possível modificar muitas das funcionalidades  por meio de como as portas lógicas e os flip-flop se conectam \cite{intel_fpga}. Ou seja, um componente que, de acordo com os sinais de entrada, permite definir quais devem ser os sinais de saída por meio da programação.
