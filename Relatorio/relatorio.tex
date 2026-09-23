@@ -2656,7 +2656,83 @@ Para alocar espaço em uma pilha, o ponteiro correspondente é decrementado com 
 
 \section{Gerenciamento de processos}
 
-Para o gerenciamento de processos, foi escolhido implementar um escalonador do tipo round-robin, dessa forma, cada processo recebe um determinado número de instruções para serem executadas, e caso não termine nesse tempo, ele é colocado no final da fila de processos prontos, e o próximo processo da fila é executado. O escalonador é acionado a cada 10 instruções executadas, e o processo que estava em execução é colocado no final da fila de processos prontos, e o próximo processo da fila é colocado em execução.
+\subsection{Implementado no algoritmo do SO}
+
+Para o gerenciamento de processos, foi escolhido implementar um escalonador do tipo round-robin, dessa forma, cada processo recebe um determinado número deinstruções para serem executadas, e caso não termine nesse tempo, ele é colocado no final da fila de processos prontos, e o próximo processo da fila é executado. 
+
+O escalonador é acionado a cada 10 instruções executadas, e o processo que estava em execução é colocado no final da fila de processos prontos, e o próximo processo da fila é colocado em execução. Caso um processo chege ao final ele é removido da fila.
+
+Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([numero])}, que recebe o número do programa e o escreve no registrador \textit{R11}, que acompanha o atual programa em execução.
+
+Quando é executado um único programa serialmente, não é utilizado round-robin e o programa é executado até o final, sem interrupções e em seguida é feito o retorno para o SO.
+
+\subsection{Módulo de interrupção}
+
+Para fazer o gerenciamento de processos foi criado um novo módulo chamado Módulo de Interrupção. As entradas e saídas desse módulo são apresentadas na \autoref{tab:IO_Interrupcao}.
+
+\setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
+\begin{table}[H]
+\centering
+\caption{Entradas e saídas do módulo de interrupção}
+\label{tab:IO_Interrupcao}
+\begin{tabular}{|c|c|l|}
+\hline
+\multicolumn{3}{|c|}{\textbf{ENTRADAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+HLT & 1 & Indica se o programa chegou ao final \\
+\hline
+SinalMI & 2 & 0 = NDA; 1 = Quantum; 2 = RetornoSO \\ 
+\hline
+Valor & 32 & Posição de retorno SO ou quantum \\
+\hline
+\multicolumn{3}{|c|}{\textbf{SAÍDAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+RetornoSO & 8 & Valor para retornar para o algoritmo do SO \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+Fonte: o Autor.
+\end{center}
+\end{table} 
+
+Para atuar sobre esse módulo, foram criadas duas novas instruções para o processador, \textit{quant} e \textit{retSO}. A instrução \textit{quant} é responsável por enviar o valor do quantum para o módulo de interrupção, e a instrução \textit{retSO} é responsável por enviar o valor de retorno do SO para o módulo de interrupção. A \autoref{novas_instrucoes} apresenta as novas instruções do processador, sendo MI o módulo de interrupção.
+
+\setlength{\tabcolsep}{10pt}
+\begin{table}[H]
+\centering
+\caption{Novas instruções do processador}
+\label{novas_instrucoes}
+\begin{tabular}{|c|>{\raggedright\arraybackslash}p{7cm}|}
+\hline
+Instrução & Operação\\
+\hline
+\multicolumn{2}{|c|}{Formato 7} \\
+\hline
+quant &  MI-Quantum <= END26 \\
+retSO &  MI-RetornoSO <= END26 \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+\textit{Fonte: o Autor.}
+\end{center}
+\end{table}
+
+Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([numero])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo usuário. Para o caso do endereço de retorno, o valor será definido em outras instruções do compilador que serão criadas
+
+Além disso, o valor do endereço de retorno para SO fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução, e assume o valor do endereço de retorno do SO quando o sistema operacional termina a execução. Desse modo, é feito o controle de apenas considerar o quantum para os programas de usuário. 
+
+Do mesmo modo, o valor lido pelo módulo do PC para o endereço de retorno do SO é constantemente -1, com exceção do momento no qual ele deve fazer o salto para retornar para ele.
+
+Para que o SO saiba se um programa terminou a execução, o sinal de HALT do processador foi modificado, de modo que ele é enviado para o módulo de interrupção, que imediatamente envia o endereço de retorno do SO para o módulo do PC fazer o retorno.
+
+Ademais, o sinal do HALT também é enviado para o banco de registradores, que caso receba o valor um, sobrescreve o registrador com o programa em execução com o valor 0, indicando que o programa terminou a execução para o SO.
+
 
 \section{Gerenciamento de entrada e saída}
 
