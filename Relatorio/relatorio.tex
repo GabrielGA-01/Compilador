@@ -2660,6 +2660,8 @@ Para o gerenciamento de processos, foi escolhido implementar um escalonador do t
 
 \section{Gerenciamento de entrada e saída}
 
+\section{Extra}
+
 \subsection{Interface}
 
 Para a interface do sistema operacional com o usuário, será utilizado o display LCD que exibirá mensagens de quais são as escolhas do usuário, bem como qual é o processo que está sendo executado no momento. Para isso, serão passados códigos correspondentes a cada uma das mensagens, além disso, será utilizado um segundo registrador para indicar qual é o processo que está sendo executado no momento.
@@ -2692,7 +2694,51 @@ Fonte: o Autor.
 \end{center}
 \end{table}
 
-Para isso, será criada uma nova instrução \textit{disp}, similar à instrução \textit{out}, que fará a leitura do registrador de uso específico \textit{R11}, que contém o número do progrma em execução e o enviará para o display LCD junto com a mensagem. Além disso, para que o código chege ao módulo de entrada e saída, será criado um novo caminho de dados, que fornecerá o valor do imediado da instrução para este módulo.
+Para isso, será criada uma nova instrução \textit{disp}, similar à instrução \textit{out}, que fará a leitura do registrador de uso específico \textit{R11}, que contém o número do programa em execução e o enviará para o display LCD junto com a mensagem. Além disso, para que o código chege ao módulo de entrada e saída, será criado um novo caminho de dados, que fornecerá o valor do imediado da instrução para este módulo. A \autoref{tab:IO_Entrada_E_Saida_2.0} apresenta as novas entradas e saídas do módulo de entrada e saída, que foram adicionadas para o funcionamento do sistema operacional.
+
+\setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
+\begin{table}[H]
+\centering
+\caption{Entradas e saídas do módulo de entrada e saída com o SO}
+\label{tab:IO_Entrada_E_Saida_2.0}
+\begin{tabular}{|c|c|l|}
+\hline
+\multicolumn{3}{|c|}{\textbf{ENTRADAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+clock & 1 & Sinal de clock \\
+\hline
+clock\_fast & 1 & Sinal de clock usado em contas \\
+\hline
+SinalMES & 2 & Controla a leitura (bit 0) e a escrita (bit 1)\\
+\hline
+NumMsg & 32 & Número da mensagem a ser exibida no display \\
+\hline
+Display\_IN & 32 & Valor para o display/LCD \\
+\hline
+Switches\_IN & 18 & Valor lido dos 18 switches\\
+\hline
+Destrava & 1 & Botão que destrava o PC \\
+\hline
+\multicolumn{3}{|c|}{\textbf{SAÍDAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+Switches\_OUT & 32 & Valor dos switches extendido \\
+\hline
+TravaPC & 1 & Sinal que impede o PC de atualizar \\
+\hline
+ResetSignal & 1 & Sinal que reinicia o PC \\
+\hline
+Display\_X & 7 & Valor a ser escrito no display X \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+Fonte: o Autor.
+\end{center}
+\end{table} 
 
 % CONSIDERAÇÕES FINAIS
 \chapter{Conclusão}
