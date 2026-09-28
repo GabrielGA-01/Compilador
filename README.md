@@ -63,3 +63,26 @@ Fazer verificação de registrador sobrando em func call - OK
 
 Quando atribuir valor as labels, lembre que branch vai para Label + 1
 
+# Sobre SO
+
+Registradores de uso específico
+R15 - Pilha
+R14 - JAL
+R13 - Pilha global
+R12 - Pilha geral
+R11 - Número do programa
+R10 - Posição do programa
+R9 - Endereço do PC
+R8 - I/O: processo <-> SO
+R0 - Zero
+
+Instruções para o compilador:
+- definirProgramaParaExecutar([numero])
+- definirQuantum([numero])
+- saveRegs()
+- loadRegs()
+
+Instruções para o processador:
+- quant (OP, IM26)
+- retSO (OP, IM26)
+- disp (OP, IM26)
