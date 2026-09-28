@@ -375,6 +375,8 @@ Existem várias abordagens utilizadas para armazenar os arquivos na memória, ab
 
 Os processos são capazes de interagir com o mundo externo por meio de dispositivos de entrada e saída, como teclados, mouses, monitores e impressoras. Todavia, esses dispositivos são limitados e precisam ser compartilhados entre todos os processos simultaneamente. Desse modo, cabe ao sistema operacional gerenciar o acesso a esses dispositivos, garantindo que todos os processos possam utilizá-los \cite{tanenbaum2016sistemas}.
 
+Quando os processos precisam acessar os periféricos é feita uma chamada ao sistema operacional, que fica responsável por fazer esse acesso ao dispositivo, seja enviando ou recebendo o dado que o programa precisar.
+
 \subsection{Entrada e saída mapeadas na memória}
 
 A comunicação entre a CPU e os controladores de dispositivos ocorre por meio de registradores de controle e buffers de dados, podendo ser estruturada de duas formas principais: via espaços de endereçamento separados com instruções de E/S dedicadasou por E/S mapeada na memória, na qual os dispositivos compartilham o mesmo espaço de endereçamento da RAM. \cite{tanenbaum2016sistemas}
