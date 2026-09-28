@@ -2819,7 +2819,7 @@ Além do mais, não é implementado um sistema de chamadas de sistema para fazer
 
 Para a interface do sistema operacional com o usuário, será utilizado o display LCD que exibirá mensagens de quais são as escolhas do usuário, bem como qual é o processo que está sendo executado no momento. Para isso, serão passados códigos correspondentes a cada uma das mensagens, além disso, será utilizado um segundo registrador para indicar qual é o processo que está sendo executado no momento.
 
-O controle do display LCD será feito exclusivamente pelo sistema operacional, de modo que nenhum outro programa tenho um acesso à ele. Além disso, para ser implementado contará com uma nova função chamada \textit{showLCD([numero])}. A \autoref{tab:mensagens do LCD} abaixo apresenta quais serão os códigos correspondentes a cada uma das mensagens que serão exibidas no display LCD.
+O controle do display LCD será feito exclusivamente pelo sistema operacional, de modo que nenhum outro programa tenho um acesso à ele. Além disso, para ser implementado contará com uma nova função chamada \textit{showLCD([numero])}. A \autoref{tab:mensagens do LCD} abaixo apresenta quais serão os códigos correspondentes a cada uma das mensagens que serão exibidas no display LCD. Nela, P significa a execução de um programa; MP a execução de multiplos programas; E a edição (renomeação de um programa); D a deleção de um programa; C a criação de um programa.
 
 \setlength{\tabcolsep}{10pt}
 \begin{table}[H]
@@ -2830,7 +2830,7 @@ O controle do display LCD será feito exclusivamente pelo sistema operacional, d
 \hline
 \textbf{Código} & \textbf{Mensagem} & \textbf{Significado} \\
 \hline
-0 & 0 = um programa; 1 = multiplos & Opções de execução do usuário \\
+0 & 0=P; 1=MP; 2=E; 3=D; 4=C & Opções de execução do usuário \\
 \hline
 1 & Digite o numero do programa & Programa a ser executado \\
 \hline
