@@ -2739,6 +2739,75 @@ Para que o SO saiba se um programa terminou a execução, o sinal de HALT do pro
 
 Ademais, o sinal do HALT também é enviado para o banco de registradores, que caso receba o valor um, sobrescreve o registrador com o programa em execução com o valor 0, indicando que o programa terminou a execução para o SO.
 
+\section{Gerenciamento de memória}
+
+\subsection{Implementado no algoritmo SO}
+
+O gerenciamento de memória feito pelo SO é o controle do uso correto dos registradores entre os programas. Para isso, são utilizadas duas instruções especiais para o compilador \textit{saveRegs()} e \textit{loadRegs()}. A primeira instrução é responsável por salvar os registradores de uso geral do programa em execução na memória, e a segunda instrução é responsável por carregar os registradores de uso geral do próximo programa a ser executado. Esse salvamento e recuperação dos valores é feito utilizando as posições 1 a 16 da memória do programa junto as instruções \textit{loadi} e \textit{storei}.
+
+\subsection{Módulos de acesso à memória}
+\label{sec:Modulos_de_acesso_a_memoria}
+No processador foram criados dois módulos responsáveis por fazer o controle de qual a posição real que deve ser acessada na memória de instruções e na memória principal. Esses módulos são o Módulo de Acesso Dinâmico à Memória de Isntruções(MADMI) e o Módulo de Acesso Dinâmico à Memória Principal (MADMP).
+
+Ambos os módulos continuamente leem o valor do registrador \textit{R10} para saberem qual a posição física em que o programa em execução está na memória e apartir disso, aplicam um deslocamento multiplicando o tamanho de cada programa pelo número da posição dele. Desse modo, os programas 'acreditam' acessarem o endereço que está presente no código, mas na verdade há um deslocamento. 
+
+Além disso, o MADMI tem duas entradas a mais, o sinal de recomeçar a execução do programa e o endereço para fazer o retorno para o programa do SO. A \autoref{tab:IO_MADMI} e a \autoref{tab:IO_MADMP} apresentam, respectivamente as entradas e saídas para o MADMI e o MADMP.
+
+\setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
+\begin{table}[H]
+\centering
+\caption{Entradas e saídas dos módulos MADMI}
+\label{tab:IO_MADMI}
+\begin{tabular}{|c|c|l|}
+\hline
+\multicolumn{3}{|c|}{\textbf{ENTRADAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+EnderecoVirtual & 8 & Endereço fornecido pelo programa \\
+\hline
+R10 & 32 & Posição do programa dentro da memória \\
+\hline
+ResetSignal & 1 & Sinal para recomeçar a execução \\
+\hline
+Retorno SO & 8 & Endereço para retornar para o SO \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+EnderecoReal & 32 & Endereço real na memória \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+Fonte: o Autor.
+\end{center}
+\end{table} 
+
+\setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
+\begin{table}[H]
+\centering
+\caption{Entradas e saídas dos módulos MADMP}
+\label{tab:IO_MADMP}
+\begin{tabular}{|c|c|l|}
+\hline
+\multicolumn{3}{|c|}{\textbf{ENTRADAS}} \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+EnderecoVirtual & 8 & Endereço fornecido pelo programa \\
+\hline
+R10 & 32 & Posição do programa dentro da memória \\
+\hline
+\textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
+\hline
+EnderecoReal & 32 & Endereço real na memória \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+Fonte: o Autor.
+\end{center}
+\end{table} 
 
 \section{Gerenciamento de entrada e saída}
 
