@@ -2664,13 +2664,15 @@ Para o gerenciamento de processos, foi escolhido implementar um escalonador do t
 
 O escalonador é acionado a cada 10 instruções executadas, e o processo que estava em execução é colocado no final da fila de processos prontos, e o próximo processo da fila é colocado em execução. Caso um processo chege ao final ele é removido da fila.
 
-Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([numero])}, que recebe o número do programa e o escreve no registrador \textit{R11}, que acompanha o atual programa em execução.
+Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([numero])}. Ela escreve o número do programa em \textit{R11}, escreve a posição dele na memória em \textit{R10} e faz o salto para o PC do programa, presente no registrador \textit{R9}.
 
 Quando é executado um único programa serialmente, não é utilizado round-robin e o programa é executado até o final, sem interrupções e em seguida é feito o retorno para o SO.
 
+Quando é feito o retorno para o SO, é utiliza uma outra função do compilador \textit{obterEstado()}, que faz a leitura do registrador \textit{R11}, para saber se o programa chegou ao fim, caso o valor de retorno da função seja 0, ou caso ainda esteja em execução.
+
 \subsection{Módulo de interrupção}
 
-Para fazer o gerenciamento de processos foi criado um novo módulo chamado Módulo de Interrupção. As entradas e saídas desse módulo são apresentadas na \autoref{tab:IO_Interrupcao}.
+Para fazer o gerenciamento de processos foi criado um novo módulo chamado Módulo de Interrupção. Ele é reponsável por contar o quantum e retornar para o SO quando ele acabar ou caso o programa chege ao fim. A contagem do quantum é feita somente enquanto o valor de TravaPC for zero, ou seja, enquanto o programa estiver sendo executado. As entradas e saídas desse módulo são apresentadas na \autoref{tab:IO_Interrupcao}.
 
 \setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
 \begin{table}[H]
@@ -2688,6 +2690,8 @@ HLT & 1 & Indica se o programa chegou ao final \\
 SinalMI & 2 & 0 = NDA; 1 = Quantum; 2 = RetornoSO \\ 
 \hline
 Valor & 32 & Posição de retorno SO ou quantum \\
+\hline
+TravaPC & 1 & Se o PC está mudando ou não \\
 \hline
 \multicolumn{3}{|c|}{\textbf{SAÍDAS}} \\
 \hline
@@ -2727,11 +2731,11 @@ retSO &  MI-RetornoSO <= END26 \\
 
 Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([numero])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo usuário. Para o caso do endereço de retorno, o valor será definido em outras instruções do compilador que serão criadas
 
-Além disso, o valor do endereço de retorno para SO fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução, e assume o valor do endereço de retorno do SO quando o sistema operacional termina a execução. Desse modo, é feito o controle de apenas considerar o quantum para os programas de usuário. 
+Além do mais, o valor do endereço de retorno para SO fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução, e assume o valor do endereço de retorno do SO quando o sistema operacional termina a execução. Desse modo, é feito o controle de apenas considerar o quantum para os programas de usuário. 
 
-Do mesmo modo, o valor lido pelo módulo do PC para o endereço de retorno do SO é constantemente -1, com exceção do momento no qual ele deve fazer o salto para retornar para ele.
+Do mesmo modo, o valor lido pelo Módulo de Acesso à Memória de Instruções (apresentado na seção \autoref{sec:Modulos_de_acesso_a_memoria}) para o endereço de retorno do SO é constantemente -1, com exceção do momento no qual ele deve fazer o salto para retornar para ele.
 
-Para que o SO saiba se um programa terminou a execução, o sinal de HALT do processador foi modificado, de modo que ele é enviado para o módulo de interrupção, que imediatamente envia o endereço de retorno do SO para o módulo do PC fazer o retorno.
+Para que o SO saiba se um programa terminou a execução, o sinal de HALT do processador foi modificado, de modo que ele é enviado para o módulo de interrupção, que imediatamente envia o endereço de retorno do SO para ser feito o retorno.
 
 Ademais, o sinal do HALT também é enviado para o banco de registradores, que caso receba o valor um, sobrescreve o registrador com o programa em execução com o valor 0, indicando que o programa terminou a execução para o SO.
 
