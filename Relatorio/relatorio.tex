@@ -2664,7 +2664,7 @@ Para o gerenciamento de processos, foi escolhido implementar um escalonador do t
 
 O escalonador é acionado a cada 10 instruções executadas, e o processo que estava em execução é colocado no final da fila de processos prontos, e o próximo processo da fila é colocado em execução. Caso um processo chege ao final ele é removido da fila.
 
-Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([numero])}. Ela escreve o número do programa em \textit{R11}, escreve a posição dele na memória em \textit{R10} e faz o salto para o PC do programa, presente no registrador \textit{R9}.
+Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([número])}. Ela escreve o número do programa em \textit{R11}, escreve a posição dele na memória em \textit{R10} e faz o salto para o PC do programa, presente no registrador \textit{R9}.
 
 Quando é executado um único programa serialmente, não é utilizado round-robin e o programa é executado até o final, sem interrupções e em seguida é feito o retorno para o SO.
 
@@ -2729,7 +2729,7 @@ retSO &  MI-RetornoSO <= END26 \\
 \end{center}
 \end{table}
 
-Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([numero])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo usuário. Para o caso do endereço de retorno, o valor será definido em outras instruções do compilador que serão criadas
+Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([número])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo usuário. Para o caso do endereço de retorno, o valor será definido em outras instruções do compilador que serão criadas
 
 Além do mais, o valor do endereço de retorno para SO fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução, e assume o valor do endereço de retorno do SO quando o sistema operacional termina a execução. Desse modo, é feito o controle de apenas considerar o quantum para os programas de usuário. 
 
