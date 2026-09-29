@@ -2811,7 +2811,7 @@ Fonte: o Autor.
 
 \section{Gerenciamento de entrada e saída}
 
-\subsection{Implementado no Sistema Operacional}
+\subsection{Implementado no algoritmo SO}
 
 Para fazer o controle de entrada e saída será utilizado o registrador \textit{R8}, que receberá os valores de input enviados pelo sistema operacional e os valores de output que o programa quer fazer. 
 
@@ -2829,7 +2829,7 @@ Caso o primeiro processo na lista de espera de entrada e saída seja um output, 
 
 Assim que o botão do FPGA for apertado, o valor do buffer do módulo de entrada e saída passará para o valor -2, indicando que o valor foi lido pelo usuário e o sistema operacional removerá o primeiro programa da lista de espera E/S e o coloca na lista de prontos. Além disso, definirá o valor do registrador \textit{R8} do programa para -2.
 
-Caso o SO volte a executar e o valor do registrador \textit{R8} seja -2, então não há pedido de input ou output pelo programa que estava sendo executado.
+Caso o SO volte a executar e o valor do registrador \textit{R8} seja -2, então não há pedido de input ou output pelo programa que estava sendo executado. Além do mais, caso todos os programas estejam na espera por E/S, então o SO fica em uma espera ocupada com \textit{lerBuffer()}.
 
 \section{Extra}
 
