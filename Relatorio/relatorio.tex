@@ -2811,7 +2811,25 @@ Fonte: o Autor.
 
 \section{Gerenciamento de entrada e saída}
 
-Além do mais, não é implementado um sistema de chamadas de sistema para fazer operações de entrada e saída, ou seja, os programas de usuário podem executar essas operações diretamente. Para o projeto desenvolvido essa abordagem simplifica a implementação e não prejudica a execução, pois apenas um programa executa de cada vez.
+\subsection{Implementado no Sistema Operacional}
+
+Para fazer o controle de entrada e saída será utilizado o registrador \textit{R8}, que receberá os valores de input enviados pelo sistema operacional e os valores de output que o programa quer fazer. 
+
+Quando houver um input de um programa, será escrito o valor -1 no registrador \textit{R8} e feito uma interrupção da execução do programa. Quando o sistema operacional retornar ele salvará o contexto do programa e, imediatamente após isso, ele acessará o valor do registrador \textit{R8} do programa que estava em execução usando a instrução do compilador \textit{lerReg([número])}. Caso o retorno dessa função for -1, isso correspondente a um input, então removerá o processo da lista de prontos e o adicionará a uma lista de processos esperando E/S. 
+
+Caso seja o primeiro processo da lista de espera por E/S, o SO escreverá na segunda linha do LCD a mensagem de espera de input para ao programa correspondente. Essa mensagem pode ser vista na \autoref{tab:mensagens do LCD}. Ademais, configurará o módulo de entrada e saída no modo input usando a instrução do compilador \textit{definirModoES([número])}, passando o número um. Essa instrução usa a instrução do processador \textit{DFMES}, que fará a atribuição.
+
+Assim que ocorrer um input, o valor será salvo em um buffer no Módulo de Entrada e Saída. Esse buffer será constantemente acessado pelo sistema operacional, que após executar cada programa, executa a função do compilador \textit{lerBuffer()}, que usará uma nova função do processador \textit{LB}, que passa um sinal para o processador escrever o valor do buffer do Módulo de Entrada e Saída no registrador \textit{R8} do SO, além disso, o próprio \textit{lerBuffer} irá retornar o valor do registrador \textit{R8}.
+
+Enquanto não houver um valor de input, o buffer ficará com o valor -1, indicando que não há nenhum valor novo lido. Caso o valor seja diferente de -1, o sistema operacional detecta que houve um input e retira o primeiro programa da lista de espera de E/S e coloca ele na lista de pronto. Antes dele ser executado, o SO irá usar a instrução do compilador \textit{lerBufferLimpa()}, que irá ler o buffer para o registrador \textit{R8} do programa que precisa do input, ao mesmo tempo que limpa o buffer usando a instrução do processador \textit{LBL}. Esse registrador será carregado para outro pelo programa do usuário e imediatamente após, será mudado para -2.
+
+Para o caso do output, o programa escreverá o valor desejado também no registrador \textit{R8} e será feito uma interrupção. Como os valores para o output devem ser positivos, não haverá conflito com o sinal -1 usado para o input. Quando o sistema operacional for executar, ele fará a leitura do valor seguindo o mesmo procedimento do caso do input, porém obterá um valor diferente, logo, guardará o valor do output e colocará o programa na lista de espera por entrada e saída.
+
+Caso o primeiro processo na lista de espera de entrada e saída seja um output, ficará uma mensagem no LCD mostrando que está sendo exibido o valor do programa correspondente. Além do mais, será configurado o módulo de entrada e saída com o modo de output, usando \textit{definirModoES([número])} com o número zero e exibido o valor da saída nos diplays de sete segmentos.
+
+Assim que o botão do FPGA for apertado, o valor do buffer do módulo de entrada e saída passará para o valor -2, indicando que o valor foi lido pelo usuário e o sistema operacional removerá o primeiro programa da lista de espera E/S e o coloca na lista de prontos. Além disso, definirá o valor do registrador \textit{R8} do programa para -2.
+
+Caso o SO volte a executar e o valor do registrador \textit{R8} seja -2, então não há pedido de input ou output pelo programa que estava sendo executado.
 
 \section{Extra}
 
@@ -2819,7 +2837,7 @@ Além do mais, não é implementado um sistema de chamadas de sistema para fazer
 
 Para a interface do sistema operacional com o usuário, será utilizado o display LCD que exibirá mensagens de quais são as escolhas do usuário, bem como qual é o processo que está sendo executado no momento. Para isso, serão passados códigos correspondentes a cada uma das mensagens, além disso, será utilizado um segundo registrador para indicar qual é o processo que está sendo executado no momento.
 
-O controle do display LCD será feito exclusivamente pelo sistema operacional, de modo que nenhum outro programa tenho um acesso à ele. Além disso, para ser implementado contará com uma nova função chamada \textit{showLCD([numero])}. A \autoref{tab:mensagens do LCD} abaixo apresenta quais serão os códigos correspondentes a cada uma das mensagens que serão exibidas no display LCD. Nela, P significa a execução de um programa; MP a execução de multiplos programas; E a edição (renomeação de um programa); D a deleção de um programa; C a criação de um programa.
+O controle do display LCD será feito exclusivamente pelo sistema operacional, de modo que nenhum outro programa tenho um acesso à ele. Além disso, para ser implementado contará com uma nova função chamada \textit{showLCD([número])}. A \autoref{tab:mensagens do LCD} abaixo apresenta quais serão os códigos correspondentes a cada uma das mensagens que serão exibidas no display LCD. Nela, P significa a execução de um programa; MP a execução de multiplos programas; E a edição (renomeação de um programa); D a deleção de um programa; C a criação de um programa.
 
 \setlength{\tabcolsep}{10pt}
 \begin{table}[H]
@@ -2838,7 +2856,13 @@ O controle do display LCD será feito exclusivamente pelo sistema operacional, d
 \hline
 3 & Digite os numeros dos programas & Programas a serem executados \\ 
 \hline
-4 & Programa [número] & Programa em execução \\
+4 & Executando P[número] & Programa em execução \\
+\hline
+5 & Input P[número] & Programa esperando input \\
+\hline
+6 & Output P[número] & Programa esperando input \\
+\hline
+7 & Esperando & Não há programas prontos \\
 \hline
 \end{tabular}
 \vspace{-0.5em}

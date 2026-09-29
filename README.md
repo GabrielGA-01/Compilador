@@ -81,8 +81,15 @@ Instruções para o compilador:
 - definirQuantum([numero])
 - saveRegs()
 - loadRegs()
+- (ES) lerBuffer()
+- (ES) lerBufferLimpa()
+- (ES) lerReg([numero])
+- (ES) definirModoES([número])
 
 Instruções para o processador:
 - quant (OP, IM26)
 - retSO (OP, IM26)
 - disp (OP, IM26)
+- (ES) LB (OP, -)
+- (ES) LBL (OP, -)
+- (ES) DFMES (OP, IM26)
