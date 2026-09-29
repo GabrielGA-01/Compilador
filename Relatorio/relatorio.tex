@@ -2809,6 +2809,14 @@ Fonte: o Autor.
 \end{center}
 \end{table} 
 
+\section{Gerenciamento de arquivo}
+
+Para fazer operações com arquivos, será usado a interface do sistema operacional mostrada na \autoref{tab:mensagens do LCD}. A exclusão de um arquivo impedirá a escolha dele para ser executado posteriormente. A edição de um arquivo mudará o nome dele, podendo atribuir outro número que não esteja sendo usado. 
+
+A criação de um arquivo começa recebendo o número que será o nome dele. Em sequência, utilizará os switches para escrever os 16 bits mais significativos e os 16 bits menos significativos de cada uma das linhas do arquivo alternadamente. Quando houver uma linha com 32 zeros, encerra a escrita do arquivo.
+
+Para a criação, o SO esserá usado um estado especial para o módulo de entrada e saída utiliando a função do compilador \textit{definirModoES([número])} com o número 2, indicando escrita do arquivo. Nesse modo, a cada input ele salva em meio buffer, após dois, junta os valores e os escreve na posição da linha correspondente na memória de instruções.
+
 \section{Gerenciamento de entrada e saída}
 
 \subsection{Implementado no algoritmo SO}
