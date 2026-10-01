@@ -311,6 +311,8 @@ O objetivo geral é desenvolver um sistema operacional simplificado capaz de lid
 	\item Fazer o planejamento da implementação de um sistema operacional simplificado;
 	\item Implementar o módulo de interrupção, responsável por definir o quantum de cada programa e por alternar entre os programas em execução;
 	\item Implementar o controle de acesso dinâmico à memória principal e à memória de instruções de acordo com o programa que é executado;
+	\item Permitir a criação, edição e deleção de arquivos;
+	\item Fazer a chamada ao SO para operações de entrada e saída;
 	\item Desenvolver o código do sistema operacional em C- para fazer o escalonamento entre os processos utilizando Round Robin e implementar a interface;
 	\item Compilar o código do sistema operacional junto com os outros 10 códigos em C- e testar no kit FPGA, para verificar se o sistema operacional é capaz de gerenciar a execução dos programas corretamente;
    
@@ -2656,23 +2658,89 @@ Para alocar espaço em uma pilha, o ponteiro correspondente é decrementado com 
 
 \chapter{Desenvolvimento do Sistema operacional}
 
+\section{Papel dos registradores}
+
+Para tornar viável a implementação do sistema operacional foi necessário definir novos registradores para desempenharem funções específicas no processador. Além disso, de modo a aumentar o tempo de compilação, o número de registradores foi reduzido para 16. A \autoref{tab:registradores_so} apresenta o papel que cada um dos registradores irá desempenhar.
+
+\begin{table}[h!]
+\centering
+\caption{Papel de cada um dos registradores}
+\label{tab:registradores_so}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l l}
+\toprule
+\textbf{Registrador} & \textbf{Papel / Função} \\
+\midrule
+\textbf{R0}  & Zero (valor constante 0) \\
+\textbf{R1}  & Compilador \\
+\textbf{R2}  & Compilador \\
+\textbf{R3}  & Compilador \\
+\textbf{R4}  & Compilador \\
+\textbf{R5}  & Sem uso \\
+\textbf{R6}  & Sem uso \\
+\textbf{R7}  & Sem uso \\
+\textbf{R8}  & I/O: comunicação entre processo e SO \\
+\textbf{R9}  & Endereço de retorno do PC \\
+\textbf{R10} & Posição do programa na memória \\
+\textbf{R11} & Número (nome) do programa \\
+\textbf{R12} & Pilha geral do compilador \\
+\textbf{R13} & Pilha global do compilador \\
+\textbf{R14} & Retorno da instrução JAL \\
+\textbf{R15} & Pilha em hardware \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \section{Gerenciamento de processos}
 
 \subsection{Implementado no algoritmo do SO}
 
-Para o gerenciamento de processos, foi escolhido implementar um escalonador do tipo round-robin, dessa forma, cada processo recebe um determinado número deinstruções para serem executadas, e caso não termine nesse tempo, ele é colocado no final da fila de processos prontos, e o próximo processo da fila é executado. 
+Para o gerenciamento de processos, foi escolhido implementar um escalonador do tipo round-robin, dessa forma, cada processo recebe um determinado número deinstruções para serem executadas, e caso não termine nesse tempo, ele é colocado no final da fila de processos prontos, e o próximo processo da fila é executado. Caso o processo faça uma operação de entrada e saída, ele deixará de estar na fila de prontos e irá para a fila de E/S, conforme \autoref{sec:gerenciamento_de_entrada_e_saida}.
 
-O escalonador é acionado a cada 10 instruções executadas, e o processo que estava em execução é colocado no final da fila de processos prontos, e o próximo processo da fila é colocado em execução. Caso um processo chege ao final ele é removido da fila.
+Na implementação, o escalonador é acionado por padrão a cada 10 instruções executadas. Após isso, o processo que estava em execução é colocado no final da fila de processos prontos e o próximo processo da fila é colocado em execução. Caso um processo termine a sua execução, ele é removido de todas as filas.
 
-Para fazer o controle de qual programa está em execução, foi implementada uma nova função para o compilador, chamada \textit{definirProgramaParaExecutar([número])}. Ela escreve o número do programa em \textit{R11}, escreve a posição dele na memória em \textit{R10} e faz o salto para o PC do programa, presente no registrador \textit{R9}.
+O SO inicialmente salva em uma variável o número de processos que serão executados e a cada processo que chega ao fim, ele subtrai um dessa variável. A cada novo processo que iniciará a execução, o SO verifica o valor dessa variável para saber se ainda há processo para serem executado ou não.
 
-Quando é executado um único programa serialmente, não é utilizado round-robin e o programa é executado até o final, sem interrupções e em seguida é feito o retorno para o SO.
+Quando o SO verifica que há um programa na fila de prontos para ser executado ele utiliza a funçao do compilador \textit{definirProgramaParaExecutar([número])}. A \autoref{tab:definir_programa} abaixo descreve, em ordem sequencial, o procedimento realizado por essa instrução. O Módulo de Interrupção é apresentado na \autoref{sec:modulo_de_interrupcao}.
 
-Quando é feito o retorno para o SO, é utiliza uma outra função do compilador \textit{obterEstado()}, que faz a leitura do registrador \textit{R11}, para saber se o programa chegou ao fim, caso o valor de retorno da função seja 0, ou caso ainda esteja em execução.
+\vspace{0.5em}
+
+\begin{table}[h!]
+\centering
+\caption{Ações realizadas pela função de definição do programa}
+\label{tab:definir_programa}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabularx}{\textwidth}{X}
+\midrule
+1. Escreve o número do programa no registrador \textit{R10}; \\
+2. Escreve a posição do programa no buffer do banco de registradores; \\
+3. Salva os registradores do Sistema Operacional (SO), com exceção de \textit{R10} e \textit{R11}; \\
+4. Carrega os registradores do programa, com exceção de \textit{R10} e \textit{R11}; \\
+5. Move o valor do registrador \textit{R9} (retorno) para o buffer do PC; \\
+6. Atualiza o endereço de retorno do Módulo de Interrupção; \\
+7. Simultaneamente aplica os valores dos buffers no valor do PC e no registrador \textit{R10}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Salvar e recuperar os valores dos registradores são operações feitas por outras duas funções especiais do compilador \textit{saveRegs()} e \textit{loadRegs()}. Elas são apresentadas mais detalhadamente na \autoref{sec:gerenciamento_memoria_implementado_no_algortimo_SO}
+
+Para implementar essas funcionalidades, foi necessário criar uma série de novas funções para o processador, sendo elas: \textit{bufBR}, para salvar a posição do programa no buffer do banco de registradores; \textit{bufPC}, para salvar a posição de \textit{R9} no buffer do Módulo do PC; \textit{aplBuf} para aplicar os dois buffers ao mesmo tempo; \textit{retSo} para definir o endereço para retornar para o SO posteriormente, isso é explicado melhor na \autoref{sec:modulo_de_interrupcao}. Mais detalhes sobre essas funções está disponível na \autoref{sec:novas_instrucoes_processador}.
+
+Para a execução de um único programa, não é utiliado o quantum e ele pode ser executado diretamente até o final, sendo interrompido somente pelas operações de entrada e saída que fizer.
+
+Caso haja múltiplos programas para serem executados, eles ficam dividos em duas filas: prontos e bloqueados. Os programas prontos podem ser executados a qualquer momento, enquanto os bloqueados estão esperando por entrada ou saída.
+
+O SO sempre irá escolher o primeiro programa da lista de prontos para ser executado e utilizará a instrução \textit{definirProgramaParaExecutar[número]} para fazer a troca de contexto para ele. Após o programa chegar ao fim ou acabar o quantum dele, o processador fará o retorno para a execução do SO.
+
+Quando o SO retornar, ele utilizará a função do compilador \textit{lerReg([numero])} para obter o valor do registrador \textit{R11}. Se o valor desse registrador for zero, então o programa chegou ao fim, nesse caso o SO remove o programa da lista de prontos e soma em uma variável que mais um programa chegou ao fim. Caso contrário, se o valor do registrador for diferente de zero, então o SO removerá o programa da primeira posição da fila de prontos para última posição da fila de prontos.
+
+Caso o programa seja interrompido por ter solicitado um input ou output ele será removido da lista de prontos e irá para última posição da lista de bloqueados. Há mais detalhes sobre como isso ocorre na \autoref{sec:gerenciamento_de_entrada_e_saida}.
 
 \subsection{Módulo de interrupção}
+\label{sec:modulo_de_interrupcao}
 
-Para fazer o gerenciamento de processos foi criado um novo módulo chamado Módulo de Interrupção. Ele é reponsável por contar o quantum e retornar para o SO quando ele acabar ou caso o programa chege ao fim. A contagem do quantum é feita somente enquanto o valor de TravaPC for zero, ou seja, enquanto o programa estiver sendo executado. As entradas e saídas desse módulo são apresentadas na \autoref{tab:IO_Interrupcao}.
+Foi criado um módulo chamado Módeulo de Interrupção, resposável por fazer o retorno do programa em execução para o SO. Para isso, ele faz a contagem do quantum para os programas do usuário e verifica se o programa chegou ao fim. Caso ocorra um desses eventos, ele faz o retorno para o SO. A contagem do quantum não é feita quando o SO estiver em execução. As entradas e saídas desse módulo são apresentadas na \autoref{tab:IO_Interrupcao}.
 
 \setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
 \begin{table}[H]
@@ -2697,7 +2765,9 @@ TravaPC & 1 & Se o PC está mudando ou não \\
 \hline
 \textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
 \hline
-RetornoSO & 8 & Valor para retornar para o algoritmo do SO \\
+RetornoSO & 8 & Valor do PC para retornar ao SO \\
+\hline
+R10 & 32 & Valor para ser escrito em R10 \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -2706,44 +2776,30 @@ Fonte: o Autor.
 \end{center}
 \end{table} 
 
-Para atuar sobre esse módulo, foram criadas duas novas instruções para o processador, \textit{quant} e \textit{retSO}. A instrução \textit{quant} é responsável por enviar o valor do quantum para o módulo de interrupção, e a instrução \textit{retSO} é responsável por enviar o valor de retorno do SO para o módulo de interrupção. A \autoref{novas_instrucoes} apresenta as novas instruções do processador, sendo MI o módulo de interrupção.
+Para atuar sobre esse módulo, são usadas as instruções \textit{quant} e \textit{retSO}. A instrução \textit{quant} é responsável por enviar o valor do quantum para o módulo de interrupção, e a instrução \textit{retSO}, como explicado na seção anterior, é responsável por enviar o valor de retorno do SO para o módulo de interrupção. A \autoref{sec:novas_instrucoes_processador} traz mais detalhes sobre a classificação formal dessas instruções.
 
-\setlength{\tabcolsep}{10pt}
-\begin{table}[H]
-\centering
-\caption{Novas instruções do processador}
-\label{novas_instrucoes}
-\begin{tabular}{|c|>{\raggedright\arraybackslash}p{7cm}|}
-\hline
-Instrução & Operação\\
-\hline
-\multicolumn{2}{|c|}{Formato 7} \\
-\hline
-quant &  MI-Quantum <= END26 \\
-retSO &  MI-RetornoSO <= END26 \\
-\hline
-\end{tabular}
-\vspace{-0.5em}
-\begin{center}
-\textit{Fonte: o Autor.}
-\end{center}
-\end{table}
+Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([número])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo sistema operaciona. O endereço de retorno do SO é definido pela função \textit{definirProgramaParaExecutar([numero])}.
 
-Além disso, para que o sistema operacional tenha acesso à mudança do quantum, foi criada uma nova função em C-, \textit{definirQuantum([número])}. Por padrão, o quantum é definido como 10 instruções, mas o valor pode ser alterado pelo usuário. Para o caso do endereço de retorno, o valor será definido em outras instruções do compilador que serão criadas
+Além do mais, o valor da saída do módulo \textit{RetornoSO} fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução e assume o valor do endereço de retorno do SO quando for necessário fazer o retorno para o SO.
 
-Além do mais, o valor do endereço de retorno para SO fica em dois estados principais: assume -1 enquanto o sistema operacional está em execução, e assume o valor do endereço de retorno do SO quando o sistema operacional termina a execução. Desse modo, é feito o controle de apenas considerar o quantum para os programas de usuário. 
+Sendo assim, o valor lido pelo Módulo de Acesso à Memória de Instruções, apresentado na seção \autoref{sec:Modulos_de_acesso_a_memoria}, para o endereço de retorno do SO é constantemente -1, com exceção do momento no qual ele deve fazer o salto para retornar ao SO.
 
-Do mesmo modo, o valor lido pelo Módulo de Acesso à Memória de Instruções (apresentado na seção \autoref{sec:Modulos_de_acesso_a_memoria}) para o endereço de retorno do SO é constantemente -1, com exceção do momento no qual ele deve fazer o salto para retornar para ele.
+Além disso, ao mesmo tempo que atribui o endereço de retorno para a variável \textit{RetornoSO}, também atualiza o valor do registrador \textit{R10} (posição do programa em execução) para zero, de modo que o Módulo de Acesso à Memória de Instruções acesse o endereço de retorno do SO e usando a posição da memória em que o SO está de fato.
 
-Para que o SO saiba se um programa terminou a execução, o sinal de HALT do processador foi modificado, de modo que ele é enviado para o módulo de interrupção, que imediatamente envia o endereço de retorno do SO para ser feito o retorno.
-
-Ademais, o sinal do HALT também é enviado para o banco de registradores, que caso receba o valor um, sobrescreve o registrador com o programa em execução com o valor 0, indicando que o programa terminou a execução para o SO.
+Outra mudança necessária foi na operação \textit{HALT}, que ao invés de parar o processador, é utilizado pelo Módulo de Interrupção. Quando ele assume o valor um, esse módulo imediatamente realiza o retorno para o SO. Ademais, o sinal do HALT também é enviado para o banco de registradores, que, caso receba o valor um, sobrescreve o registrador \textit{R11} (com o número do programa em execução) com o valor 0, indicando que o programa terminou a execução.
 
 \section{Gerenciamento de memória}
 
 \subsection{Implementado no algoritmo SO}
+\label{sec:gerenciamento_memoria_implementado_no_algortimo_SO}
 
-O gerenciamento de memória feito pelo SO é o controle do uso correto dos registradores entre os programas. Para isso, são utilizadas duas instruções especiais para o compilador \textit{saveRegs()} e \textit{loadRegs()}. A primeira instrução é responsável por salvar os registradores de uso geral do programa em execução na memória, e a segunda instrução é responsável por carregar os registradores de uso geral do próximo programa a ser executado. Esse salvamento e recuperação dos valores é feito utilizando as posições 1 a 16 da memória do programa junto as instruções \textit{loadi} e \textit{storei}.
+O gerenciamento de memória feito pelo SO busca fazer o controle e uso correto dos registradores entre os programas. Para isso, dentro da função \textit{definirProgramaParaExecutar([numero])}, são utilizadas duas instruções especiais para o compilador \textit{saveRegs()} e \textit{loadRegs()}. A primeira instrução é responsável por salvar os registradores de uso geral do programa em execução na memória, e a segunda instrução é responsável por carregar os registradores de uso geral do próximo programa a ser executado. 
+
+Esse salvamento e recuperação dos valores é feito utilizando as posições 0 a 13 da memória do programa, o que totaliza 14 posições, o número de registradores que são salvos/recuperados, já que não é preciso fazer isso com os registradores \textit{R10} e \textit{R11}.
+
+Além disso, foram escolhidas as primeiras posições da memória para utilizar o espaço o mais distante possível das pilhas implementadas pelo compilador, que começam na última posição da memória e vão até a primeira.
+
+Para implementar essas funções são utilizadas as instruções do processador \textit{loadi} e \textit{storei}, passando o registrador que se deseja salvar ou recuperar junto com o imediato da posição da memória na qual ele ficará/está armazenado.
 
 \subsection{Módulos de acesso à memória}
 \label{sec:Modulos_de_acesso_a_memoria}
@@ -2751,7 +2807,7 @@ No processador foram criados dois módulos responsáveis por fazer o controle de
 
 Ambos os módulos continuamente leem o valor do registrador \textit{R10} para saberem qual a posição física em que o programa em execução está na memória e apartir disso, aplicam um deslocamento multiplicando o tamanho de cada programa pelo número da posição dele. Desse modo, os programas 'acreditam' acessarem o endereço que está presente no código, mas na verdade há um deslocamento. 
 
-Além disso, o MADMI tem duas entradas a mais, o sinal de recomeçar a execução do programa e o endereço para fazer o retorno para o programa do SO. A \autoref{tab:IO_MADMI} e a \autoref{tab:IO_MADMP} apresentam, respectivamente as entradas e saídas para o MADMI e o MADMP.
+Além disso, o MADMI tem três entradas a mais, o sinal de recomeçar a execução do programa, o endereço para fazer o retorno para o programa do SO e o valor para a escrita de um novo programa. Além de uma saída a mais, responsável por enviar o valor para ser escrita na memória de instruções. A \autoref{tab:IO_MADMI} e a \autoref{tab:IO_MADMP} apresentam, respectivamente as entradas e saídas para o MADMI e o MADMP.
 
 \setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
 \begin{table}[H]
@@ -2772,9 +2828,13 @@ ResetSignal & 1 & Sinal para recomeçar a execução \\
 \hline
 Retorno SO & 8 & Endereço para retornar para o SO \\
 \hline
+Switches & 32 & Linha do novo programa sendo escrito \\
+\hline
 \textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
 \hline
 EnderecoReal & 32 & Endereço real na memória \\
+\hline
+NumEscrita & 32 & Número para ser escrito na MI \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -2815,10 +2875,14 @@ Para fazer operações com arquivos, será usado a interface do sistema operacio
 
 A criação de um arquivo começa recebendo o número que será o nome dele. Em sequência, utilizará os switches para escrever os 16 bits mais significativos e os 16 bits menos significativos de cada uma das linhas do arquivo alternadamente. Quando houver uma linha com 32 zeros, encerra a escrita do arquivo.
 
-Para a criação, o SO esserá usado um estado especial para o módulo de entrada e saída utiliando a função do compilador \textit{definirModoES([número])} com o número 2, indicando escrita do arquivo. Nesse modo, a cada input ele salva em meio buffer, após dois, junta os valores e os escreve na posição da linha correspondente na memória de instruções.
+Para a criação, o SO esserá usado um estado especial para o módulo de entrada e saída utiliando a função do compilador \textit{definirModoES([número])} com o número 2, indicando escrita do arquivo. Nesse modo, a cada input ele salva em meio buffer. Após dois inputs, junta os valores e os passa para o MADMI. O primeiro input equivale aos bits mais significativos e o segundo input aos bits menos significativos.
+
+O MADMI começa a escrita na linha zero e vai incrementando sequencialmente. A cada input do usuário, o valor do lido pelo MADMI irá mudar, quando for uma entrada impar (o usuário escreveu apenas meia linha), o valor lido será todos os bits com o sinal 1 e quando for par (o usuário entrou 32 números), será a própria entrada do usuário. Acompanhando essa variação é feito o controle da linha atual. Após a linha totalmente zero, reseta o valor da linha para a escrita de um programa futuro. Além do mais, \textit{NumEscrita} permanece com o valor -1, com exceção do momento no qual ele deve realizar a escrita de fato.
+
+Enquanto esse processo de escrita ocorrer, o MADMI garantirá que o PC permanecerá parado, de modo que o código do SO permanecerá parado na instrução de definir o modo do Módulo de Entrada e Saída. Após o MADMI terminar a escrita, no próximo ciclo ele permite a atualização do valor do PC para o SO continuar a execução.
 
 \section{Gerenciamento de entrada e saída}
-
+\label{sec:gerenciamento_de_entrada_e_saida}
 \subsection{Implementado no algoritmo SO}
 
 Para fazer o controle de entrada e saída será utilizado o registrador \textit{R8}, que receberá os valores de input enviados pelo sistema operacional e os valores de output que o programa quer fazer. 
@@ -2827,7 +2891,7 @@ Quando houver um input de um programa, será escrito o valor -1 no registrador \
 
 Caso seja o primeiro processo da lista de espera por E/S, o SO escreverá na segunda linha do LCD a mensagem de espera de input para ao programa correspondente. Essa mensagem pode ser vista na \autoref{tab:mensagens do LCD}. Ademais, configurará o módulo de entrada e saída no modo input usando a instrução do compilador \textit{definirModoES([número])}, passando o número um. Essa instrução usa a instrução do processador \textit{DFMES}, que fará a atribuição.
 
-Assim que ocorrer um input, o valor será salvo em um buffer no Módulo de Entrada e Saída. Esse buffer será constantemente acessado pelo sistema operacional, que após executar cada programa, executa a função do compilador \textit{lerBuffer()}, que usará uma nova função do processador \textit{LB}, que passa um sinal para o processador escrever o valor do buffer do Módulo de Entrada e Saída no registrador \textit{R8} do SO, além disso, o próprio \textit{lerBuffer} irá retornar o valor do registrador \textit{R8}.
+Assim que ocorrer um input, o valor será salvo em um buffer no Módulo de Entrada e Saída. Esse buffer será constantemente acessado pelo sistema operacional, que após executar cada programa, executa a função do compilador \textit{lerBuffer()}, que usará uma nova função do processador \textit{LB}, que passa um sinal para o processador escrever o valor do buffer do Módulo de Entrada e Saída no registrador \textit{R8} do SO, além disso, o próprio \textit{lerBuffer()} irá retornar o valor do registrador \textit{R8}.
 
 Enquanto não houver um valor de input, o buffer ficará com o valor -1, indicando que não há nenhum valor novo lido. Caso o valor seja diferente de -1, o sistema operacional detecta que houve um input e retira o primeiro programa da lista de espera de E/S e coloca ele na lista de pronto. Antes dele ser executado, o SO irá usar a instrução do compilador \textit{lerBufferLimpa()}, que irá ler o buffer para o registrador \textit{R8} do programa que precisa do input, ao mesmo tempo que limpa o buffer usando a instrução do processador \textit{LBL}. Esse registrador será carregado para outro pelo programa do usuário e imediatamente após, será mudado para -2.
 
@@ -2839,9 +2903,80 @@ Assim que o botão do FPGA for apertado, o valor do buffer do módulo de entrada
 
 Caso o SO volte a executar e o valor do registrador \textit{R8} seja -2, então não há pedido de input ou output pelo programa que estava sendo executado. Além do mais, caso todos os programas estejam na espera por E/S, então o SO fica em uma espera ocupada com \textit{lerBuffer()}.
 
-\section{Extra}
+\section{Novas instruções do processador}
+\label{sec:novas_instrucoes_processador}
 
-\subsection{Interface}
+Novas instruções foram apresentadas nas seções anteriores, essa seção busca apresentar de modo formal a operação que cada uma delas realiza, o Opcode que receberam e em qual formato de instruções elas estão. A \autoref{tab:opcode_instrucoes_SO} apresenta o Opcode das novas instruções do processador.
+
+\setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
+\begin{table}[H]
+\centering
+\caption{Lista numerada das instruções novas do processador}
+\label{tab:opcode_instrucoes_SO}
+\begin{tabular}{|c c|c c|}
+\hline
+Opcode & Instrução & Opcode & Instrução \\
+\hline
+\texttt{100111} & bufBR  & \texttt{101011} & LB    \\
+\texttt{101000} & bufPC  & \texttt{101100} & LBL   \\
+\texttt{101001} & aplBuf & \texttt{101101} & DFMES \\
+\texttt{101010} & quant  & \texttt{101110} & disp  \\
+\texttt{101011} & retSO  &                 &       \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+Fonte: o Autor.
+\end{center}
+\end{table}
+
+A \autoref{tab:instrucoes_processador_so} apresenta as novas instruções, o formato e as operações realiazadas. Nele, \textit{'PC-'} faz referência ao Módulo do PC, \textit{'MI-'} ao Módulo de Interrupção, \textit{'BR-'} ao Banco de Registradores. A mensagem do LCD faz referência à \autoref{tab:mensagens do LCD}. A forma da instrução de cada formato está na \autoref{tab:formatos_instrucoes}.
+
+\setlength{\tabcolsep}{10pt}
+\begin{table}[H]
+\centering
+\caption{Novas instruções do processador}
+\label{tab:instrucoes_processador_so}
+\begin{tabular}{|c|>{\raggedright\arraybackslash}p{7cm}|}
+\hline
+Instrução & Operação\\
+\hline
+\multicolumn{2}{|c|}{Formato 5} \\
+\hline
+	bufBR & BR-Buffer <= RS \\
+\hline
+\multicolumn{2}{|c|}{Formato 6} \\
+\hline
+disp & Diplay-LCD <= Mensagem[IM20][RT] \\
+\hline
+\multicolumn{2}{|c|}{Formato 7} \\
+\hline
+bufPC & PC-Buffer <= END26 \\
+aplBuf & PC <= PC-Buffer; R10 <= BR-Buffer \\
+quant &  MI-Quantum <= END26 \\
+retSO &  MI-RetornoSO <= END26 \\
+LB & R8 <= ES-Buffer \\
+LBL & R8 <= ES-Buffer; ES-Buffer <= -1 \\
+DFMES & ES-Modo <= IM26 \\
+\hline
+\end{tabular}
+\vspace{-0.5em}
+\begin{center}
+\textit{Fonte: o Autor.}
+\end{center}
+\end{table}
+
+A \autoref{fig:cmdados-SO} apresenta os novos caminhos de dados considerando a criação de nóvos módulos e alteração de variáveis de sinais. Todos os caminhos novos estão na cor verde, está na cor amarela a alteração de um sinal que já existia anteriormente.
+
+\begin{figure}[H]
+  \centering
+  \caption{Caminho de dados com SO}
+  \includegraphics[angle=90, height=0.9\textheight]{Imagens/CmDados_SO.png} \\
+  Fonte: o Autor.
+  \label{fig:cmdados-SO}
+\end{figure}
+
+\section{Interface}
 
 Para a interface do sistema operacional com o usuário, será utilizado o display LCD que exibirá mensagens de quais são as escolhas do usuário, bem como qual é o processo que está sendo executado no momento. Para isso, serão passados códigos correspondentes a cada uma das mensagens, além disso, será utilizado um segundo registrador para indicar qual é o processo que está sendo executado no momento.
 
@@ -2871,6 +3006,12 @@ O controle do display LCD será feito exclusivamente pelo sistema operacional, d
 6 & Output P[número] & Programa esperando input \\
 \hline
 7 & Esperando & Não há programas prontos \\
+\hline
+8 & P[número] não econtrado & Sem deleção/execução \\
+\hline
+9 & P[número] já existe & Caso dois nomes iguais \\
+\hline
+10 & P[nuúmero] salvo & Escreveu um programa novo \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -2927,31 +3068,22 @@ Fonte: o Autor.
 
 % CONSIDERAÇÕES FINAIS
 \chapter{Conclusão}
-Ao longo deste relatório, foi apresentado o desenvolvimento de um compilador para a linguagem C-, capaz de traduzir um programa de alto nível até o código binário, além do processador MIPS monociclo que serve de alvo para esse código e que foi desenvolvido anteriormente. Com isso, tornou-se possível acompanhar todo o caminho de um programa, desde a sua escrita em C- até a execução das instruções em binário no hardware, passando pela análise léxica, sintática e semântica e, em seguida, pela geração do código intermediário, do assembly e do executável.
+Foram apresentadas quatro tipos de gerenciamento que serão implementados no sistema operacional: processos; memória; arquivo; e entrada e saída. Para cada um deles foi apontada a fundamentação teórica e mudanças que serão implementadas para que eles possam funcionar junto ao processador e o compilador oriundo de projetos anteriores.
 
 \section{Dificuldades Encontradas}
-Durante o desenvolvimento do compilador, uma das maiores dificuldades foi a alocação de registradores, já que o processador possui uma quantidade pequena de registradores de uso geral. Foi preciso criar uma forma de reaproveitá-los ao longo do programa e de decidir quando um valor deveria ser guardado na memória para liberar espaço, o que exigiu bastante atenção para não sobrescrever um valor que ainda seria utilizado.
+O maior desafio encontrado foi fazer o planjamento detalhado de quais módulos do processador serão alterados e quais precisam ser criados para implementar todas as novas funcionalidades simultaneamente, bem como os novos caminhos de dados para isso.
 
-Ligada a essa questão, também foi trabalhosa a situação dos valores temporários que precisam sobreviver a uma chamada de função, pois eles não podem simplesmente ficar em um registrador que a função chamada pode alterar. Para tratar esse caso, foi necessário acompanhar o uso de cada temporário e proteger aqueles que atravessam uma chamada.
-
-Outro ponto que gerou dificuldade foi o gerenciamento de memória com as duas pilhas, principalmente para garantir o funcionamento correto da recursão, na qual cada chamada precisa da sua própria região de memória. Além disso, na geração do código binário, foi preciso ter cuidado no cálculo do destino dos desvios, que é feito de forma relativa em relação à próxima instrução, e na conversão das quádruplas genéricas para o formato de instrução correto de acordo com o tipo dos operandos.
-
-Em relação ao processador, durante o seu desenvolvimento, foram encontradas algumas contradições entre a operação realizada pelas instruções storer e storei e o caminho de dados. Além disso, o salto condicional a princípio não estava considerando a posição atual do PC. Ambos os erros já foram corrigidos.
-
-Ainda sobre o processador, inicialmente estava planejado executar as operações de multiplicação e divisão utilizando dois registradores especiais para armazenar o resultado, RH, para a parte alta da multiplicação e RL, para a parte baixa da multiplicação. Porém, constatou-se que isso iria fazer a utilização do processador ser consideravelmente mais complicada. Isso levou a uma mudança para permitir que a parte baixa do resultado pudesse ser escrita em qualquer registrador. Foi também abandonada a ideia de utilizar o registrador específico RH, pois, durante o desenvolvimento da integração entre a ULA e o banco de registradores, foi observado que o tempo de compilação aumentava de cerca de 11 minutos para meia hora ao utilizar duas conexões entre a ULA e o banco de registradores. Sendo assim, o projeto passou a utilizar somente a saída padrão, SL, para essas instruções.
-
-Além disso, para receber e enviar dados para o módulo de entrada e saída, a princípio, seriam utilizados exclusivamente dois registradores especiais, RIN, para receber os dados, e ROUT para enviar. Todavia, isso também poderia dificultar a utilização do processador futuramente, então passou a ser permitido que qualquer registrador desempenhe essas funções. Um outro desafio encontrado foi o caminho de dados, que originalmente havia sido desenvolvido de um modo muito ineficiente. Desse modo, foi preciso corrigi-lo, tanto para ser mais fácil de compreendê-lo quanto para ser mais simples de implementá-lo. Por fim, na etapa de testes no kit FPGA, foram encontradas grandes dificuldades para escrever corretamente os valores no display, já que o valor era escrito em um ciclo de clock e perdido no ciclo seguinte. Após muitos testes, a solução encontrada foi escrever no display somente durante a borda de descida do clock.
+Além disso, outro desafio é analisar de forma crítica se o que está sendo planejado está correto e é viável de ser feito, tomando cuidado para não propor propostas falhas e acarretar em mais trabalho futuramente.
 
 \section{Destaques}
-Um dos principais destaques do projeto é o fato de o compilador funcionar de ponta a ponta, ou seja, ele recebe um programa em C- e produz, de forma automática, o código intermediário, o código assembly e o código binário correspondente. Além disso, o binário gerado utiliza exatamente os mesmos opcodes e formatos do processador desenvolvido anteriormente, o que permite que o código produzido pelo compilador seja de fato executado no hardware implementado no kit FPGA.
-
-Outro ponto de destaque é o suporte à recursão, que pôde ser demonstrado nos exemplos do fatorial e do máximo divisor comum. Poder acompanhar um mesmo programa em todas as suas representações, desde o código-fonte até o binário, ajuda bastante a entender de maneira concreta como um compilador transforma um programa de alto nível em algo que a máquina consegue executar. Em relação ao processador, vale destacar que todos os módulos desenvolvidos foram testados e apresentaram o funcionamento de acordo com o planejado, e a integração entre eles foi feita aos poucos, sem grandes problemas.
+O destaque do projeto é a proposta de fazer o gerenciamento de entrada e saída por meio do SO, garantindo que o processador não pare caso haja um processo esperando por entrada ou saída.
 
 \section{Trabalhos Futuros}
-No compilador, muitas melhorias ainda poderiam ser feitas. Seria interessante aplicar otimizações ao código gerado, de modo a reduzir a quantidade de instruções produzidas, além de aprimorar a alocação de registradores e o controle dos valores temporários. Também seria possível ampliar o conjunto de construções da linguagem tratadas pelo compilador e melhorar as mensagens de erro apresentadas ao usuário.
+No processador, muitas melhorias poderiam ser feitas, incluindo: uma melhor organização do caminho de dados, que poderia ser mais simples e direto; ao invés de escrever em dois registradores ao mesmo tempo no banco, transformar os registradores especiais em buffers que ficariam dentro do módulo onde são usados; teste de mais instruções para garantir ainda mais solidamente o correto funcionamento.
 
-Já no processador, muitas melhorias poderiam ser feitas, incluindo: uma melhor organização do caminho de dados, que poderia ser mais simples e direto; ao invés de escrever em dois registradores ao mesmo tempo no banco, transformar os registradores especiais em buffers que ficariam dentro do módulo onde são usados; teste de mais instruções para garantir ainda mais solidamente o correto funcionamento.
+No compilador seria interessante aplicar otimizações ao código gerado, de modo a reduzir a quantidade de instruções produzidas, além de aprimorar a alocação de registradores e o controle dos valores temporários. Também seria possível melhorar as mensagens de erro apresentadas ao usuário.
 
+Para o sistema operacional é possível adicionar uma simulação do disco, de modo que os programas não começem diretamente na memória principal, bem como a BIOS para trazer o sistema operacional pela primeira vez para a memória principal. Ademais, ainda seria possível implementar a segmentação da memória principal, de modo que os códigos só utilizassem o espaço que de fato precissam.
 % ---
 % Finaliza a parte no bookmark do PDF
 % para que se inicie o bookmark na raiz

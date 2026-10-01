@@ -76,6 +76,17 @@ R9 - Endereço do PC
 R8 - I/O: processo <-> SO
 R0 - Zero
 
+Núcleo do SO:
+
+definirProgramaParaExecutar:
+- Escreve o número do programa em R11
+- Escreve a posição do programa no buffer do banco de registradores
+- saveRegs()
+- loadRegs() {Não carrega R10 e R11} || Não atualiza R9 de R10=0
+- Move o conteúdo de R9 para o buffer do do PC  
+- Atualiza o endereço de retorno do Módulo de Interrupção
+- Aplica os valores contidos nos buffers do PC e do banco para o PC e R10
+
 Instruções para o compilador:
 - definirProgramaParaExecutar([numero])
 - definirQuantum([numero])
@@ -83,13 +94,22 @@ Instruções para o compilador:
 - loadRegs()
 - (ES) lerBuffer()
 - (ES) lerBufferLimpa()
-- (ES) lerReg([numero])
+- (PR/ES) lerReg([numero])
 - (ES) definirModoES([número])
 
+(PR) = Processos
+(ME) = Memória
+(ES) = Entrada e saída
+
 Instruções para o processador:
-- quant (OP, IM26)
-- retSO (OP, IM26)
-- disp (OP, IM26)
+- (PR)bufferBanco (OP, REG)
+- (PR)bufferPC (OP, REG)
+- (PR)aplicarBuffer (OP, -)
+- (PR) retSO (OP, IM26)
+- (PR) quant (OP, IM26)
 - (ES) LB (OP, -)
 - (ES) LBL (OP, -)
 - (ES) DFMES (OP, IM26)
+- disp (OP, IM26)
+[Adicionar depois]
+- (ES) Novas instruções de IN e OUT que levam ao SO
