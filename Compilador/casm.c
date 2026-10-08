@@ -1029,7 +1029,15 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case lerBufferLimpa
             else if (strcmp(funcName, "lerBufferLimpa") == 0) {
+                Address returnReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
 
+                // 2 - Retorna o valor do buffer para quem chamou a função
+                insertQuadAfter(current, OP_MOV, returnReg, *createRegisterAddr(8), createEmptyAddr());
+
+                // 1 - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
+                insertQuadAfter(current, OP_LBL, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+                // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
             }
 
             // Case lerReg
