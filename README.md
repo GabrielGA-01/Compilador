@@ -82,7 +82,7 @@ definirProgramaParaExecutar:
 - Escreve o número do programa em R11
 - Escreve a posição do programa no buffer do banco de registradores
 - saveRegs()
-- loadRegs() {Não carrega R10 e R11} || Não atualiza R9 de R10=0
+- loadRegs() {Não carrega R0, R10 e R11} || Não atualiza R9 de R10=0
 - Move o conteúdo de R9 para o buffer do do PC  
 - Atualiza o endereço de retorno do Módulo de Interrupção
 - Aplica os valores contidos nos buffers do PC e do banco para o PC e R10

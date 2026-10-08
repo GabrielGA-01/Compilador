@@ -2795,7 +2795,7 @@ Outra mudança necessária foi na operação \textit{HALT}, que ao invés de par
 
 O gerenciamento de memória feito pelo SO busca fazer o controle e uso correto dos registradores entre os programas. Para isso, dentro da função \textit{definirProgramaParaExecutar([numero])}, são utilizadas duas instruções especiais para o compilador \textit{saveRegs()} e \textit{loadRegs()}. A primeira instrução é responsável por salvar os registradores de uso geral do programa em execução na memória, e a segunda instrução é responsável por carregar os registradores de uso geral do próximo programa a ser executado. 
 
-Esse salvamento e recuperação dos valores é feito utilizando as posições 0 a 13 da memória do programa, o que totaliza 14 posições, o número de registradores que são salvos/recuperados, já que não é preciso fazer isso com os registradores \textit{R10} e \textit{R11}.
+Esse salvamento e recuperação dos valores é feito utilizando as posições 0 a 12 da memória do programa, o que totaliza 13 posições, o número de registradores que são salvos/recuperados, já que não é preciso fazer isso com os registradores \textit{R0}, \textit{R10} e \textit{R11}.
 
 Além disso, foram escolhidas as primeiras posições da memória para utilizar o espaço o mais distante possível das pilhas implementadas pelo compilador, que começam na última posição da memória e vão até a primeira.
 
