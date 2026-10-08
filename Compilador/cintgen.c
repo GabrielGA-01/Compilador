@@ -247,6 +247,15 @@ const char* opToString(QuadOp op) {
         case OP_MOVR:    return "movr";
         case OP_ALLOC:   return "alloc";
         case OP_FREE:    return "free";
+        case OP_BUFBR:   return "bufBR";
+        case OP_BUFPC:   return "bufPC";
+        case OP_APLBUF:  return "aplBuf";
+        case OP_RETSO:   return "retSO";
+        case OP_QUANT:   return "quant";
+        case OP_LB:      return "LB";
+        case OP_LBL:     return "LBL";
+        case OP_DFMES:   return "DFMES";
+        case OP_DISP:    return "disp";
         default:         return "unknown";
     }
 }

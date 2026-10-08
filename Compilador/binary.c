@@ -30,6 +30,15 @@ char* getOpcodeBinary(QuadOp op) {
         case OP_JR:      return "100010";
         case OP_BLE:     return "100101";
         case OP_BGE:     return "100110";
+        case OP_BUFBR:   return "100111";
+        case OP_BUFPC:   return "101000";
+        case OP_APLBUF:  return "101001";
+        case OP_QUANT:   return "101010";
+        case OP_RETSO:   return "101011";
+        case OP_LB:      return "101100";
+        case OP_LBL:     return "101101";
+        case OP_DFMES:   return "101110";
+        case OP_DISP:    return "101111";
         default:         return "000001"; // NOP
     }
 }

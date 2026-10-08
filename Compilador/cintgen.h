@@ -44,6 +44,15 @@ typedef enum {
     OP_MOVR,
     OP_ALLOC,
     OP_FREE,
+    OP_BUFBR,
+    OP_BUFPC,
+    OP_APLBUF,
+    OP_RETSO,
+    OP_QUANT,
+    OP_LB,
+    OP_LBL,
+    OP_DFMES,
+    OP_DISP,
     NONE_OP
 } QuadOp;
 
