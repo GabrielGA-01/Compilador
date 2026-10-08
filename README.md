@@ -97,7 +97,7 @@ Instruções para o compilador:
 - loadRegs()
 - (ES) lerBuffer() - Escreve buffer de ES {LB} em R8 e retorna R8
 - (ES) lerBufferLimpa() - {LBL} + retorno R8
-- (PR/ES) lerReg([numero])
+- (PR/ES) lerReg([numero]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
 - (ES) definirModoES([número])
 
 (PR) = Processos

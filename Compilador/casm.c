@@ -904,7 +904,20 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             else if(current->addr2.kind == TEMP_VAR || current->addr2.kind == REGISTER_KIND){
                 current->op = OP_MOVR;
             }
-            else if(current->addr2.kind == INT_CONST || current->addr2.kind == LABEL_KIND) current->op = OP_MOVI;
+            else if(current->addr2.kind == INT_CONST || current->addr2.kind == LABEL_KIND){
+                current->op = OP_MOVI;
+
+                // GABIARRA FORTE para ler imediato passado para a função lerReg diretamente - Parte 1
+                // Para evitar uma instrução sem papel em lerReg
+                if(current->next != NULL && current->next->next != NULL && strcmp(current->next->next->addr2.name, "lerReg") == 0){
+                    current->addr2.val = current->addr2.val + 10; // Gambiarra para saber que de fato foi passado um número
+                    current->next->next->addr3 = current->addr2; 
+                    if(current->addr1.kind == TEMP_VAR) current->addr1 = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                    if(current->addr2.kind == TEMP_VAR) current->addr2 = *allocate_register(current->addr2.name, tempControlHead, regVector);
+                    if(current->addr3.kind == TEMP_VAR) current->addr3 = *allocate_register(current->addr3.name, tempControlHead, regVector);
+                    current = removeQuad(before, current);
+                }
+            } 
             break;
         case OP_ADD:
             if(current->addr3.kind == INT_CONST) current->op = OP_ADDI;
@@ -937,9 +950,11 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             {
                 current->next->addr1 = current->addr1;
             }
-            // GAMBIARRA SINISTRA - Salva o valor passado no lugar do número de parâmetros da função lerReg 
-            if(strcmp(current->next->addr2.name, "lerReg") == 0) current->next->addr3 = current->addr1;
-            
+            // GABIARRA FORTE para ler imediato passado para a função lerReg diretamente - Parte 2
+            // Apenas queima o registrador, não será necessário usá-lo
+            else if(current->next != NULL && strcmp(current->next->addr2.name, "lerReg") == 0){
+                allocate_register(current->addr1.name, tempControlHead, regVector);
+            }
             // Caso geral de parâmetro
             else{
                 // Aloca um espaço na pilha || Adiciona o parâmetro
@@ -1042,6 +1057,18 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case lerReg
             else if (strcmp(funcName, "lerReg") == 0) {
+                Address returnReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+
+                // 1 - Retorna o valor do registrador requisitado
+                if(current->addr3.kind == INT_CONST && current->addr3.val - 10 >= 0){
+                    insertQuadAfter(current, OP_MOV, returnReg, *createRegisterAddr(current->addr3.val - 10), createEmptyAddr());
+                }
+                else{
+                    perror("Error: lerReg only accepts integer constants as the register number.");
+                    exit(1);
+                } 
+
+                // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
 
             }
 
