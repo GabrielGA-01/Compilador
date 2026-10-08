@@ -92,13 +92,13 @@ Instruções para o compilador:
 - (alteração 1.1) definirNumeroDoPrograma([numero])
 - (alteração 1.1) definirPosicaoDoPrograma([numero])
 - (alteração 1.1) trocarDeContexto()
-- definirQuantum([numero])
+- definirQuantum([numero]) - Utiliza um registrador para passar o valor para GI
 - saveRegs()
 - loadRegs()
 - (ES) lerBuffer() - Escreve buffer de ES {LB} em R8 e retorna R8
 - (ES) lerBufferLimpa() - {LBL} + retorno R8
-- (PR/ES) lerReg([numero]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
-- (ES) definirModoES([número])
+- (PR/ES) lerReg([constante]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
+- (ES) definirModoES([número]) - Utiliza um registrador para passar o valor para ES
 
 (PR) = Processos
 (ME) = Memória
