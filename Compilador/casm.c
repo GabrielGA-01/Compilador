@@ -1021,7 +1021,20 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case saveRegs
             else if (strcmp(funcName, "saveRegs") == 0) {
-
+                // Ordem inversa para aparecer na ordem no código final
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(15), createNumericAddr(12));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(14), createNumericAddr(11));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(13), createNumericAddr(10));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(12), createNumericAddr(9));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(9), createNumericAddr(8));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(8), createNumericAddr(7));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(7), createNumericAddr(6));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(6), createNumericAddr(5));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(5), createNumericAddr(4));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(4), createNumericAddr(3));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(3), createNumericAddr(2));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(2), createNumericAddr(1));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(1), createNumericAddr(0));
             }
 
             // Case loadRegs
