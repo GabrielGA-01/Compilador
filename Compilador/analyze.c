@@ -249,16 +249,23 @@ void buildSymtab(ASTNode * syntaxTree)
 { 
     if (listing == NULL) listing = stdout;
     
-    ExpType outputParamTypes[1] = { Integer };
     // input()
     st_insert("input", 0, location++, Integer, ID_FUN, 0, 0, NULL);
-
-    //output([number])
+    
+    // output([number])
+    ExpType outputParamTypes[1] = { Integer };
     st_insert("output", 0, location++, Void, ID_FUN, 0, 1, outputParamTypes);
 
-    // definirProgramaParaExecutar([numero])
-    ExpType definirProgramaParaExecutarParamTypes[1] = { Integer };
-    st_insert("definirProgramaParaExecutar", 0, location++, Void, ID_FUN, 0, 1, definirProgramaParaExecutarParamTypes);
+    // definirNumeroDoPrograma([numero])
+    ExpType definirNumeroDoProgramaParamTypes[1] = { Integer };
+    st_insert("definirNumeroDoPrograma", 0, location++, Void, ID_FUN, 0, 1, definirNumeroDoProgramaParamTypes);
+
+    // definirPosicaoDoPrograma([numero])
+    ExpType definirPosicaoDoProgramaParamTypes[1] = { Integer };
+    st_insert("definirPosicaoDoPrograma", 0, location++, Void, ID_FUN, 0, 1, definirPosicaoDoProgramaParamTypes);
+
+    // trocarDeContexto()
+    st_insert("trocarDeContexto", 0, location++, Void, ID_FUN, 0, 0, NULL);
 
     // definirQuantum([numero])
     ExpType definirQuantumParamTypes[1] = { Integer };
@@ -283,7 +290,7 @@ void buildSymtab(ASTNode * syntaxTree)
     // definirModoES([número])
     ExpType definirModoESParamTypes[1] = { Integer };
     st_insert("definirModoES", 0, location++, Void, ID_FUN, 0, 1, definirModoESParamTypes);
-  
+
   traverse(syntaxTree, insertNode, checkNode);
   
     if (st_lookup("main") == -1) {

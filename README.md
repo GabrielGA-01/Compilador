@@ -88,12 +88,15 @@ definirProgramaParaExecutar:
 - Aplica os valores contidos nos buffers do PC e do banco para o PC e R10
 
 Instruções para o compilador:
-- definirProgramaParaExecutar([numero])
+- (alteração 1.0) definirProgramaParaExecutar([numero])
+- (alteração 1.1) definirNumeroDoPrograma([numero])
+- (alteração 1.1) definirPosicaoDoPrograma([numero])
+- (alteração 1.1) trocarDeContexto()
 - definirQuantum([numero])
 - saveRegs()
 - loadRegs()
-- (ES) lerBuffer()
-- (ES) lerBufferLimpa()
+- (ES) lerBuffer() - Escreve buffer de ES {LB} em R8 e retorna R8
+- (ES) lerBufferLimpa() - {LBL} + retorno R8
 - (PR/ES) lerReg([numero])
 - (ES) definirModoES([número])
 
@@ -102,13 +105,13 @@ Instruções para o compilador:
 (ES) = Entrada e saída
 
 Instruções para o processador:
-- (PR)bufferBanco (OP, REG)
-- (PR)bufferPC (OP, REG)
-- (PR)aplicarBuffer (OP, -)
+- (PR) bufBR (OP, REG)
+- (PR) bufPC (OP, REG)
+- (PR) aplBuf (OP, -)
 - (PR) retSO (OP, IM26)
 - (PR) quant (OP, IM26)
-- (ES) LB (OP, -)
-- (ES) LBL (OP, -)
+- (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
+- (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
 - (ES) DFMES (OP, IM26)
 - disp (OP, IM26)
 [Adicionar depois]
