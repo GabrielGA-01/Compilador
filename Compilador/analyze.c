@@ -247,20 +247,51 @@ static void insertNode( ASTNode * t)
 // constroi tabela de simbolos
 void buildSymtab(ASTNode * syntaxTree)
 { 
-  if (listing == NULL) listing = stdout;
-  
-  ExpType outputParamTypes[1] = { Integer };
-  st_insert("input", 0, location++, Integer, ID_FUN, 0, 0, NULL);
-  st_insert("output", 0, location++, Void, ID_FUN, 0, 1, outputParamTypes);
+    if (listing == NULL) listing = stdout;
+    
+    ExpType outputParamTypes[1] = { Integer };
+    // input()
+    st_insert("input", 0, location++, Integer, ID_FUN, 0, 0, NULL);
+
+    //output([number])
+    st_insert("output", 0, location++, Void, ID_FUN, 0, 1, outputParamTypes);
+
+    // definirProgramaParaExecutar([numero])
+    ExpType definirProgramaParaExecutarParamTypes[1] = { Integer };
+    st_insert("definirProgramaParaExecutar", 0, location++, Void, ID_FUN, 0, 1, definirProgramaParaExecutarParamTypes);
+
+    // definirQuantum([numero])
+    ExpType definirQuantumParamTypes[1] = { Integer };
+    st_insert("definirQuantum", 0, location++, Void, ID_FUN, 0, 1, definirQuantumParamTypes);
+
+    // saveRegs()
+    st_insert("saveRegs", 0, location++, Void, ID_FUN, 0, 0, NULL);
+
+    // loadRegs()
+    st_insert("loadRegs", 0, location++, Void, ID_FUN, 0, 0, NULL);
+
+    // lerBuffer()
+    st_insert("lerBuffer", 0, location++, Integer, ID_FUN, 0, 0, NULL);
+
+    // lerBufferLimpa()
+    st_insert("lerBufferLimpa", 0, location++, Integer, ID_FUN, 0, 0, NULL);
+
+    // lerReg([numero])
+    ExpType lerRegParamTypes[1] = { Integer };
+    st_insert("lerReg", 0, location++, Integer, ID_FUN, 0, 1, lerRegParamTypes);
+
+    // definirModoES([número])
+    ExpType definirModoESParamTypes[1] = { Integer };
+    st_insert("definirModoES", 0, location++, Void, ID_FUN, 0, 1, definirModoESParamTypes);
   
   traverse(syntaxTree, insertNode, checkNode);
   
-  if (st_lookup("main") == -1) {
-      fprintf(listing, "[Semantic Error] Function main not declared\n");
-      Error = 1;
-  }
-  
-  if (TraceAnalyze) { }
+    if (st_lookup("main") == -1) {
+        fprintf(listing, "[Semantic Error] Function main not declared\n");
+        Error = 1;
+    }
+    
+    if (TraceAnalyze) { }
 }
 
 static void typeError(ASTNode * t, char * message)
