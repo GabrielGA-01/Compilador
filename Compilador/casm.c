@@ -925,12 +925,21 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
         case OP_PARAM:
             // Apenas faz a alocação do espaço, a liberação é feita na função que for chamada
 
-            // Caso a próxima instrução for um call output
+            // Caso a próxima instrução for um call de uma função sem retono
+            // CUIDADO: a função deve receber EXATAMENTE um parâmetro e sem retorno.
             // Apenas adiciona o registrador a ser escrito nela
             if(current->next != NULL && current->next->op == OP_CALL &&
-               strcmp(current->next->addr2.name, "output") == 0){
+                strcmp(current->next->addr2.name, "output") == 0 ||
+                strcmp(current->next->addr2.name, "definirQuantum") == 0 ||
+                strcmp(current->next->addr2.name, "definirNumeroDoPrograma") == 0 ||
+                strcmp(current->next->addr2.name, "definirPosicaoDoPrograma") == 0 ||
+                strcmp(current->next->addr2.name, "definirModoES") == 0)
+            {
                 current->next->addr1 = current->addr1;
             }
+            // GAMBIARRA SINISTRA - Salva o valor passado no lugar do número de parâmetros da função lerReg 
+            if(strcmp(current->next->addr2.name, "lerReg") == 0) current->next->addr3 = current->addr1;
+            
             // Caso geral de parâmetro
             else{
                 // Aloca um espaço na pilha || Adiciona o parâmetro
@@ -952,6 +961,7 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             insertLabel(&labelHead, current->addr1.name, lineNumber);
             current->addr1.val = lineNumber;
             break;
+
         case OP_CALL:
             // Adiciona o endereço de retorno à pilha e recebe o retorno da função
             Address* retAddrs = createLabelAddr();
@@ -969,9 +979,67 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             // Caso seja output
             else if(strcmp(funcName, "output") == 0){
                 Address outputReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                printf("%s", current->addr1.name);
                 insertQuadAfter(current, OP_OUT, outputReg, createEmptyAddr(), createEmptyAddr());
 
                 // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
+            }
+            // Case definirNumeroDoPrograma
+            else if (strcmp(funcName, "definirNumeroDoPrograma") == 0) {
+                printf(" || %s", current->addr1.name);
+            }
+
+            // Case definirPosicaoDoPrograma
+            else if (strcmp(funcName, "definirPosicaoDoPrograma") == 0) {
+
+            }
+
+            // Case trocarDeContexto
+            else if (strcmp(funcName, "trocarDeContexto") == 0) {
+
+            }
+
+            // Case definirQuantum
+            else if (strcmp(funcName, "definirQuantum") == 0) {
+
+            }
+
+            // Case saveRegs
+            else if (strcmp(funcName, "saveRegs") == 0) {
+
+            }
+
+            // Case loadRegs
+            else if (strcmp(funcName, "loadRegs") == 0) {
+
+            }
+
+            // Case lerBuffer
+            else if (strcmp(funcName, "lerBuffer") == 0) {
+                Address returnReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+
+                // 2 - Retorna o valor do buffer para quem chamou a função
+                insertQuadAfter(current, OP_MOV, returnReg, *createRegisterAddr(8), createEmptyAddr());
+
+                // 1 - Faz a leitura do buffer de ES para o registrador R8
+                insertQuadAfter(current, OP_LB, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+                // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
+            }
+
+            // Case lerBufferLimpa
+            else if (strcmp(funcName, "lerBufferLimpa") == 0) {
+
+            }
+
+            // Case lerReg
+            else if (strcmp(funcName, "lerReg") == 0) {
+
+            }
+
+            // Case definirModoES
+            else if (strcmp(funcName, "definirModoES") == 0) {
+
             }
             // Caso geral de chamada de função
             else{
