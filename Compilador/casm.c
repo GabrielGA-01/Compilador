@@ -1039,7 +1039,19 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case loadRegs
             else if (strcmp(funcName, "loadRegs") == 0) {
-
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(15), *createRegisterAddr(0), createNumericAddr(12));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(14), *createRegisterAddr(0), createNumericAddr(11));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(13), *createRegisterAddr(0), createNumericAddr(10));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(12), *createRegisterAddr(0), createNumericAddr(9));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(9), *createRegisterAddr(0), createNumericAddr(8));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(8), *createRegisterAddr(0), createNumericAddr(7));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(7), *createRegisterAddr(0), createNumericAddr(6));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(6), *createRegisterAddr(0), createNumericAddr(5));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(5), *createRegisterAddr(0), createNumericAddr(4));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(3));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(3), *createRegisterAddr(0), createNumericAddr(2));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(2), *createRegisterAddr(0), createNumericAddr(1));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(1), *createRegisterAddr(0), createNumericAddr(0));
             }
 
             // Case lerBuffer
