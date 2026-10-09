@@ -946,7 +946,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                 strcmp(current->next->addr2.name, "definirQuantum") == 0 ||
                 strcmp(current->next->addr2.name, "definirNumeroDoPrograma") == 0 ||
                 strcmp(current->next->addr2.name, "definirPosicaoDoPrograma") == 0 ||
-                strcmp(current->next->addr2.name, "definirModoES") == 0)
+                strcmp(current->next->addr2.name, "definirModoES") == 0 ||
+                strcmp(current->next->addr2.name, "showLCD") == 0)
             {
                 current->next->addr1 = current->addr1;
             }
@@ -1016,7 +1017,10 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case definirQuantum
             else if (strcmp(funcName, "definirQuantum") == 0) {
-
+            }
+            else if (strcmp(funcName, "showLCD") == 0) {
+                Address msgNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_DISP, msgNumberReg, *createRegisterAddr(11), createEmptyAddr());
             }
 
             // Case saveRegs
