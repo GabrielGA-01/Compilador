@@ -1014,7 +1014,19 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case trocarDeContexto
             else if (strcmp(funcName, "trocarDeContexto") == 0) {
+                Address retSOAddr = *createLabelAddr();
 
+                // 4 - Criar a label de retorno
+                insertQuadAfter(current, OP_LABEL, retSOAddr, createEmptyAddr(), createEmptyAddr());
+
+                // 3 - Aplicar a mudança de contexto
+                insertQuadAfter(current, OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+                // 2 - Atualizar endereço de retorno para o SO no MI
+                insertQuadAfter(current, OP_RETSO, retSOAddr, createEmptyAddr(), createEmptyAddr());
+
+                // 1 - Mover R9 para o buffer do PC
+                insertQuadAfter(current, OP_BUFPC, *createRegisterAddr(9), createEmptyAddr(), createEmptyAddr());
             }
 
             // Case definirQuantum

@@ -106,10 +106,10 @@ Instruções para o compilador:
 (ES) = Entrada e saída
 
 Instruções para o processador:
-- (PR) bufBR (OP, REG)
-- (PR) bufPC (OP, REG)
-- (PR) aplBuf (OP, -)
-- (PR) retSO (OP, RD)
+- (PR) bufBR (OP, REG) - Salva o valor no buffer do BR
+- (PR) bufPC (OP, REG) - Salva o valor no buffer do PC
+- (PR) aplBuf (OP, -) - Aplica o buffer do PC e do BR ao mesmo tempo
+- (PR) retSO (OP, RD) - Define o endereço de retorno
 - (PR) quant (OP, RD)
 - (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
 - (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
