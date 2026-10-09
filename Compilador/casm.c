@@ -1017,6 +1017,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case definirQuantum
             else if (strcmp(funcName, "definirQuantum") == 0) {
+                Address quantumNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);   
+                insertQuadAfter(current, OP_QUANT, quantumNumberReg, createEmptyAddr(), createEmptyAddr());
             }
             else if (strcmp(funcName, "showLCD") == 0) {
                 Address msgNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
