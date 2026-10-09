@@ -113,7 +113,7 @@ Instruções para o processador:
 - (PR) quant (OP, RD)
 - (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
 - (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
-- (ES) DFMES (OP, RD)
+- (ES) DFMES (OP, RD) - Define o modo de ES
 - disp (OP, RS, RT) - Passa um registrador com o número da mensagem e outro com o número do programa
 [Adicionar depois]
 - (ES) Novas instruções de IN e OUT que levam ao SO

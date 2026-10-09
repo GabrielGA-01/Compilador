@@ -1105,7 +1105,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case definirModoES
             else if (strcmp(funcName, "definirModoES") == 0) {
-
+                Address modeNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_DFMES, modeNumberReg, createEmptyAddr(), createEmptyAddr());                
             }
             // Caso geral de chamada de função
             else{
