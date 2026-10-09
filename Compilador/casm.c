@@ -1008,7 +1008,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case definirPosicaoDoPrograma
             else if (strcmp(funcName, "definirPosicaoDoPrograma") == 0) {
-
+                Address programPositionReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_BUFBR, programPositionReg, createEmptyAddr(), createEmptyAddr()); 
             }
 
             // Case trocarDeContexto
