@@ -291,6 +291,10 @@ void buildSymtab(ASTNode * syntaxTree)
     ExpType definirModoESParamTypes[1] = { Integer };
     st_insert("definirModoES", 0, location++, Void, ID_FUN, 0, 1, definirModoESParamTypes);
 
+    // showLCD([número])
+    ExpType msgNumberLCD[1] = { Integer };
+    st_insert("showLCD", 0, location++, Void, ID_FUN, 0, 1, msgNumberLCD);
+
   traverse(syntaxTree, insertNode, checkNode);
   
     if (st_lookup("main") == -1) {

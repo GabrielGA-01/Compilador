@@ -99,6 +99,7 @@ Instruções para o compilador:
 - (ES) lerBufferLimpa() - {LBL} + retorno R8
 - (PR/ES) lerReg([constante]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
 - (ES) definirModoES([número]) - Utiliza um registrador para passar o valor para ES
+- (Bonus) showLCD([número]) - Envia o registrador R11 junto com um registrador com o número da mensagem
 
 (PR) = Processos
 (ME) = Memória
@@ -108,11 +109,11 @@ Instruções para o processador:
 - (PR) bufBR (OP, REG)
 - (PR) bufPC (OP, REG)
 - (PR) aplBuf (OP, -)
-- (PR) retSO (OP, IM26)
-- (PR) quant (OP, IM26)
+- (PR) retSO (OP, RD)
+- (PR) quant (OP, RD)
 - (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
 - (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
-- (ES) DFMES (OP, IM26)
-- disp (OP, IM26)
+- (ES) DFMES (OP, RD)
+- disp (OP, RS, RT) - Passa um registrador com o número da mensagem e outro com o número do programa
 [Adicionar depois]
 - (ES) Novas instruções de IN e OUT que levam ao SO
