@@ -3020,7 +3020,7 @@ Fonte: o Autor.
 \end{center}
 \end{table}
 
-Para isso, será criada uma nova instrução \textit{disp}, similar à instrução \textit{out}, que fará a leitura do registrador de uso específico \textit{R11}, que contém o número do programa em execução e o enviará para o display LCD junto com a mensagem. Além disso, para que o código chege ao módulo de entrada e saída, será criado um novo caminho de dados, que fornecerá o valor do imediado da instrução para este módulo. A \autoref{tab:IO_Entrada_E_Saida_2.0} apresenta as novas entradas e saídas do módulo de entrada e saída, que foram adicionadas para o funcionamento do sistema operacional.
+Para isso, será criada uma nova instrução \textit{disp}, similar à instrução \textit{out}, que fará a leitura do registrador de uso específico \textit{R11}, que contém o número do programa em execução e o enviará para o LCD junto com a mensagem. Além disso, para que o código chegue ao módulo de entrada e saída, será criado um novo caminho de dados, que fornecerá o valor de outro registrador contendo o número da mensagem para este módulo. A \autoref{tab:IO_Entrada_E_Saida_2.0} apresenta as novas entradas e saídas do módulo de entrada e saída, que foram adicionadas para o funcionamento do sistema operacional.
 
 \setlength{\tabcolsep}{10pt} % Define o tamanho das colunas
 \begin{table}[H]
@@ -3028,7 +3028,7 @@ Para isso, será criada uma nova instrução \textit{disp}, similar à instruç�
 \caption{Entradas e saídas do módulo de entrada e saída com o SO}
 \label{tab:IO_Entrada_E_Saida_2.0}
 \begin{tabular}{|c|c|l|}
-\hline
+\hline	
 \multicolumn{3}{|c|}{\textbf{ENTRADAS}} \\
 \hline
 \textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
