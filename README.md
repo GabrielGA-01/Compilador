@@ -89,7 +89,7 @@ definirProgramaParaExecutar:
 
 Instruções para o compilador:
 - (alteração 1.0) definirProgramaParaExecutar([numero])
-- (alteração 1.1) definirNumeroDoPrograma([numero])
+- (alteração 1.1) definirNumeroDoPrograma([numero]) - Escreve no registrador R11
 - (alteração 1.1) definirPosicaoDoPrograma([numero])
 - (alteração 1.1) trocarDeContexto()
 - definirQuantum([numero]) - Utiliza um registrador para passar o valor para GI

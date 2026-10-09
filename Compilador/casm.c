@@ -1002,7 +1002,8 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             }
             // Case definirNumeroDoPrograma
             else if (strcmp(funcName, "definirNumeroDoPrograma") == 0) {
-                printf(" || %s", current->addr1.name);
+                Address programNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
+                insertQuadAfter(current, OP_MOV, *createRegisterAddr(11), programNumberReg, createEmptyAddr()); 
             }
 
             // Case definirPosicaoDoPrograma
