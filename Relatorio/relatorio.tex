@@ -2947,17 +2947,17 @@ Instrução & Operação\\
 \hline
 \multicolumn{2}{|c|}{Formato 6} \\
 \hline
-disp & Diplay-LCD <= Mensagem[IM20][RT] \\
+disp & Diplay-LCD <= Mensagem[RS][RT] \\
 \hline
 \multicolumn{2}{|c|}{Formato 7} \\
 \hline
-bufPC & PC-Buffer <= END26 \\
+bufPC & PC-Buffer <= RS \\
 aplBuf & PC <= PC-Buffer; R10 <= BR-Buffer \\
-quant &  MI-Quantum <= END26 \\
-retSO &  MI-RetornoSO <= END26 \\
+quant &  MI-Quantum <= RS \\
+retSO &  MI-RetornoSO <= RS \\
 LB & R8 <= ES-Buffer \\
 LBL & R8 <= ES-Buffer; ES-Buffer <= -1 \\
-DFMES & ES-Modo <= IM26 \\
+DFMES & ES-Modo <= RS \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
