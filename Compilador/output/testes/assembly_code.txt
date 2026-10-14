@@ -126,7 +126,7 @@ L26:
 	movr R6, R2
 	storedi R6, R3, 5
 	loaddi R7, R6, 5
-	beq R6, R7, L27
+	beq R3, R7, L27
 	halt
 L27:
 	movi R1, 16

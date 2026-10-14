@@ -230,7 +230,7 @@ void main(){
     makeNewQuadTest(OP_MOVR, *createRegisterAddr(6), *createRegisterAddr(2), createEmptyAddr());
     makeNewQuadTest(OP_STOREDI, *createRegisterAddr(6), *createRegisterAddr(3), createNumericAddr(5));
     makeNewQuadTest(OP_LOADDI, *createRegisterAddr(7), *createRegisterAddr(6), createNumericAddr(5));
-    makeNewQuadTest(OP_BEQ, *createRegisterAddr(6), *createRegisterAddr(7), l19);
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(3), *createRegisterAddr(7), l19);
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_LABEL, l19, createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(16), createEmptyAddr());
