@@ -1,0 +1,138 @@
+	movi R2, 10
+	movi R3, 20
+	movi R4, 20
+	addi R5, R2, 5
+	movi R6, 15
+	beq R5, R6, L0
+	halt
+L0:
+	movi R1, 1
+	out R1
+	subi R5, R3, 5
+	movi R6, 15
+	beq R5, R6, L1
+	halt
+L1:
+	movi R1, 2
+	out R1
+	muli R5, R2, 3
+	movi R6, 30
+	beq R5, R6, L2
+	halt
+L2:
+	movi R1, 3
+	out R1
+	divi R5, R3, 2
+	movi R6, 10
+	beq R5, R6, L3
+	halt
+L3:
+	movi R1, 4
+	out R1
+	addr R5, R3, R2
+	movi R6, 30
+	beq R5, R6, L4
+	halt
+L4:
+	movi R1, 5
+	out R1
+	subr R5, R3, R2
+	movi R6, 10
+	beq R5, R6, L5
+	halt
+L5:
+	movi R1, 6
+	out R1
+	mulr R5, R3, R2
+	movi R6, 200
+	beq R5, R6, L6
+	halt
+L6:
+	movi R1, 7
+	out R1
+	divr R5, R3, R2
+	movi R6, 2
+	beq R5, R6, L7
+	halt
+L7:
+	movi R1, 8
+	out R1
+	beq R3, R4, L8
+	halt
+L8:
+	beq R2, R3, L9
+	jmp L10
+L9:
+	halt
+L10:
+	movi R1, 9
+	out R1
+	bne R2, R3, L11
+	halt
+L11:
+	bne R3, R4, L12
+	jmp L13
+L12:
+	halt
+L13:
+	movi R1, 10
+	out R1
+	blt R2, R3, L14
+	halt
+L14:
+	blt R3, R2, L15
+	jmp L16
+L15:
+	halt
+L16:
+	movi R1, 11
+	out R1
+	bgt R3, R2, L17
+	halt
+L17:
+	bgt R2, R3, L18
+	jmp L19
+L18:
+	halt
+L19:
+	movi R1, 12
+	out R1
+	ble R2, R3, L20
+	halt
+L20:
+	ble R3, R2, L21
+	jmp L22
+L21:
+	halt
+L22:
+	movi R1, 13
+	out R1
+	bge R3, R2, L23
+	halt
+L23:
+	bge R2, R3, L24
+	jmp L25
+L24:
+	halt
+L25:
+	movi R1, 14
+	out R1
+	movi R5, L26
+	jr R5
+	halt
+L26:
+	movi R1, 15
+	out R1
+	movr R6, R2
+	storedi R6, R3, 5
+	loaddi R7, R6, 5
+	beq R6, R7, L27
+	halt
+L27:
+	movi R1, 16
+	out R1
+	in R7
+	movr R1, R7
+	out R1
+	movi R1, 17
+	out R1

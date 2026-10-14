@@ -1,0 +1,59 @@
+	movi R13, 127
+	movr R12, R13
+	jmp L0
+L0:
+	subi R12, R12, 1
+	in R1
+	storedi R12, R1, 1
+	LB
+	movr R1, R8
+	storedi R12, R1, 1
+	LBL
+	movr R1, R8
+	storedi R12, R1, 1
+	movr R1, R0
+	storedi R12, R1, 1
+	movi R1, 1
+	out R1
+	storedi R0, R1, 0
+	storedi R0, R2, 1
+	storedi R0, R3, 2
+	storedi R0, R4, 3
+	storedi R0, R5, 4
+	storedi R0, R6, 5
+	storedi R0, R7, 6
+	storedi R0, R8, 7
+	storedi R0, R9, 8
+	storedi R0, R12, 9
+	storedi R0, R13, 10
+	storedi R0, R14, 11
+	storedi R0, R15, 12
+	loaddi R1, R0, 0
+	loaddi R2, R0, 1
+	loaddi R3, R0, 2
+	loaddi R4, R0, 3
+	loaddi R5, R0, 4
+	loaddi R6, R0, 5
+	loaddi R7, R0, 6
+	loaddi R8, R0, 7
+	loaddi R9, R0, 8
+	loaddi R12, R0, 9
+	loaddi R13, R0, 10
+	loaddi R14, R0, 11
+	loaddi R15, R0, 12
+	movi R1, 6
+	disp R1, R11
+	movi R1, 2
+	quant R1
+	movi R1, 5
+	DFMES R1
+	movi R1, 3
+	movr R11, R1
+	movi R1, 4
+	bufBR R1
+	bufPC R9
+	retSO L14
+	aplBuf
+L14:
+	addi R12, R12, 1
+	halt

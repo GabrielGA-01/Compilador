@@ -1,0 +1,167 @@
+; --- Inicialização (sem R0 e R1) ---
+(movi, R2, 10, -)        ; R2 = 10
+(movi, R3, 20, -)        ; R3 = 20
+(movi, R4, 20, -)        ; R4 = 20
+
+; --- Testes com Imediatos (Addi, Subi, Muli, Divi) com verificação via Beq ---
+(addi, R5, R2, 5)        ; R5 = R2 + 5 (10 + 5 = 15)
+(movi, R6, 15, -)        ; Valor esperado
+(beq, R5, R6, L_ADDI_OK)
+(halt, -, -, -)
+(lab, L_ADDI_OK, -, -)
+(movi, R1, 1, -)
+(out, R1, -, -)          ; Out 1
+
+(subi, R5, R3, 5)        ; R5 = R3 - 5 (20 - 5 = 15)
+(movi, R6, 15, -)        ; Valor esperado
+(beq, R5, R6, L_SUBI_OK)
+(halt, -, -, -)
+(lab, L_SUBI_OK, -, -)
+(movi, R1, 2, -)
+(out, R1, -, -)          ; Out 2
+
+(muli, R5, R2, 3)        ; R5 = R2 * 3 (10 * 3 = 30)
+(movi, R6, 30, -)        ; Valor esperado
+(beq, R5, R6, L_MULI_OK)
+(halt, -, -, -)
+(lab, L_MULI_OK, -, -)
+(movi, R1, 3, -)
+(out, R1, -, -)          ; Out 3
+
+(divi, R5, R3, 2)        ; R5 = R3 / 2 (20 / 2 = 10)
+(movi, R6, 10, -)        ; Valor esperado
+(beq, R5, R6, L_DIVI_OK)
+(halt, -, -, -)
+(lab, L_DIVI_OK, -, -)
+(movi, R1, 4, -)
+(out, R1, -, -)          ; Out 4
+
+
+; --- Testes Aritméticos Registrador a Registrador (Addr, Subr, Mulr, Divr) ---
+(addr, R5, R3, R2)       ; R5 = R3 + R2 (20 + 10 = 30)
+(movi, R6, 30, -)        ; Valor esperado
+(beq, R5, R6, L_ADDR_OK)
+(halt, -, -, -)
+(lab, L_ADDR_OK, -, -)
+(movi, R1, 5, -)
+(out, R1, -, -)          ; Out 5
+
+(subr, R5, R3, R2)       ; R5 = R3 - R2 (20 - 10 = 10)
+(movi, R6, 10, -)        ; Valor esperado
+(beq, R5, R6, L_SUBR_OK)
+(halt, -, -, -)
+(lab, L_SUBR_OK, -, -)
+(movi, R1, 6, -)
+(out, R1, -, -)          ; Out 6
+
+(mulr, R5, R3, R2)       ; R5 = R3 * R2 (20 * 10 = 200)
+(movi, R6, 200, -)       ; Valor esperado
+(beq, R5, R6, L_MULR_OK)
+(halt, -, -, -)
+(lab, L_MULR_OK, -, -)
+(movi, R1, 7, -)
+(out, R1, -, -)          ; Out 7
+
+(divr, R5, R3, R2)       ; R5 = R3 / R2 (20 / 10 = 2)
+(movi, R6, 2, -)         ; Valor esperado
+(beq, R5, R6, L_DIVR_OK)
+(halt, -, -, -)
+(lab, L_DIVR_OK, -, -)
+(movi, R1, 8, -)
+(out, R1, -, -)          ; Out 8
+
+
+; --- Testes Lógicos e de Desvio (Beq, Bne, Blt, Bgt, Ble, Bge) ---
+(beq, R3, R4, L0)
+(halt, -, -, -)
+(lab, L0, -, -)
+(beq, R2, R3, L1)
+(jmp, L2, -, -)
+(lab, L1, -, -)
+(halt, -, -, -)
+(lab, L2, -, -)
+(movi, R1, 9, -)
+(out, R1, -, -)          ; Out 9
+
+(bne, R2, R3, L3)
+(halt, -, -, -)
+(lab, L3, -, -)
+(bne, R3, R4, L4)
+(jmp, L5, -, -)
+(lab, L4, -, -)
+(halt, -, -, -)
+(lab, L5, -, -)
+(movi, R1, 10, -)
+(out, R1, -, -)         ; Out 10
+
+(blt, R2, R3, L6)
+(halt, -, -, -)
+(lab, L6, -, -)
+(blt, R3, R2, L7)
+(jmp, L8, -, -)
+(lab, L7, -, -)
+(halt, -, -, -)
+(lab, L8, -, -)
+(movi, R1, 11, -)
+(out, R1, -, -)         ; Out 11
+
+(bgt, R3, R2, L9)
+(halt, -, -, -)
+(lab, L9, -, -)
+(bgt, R2, R3, L10)
+(jmp, L11, -, -)
+(lab, L10, -, -)
+(halt, -, -, -)
+(lab, L11, -, -)
+(movi, R1, 12, -)
+(out, R1, -, -)         ; Out 12
+
+(ble, R2, R3, L12)
+(halt, -, -, -)
+(lab, L12, -, -)
+(ble, R3, R2, L13)
+(jmp, L14, -, -)
+(lab, L13, -, -)
+(halt, -, -, -)
+(lab, L14, -, -)
+(movi, R1, 13, -)
+(out, R1, -, -)         ; Out 13
+
+(bge, R3, R2, L15)
+(halt, -, -, -)
+(lab, L15, -, -)
+(bge, R2, R3, L16)
+(jmp, L17, -, -)
+(lab, L16, -, -)
+(halt, -, -, -)
+(lab, L17, -, -)
+(movi, R1, 14, -)
+(out, R1, -, -)         ; Out 14
+
+
+; --- Testes de Jump Register (JR) ---
+(movi, R5, L18, -)
+(jr, R5, -, -)
+(halt, -, -, -)
+(lab, L18, -, -)
+(movi, R1, 15, -)
+(out, R1, -, -)         ; Out 15
+
+
+; --- Testes de Memória (Store/Load) ---
+(movr, R6, R2, -)
+(storedi, R6, R3, 5)
+(loaddi, R7, R6, 5)
+(beq, R6, R7, L19)
+(halt, -, -, -)
+(lab, L19, -, -)
+(movi, R1, 16, -)
+(out, R1, -, -)         ; Out 16
+
+
+; --- Testes de E/S (In/Out) ---
+(in, R7, -, -)
+(movr, R1, R7, -)
+(out, R1, -, -)         ; Valor inserido impresso via R1
+(movi, R1, 17, -)
+(out, R1, -, -)         ; Out 17

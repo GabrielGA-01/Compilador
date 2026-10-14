@@ -1,15 +1,17 @@
-void main(){
-    int x;
-    x = input();
-    x = lerBuffer();
-    x = lerBufferLimpa();
-    x = lerReg(0);
+    void main(){
+        int x;
+        x = input();
+        x = lerBuffer();
+        x = lerBufferLimpa();
+        x = lerReg(0);
 
-
-    output(x);
-    saveRegs();
-    loadRegs();
-    definirQuantum(1);
-    definirProgramaParaExecutar(1);
-    definirModoES(1);
-}
+        output(1);
+        saveRegs();
+        loadRegs();
+        showLCD(6);
+        definirQuantum(2);
+        definirModoES(5);
+        definirNumeroDoPrograma(3);
+        definirPosicaoDoPrograma(4);
+        trocarDeContexto();
+    }

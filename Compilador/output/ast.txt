@@ -1,0 +1,49 @@
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: x
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: lerBuffer
+        VAR: lerBuffer
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: lerBufferLimpa
+        VAR: lerBufferLimpa
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: lerReg
+        VAR: lerReg
+        NUM: 0
+    FUN_CALL: output
+      VAR: output
+      NUM: 1
+    FUN_CALL: saveRegs
+      VAR: saveRegs
+    FUN_CALL: loadRegs
+      VAR: loadRegs
+    FUN_CALL: showLCD
+      VAR: showLCD
+      NUM: 6
+    FUN_CALL: definirQuantum
+      VAR: definirQuantum
+      NUM: 2
+    FUN_CALL: definirModoES
+      VAR: definirModoES
+      NUM: 5
+    FUN_CALL: definirNumeroDoPrograma
+      VAR: definirNumeroDoPrograma
+      NUM: 3
+    FUN_CALL: definirPosicaoDoPrograma
+      VAR: definirPosicaoDoPrograma
+      NUM: 4
+    FUN_CALL: trocarDeContexto
+      VAR: trocarDeContexto
