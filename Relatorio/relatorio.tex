@@ -2727,6 +2727,10 @@ Salvar e recuperar os valores dos registradores são operações feitas por outr
 
 Para implementar essas funcionalidades, foi necessário criar uma série de novas funções para o processador, sendo elas: \textit{bufBR}, para salvar a posição do programa no buffer do banco de registradores; \textit{bufPC}, para salvar a posição de \textit{R9} no buffer do Módulo de MUX do PC; \textit{aplBuf} para aplicar os dois buffers ao mesmo tempo; \textit{retSo} para definir o endereço para retornar para o SO posteriormente, isso é explicado melhor na \autoref{sec:modulo_de_interrupcao}. Mais detalhes sobre essas funções está disponível na \autoref{sec:novas_instrucoes_processador}.
 
+A instrução \textit{bufBR} é implementada realizando a leitura de um registrador, junto a um sinal de controle específico para SinalBanco, que faz com que o valor lido seja salvo diretamente no buffer, sem precisar passar por outros módulos do processador.
+
+Explicando mais detalhadamente \textit{bufPC}, essa instrução passa dois valores para o Módulo de MUX do PC, sendo eles, o próximo valor do PC considerando um incremento simples, o valor de um registrador contendo o valor que se deseja armazenar no buffer e um SinalMuxPC específico para essa instrução. Isso é viável, pois essa instrução não será usada junto com a uma instrução de salto para registrador. Ademais, essa abordagem garente que o Módulo do PC continue utilizando o valor do SO até o último momento antes da troca de contexto.
+
 Para a execução de um único programa, não é utiliado o quantum e ele pode ser executado diretamente até o final, sendo interrompido somente pelas operações de entrada e saída que fizer.
 
 Caso haja múltiplos programas para serem executados, eles ficam dividos em duas filas: prontos e bloqueados. Os programas prontos podem ser executados a qualquer momento, enquanto os bloqueados estão esperando por entrada ou saída.
@@ -2944,6 +2948,7 @@ Instrução & Operação\\
 \multicolumn{2}{|c|}{Formato 5} \\
 \hline
 	bufBR & BR-Buffer <= RS \\
+	bufPC & PC-Buffer <= RS \\
 \hline
 \multicolumn{2}{|c|}{Formato 6} \\
 \hline
@@ -2951,7 +2956,6 @@ disp & Diplay-LCD <= Mensagem[RS][RT] \\
 \hline
 \multicolumn{2}{|c|}{Formato 7} \\
 \hline
-bufPC & PC-Buffer <= RS \\
 aplBuf & PC <= PC-Buffer; R10 <= BR-Buffer \\
 quant &  MI-Quantum <= RS \\
 retSO &  MI-RetornoSO <= RS \\
