@@ -2725,7 +2725,7 @@ Quando o SO verifica que há um programa na fila de prontos para ser executado e
 
 Salvar e recuperar os valores dos registradores são operações feitas por outras duas funções especiais do compilador \textit{saveRegs()} e \textit{loadRegs()}. Elas são apresentadas mais detalhadamente na \autoref{sec:gerenciamento_memoria_implementado_no_algortimo_SO}
 
-Para implementar essas funcionalidades, foi necessário criar uma série de novas funções para o processador, sendo elas: \textit{bufBR}, para salvar a posição do programa no buffer do banco de registradores; \textit{bufPC}, para salvar a posição de \textit{R9} no buffer do Módulo do PC; \textit{aplBuf} para aplicar os dois buffers ao mesmo tempo; \textit{retSo} para definir o endereço para retornar para o SO posteriormente, isso é explicado melhor na \autoref{sec:modulo_de_interrupcao}. Mais detalhes sobre essas funções está disponível na \autoref{sec:novas_instrucoes_processador}.
+Para implementar essas funcionalidades, foi necessário criar uma série de novas funções para o processador, sendo elas: \textit{bufBR}, para salvar a posição do programa no buffer do banco de registradores; \textit{bufPC}, para salvar a posição de \textit{R9} no buffer do Módulo de MUX do PC; \textit{aplBuf} para aplicar os dois buffers ao mesmo tempo; \textit{retSo} para definir o endereço para retornar para o SO posteriormente, isso é explicado melhor na \autoref{sec:modulo_de_interrupcao}. Mais detalhes sobre essas funções está disponível na \autoref{sec:novas_instrucoes_processador}.
 
 Para a execução de um único programa, não é utiliado o quantum e ele pode ser executado diretamente até o final, sendo interrompido somente pelas operações de entrada e saída que fizer.
 
