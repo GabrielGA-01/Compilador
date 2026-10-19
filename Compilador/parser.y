@@ -298,66 +298,6 @@ arg_lista: arg_lista COMMA expressao
 
 %%
 
-int main(int argc, char *argv[])
-{
-  if (argc > 1) {
-    yyin = fopen(argv[1], "r");
-    if (!yyin) {
-      fprintf(stderr, "Error opening file: %s\n", argv[1]);
-      return 1;
-    }
-  }
-  
-  int aux = yyparse();
-  
-  if(aux == 0 || root != NULL) {
-    buildSymtab(root);
-    typeCheck(root);
-
-    system("mkdir -p output");
-
-    FILE* ast_file = fopen("output/ast.txt", "w");
-    if (ast_file) {
-        fprint_ast(ast_file, root, 0);
-        fclose(ast_file);
-        printf("Abstract syntax tree generated in output/ast.txt\n");
-    } else {
-        fprintf(stderr, "Error: Could not create output/ast.txt\n");
-    }
-
-    FILE* symtab_file = fopen("output/symbol_table.txt", "w");
-    if (symtab_file) {
-        printSymTab(symtab_file);
-        fclose(symtab_file);
-        printf("Symbol table generated in output/symbol_table.txt\n");
-    } else {
-        fprintf(stderr, "Error: Could not create output/symbol_table.txt\n");
-    }
-
-    if (Error == 0 && error_count == 0) {
-        // Código intermediário
-        generateProgram(root);
-        printf("Intermediate code generated successfully!\n");
-
-        // Código assembly
-        extern Quad* head;
-        extern FuncLabel* functionsHead;
-        extern tempControl* tempControlHead;
-        head = generateAssembly(head, functionsHead, tempControlHead);
-        printf("Assembly code generated successfully!\n");
-
-        // Código binário
-        extern labelControl* labelHead;
-        generateBinary(head, labelHead);
-        printf("Binary code generated successfully!\n");
-    } else {
-        printf("Intermediate code generation skipped due to errors\n");
-    }
-  }
-  
-  return aux;
-}
-
 void yyerror(const char *msg)
 {
     extern int yylineno;

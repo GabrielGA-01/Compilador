@@ -243,6 +243,18 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(17), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // --- Teste de Buffers (PC e Banco de Registradores) ---
+    Address l20 = *createLabelAddr();
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(115), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(10), *createRegisterAddr(2), l20);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l20, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(18), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
     Quad* before = NULL;
     Quad* current = headTest;

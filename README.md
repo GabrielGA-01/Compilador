@@ -78,11 +78,13 @@ R0 - Zero
 
 Núcleo do SO:
 
-definirProgramaParaExecutar:
+Mudança do SO para o programa:
+|| R10 contendo o SO
 - Escreve o número do programa em R11
 - Escreve a posição do programa no buffer do banco de registradores
 - saveRegs()
-- loadRegs() {Não carrega R0, R10 e R11} || Não atualiza R9 de R10=0
+|| R10 contendo o programa
+- loadRegs() {Não carrega R0, R10 e R11}
 - Move o conteúdo de R9 para o buffer do do PC  
 - Atualiza o endereço de retorno do Módulo de Interrupção
 - Aplica os valores contidos nos buffers do PC e do banco para o PC e R10
@@ -106,9 +108,9 @@ Instruções para o compilador:
 (ES) = Entrada e saída
 
 Instruções para o processador:
-- - (PR) bufBR (OP, REG) - Salva o valor no buffer do BR
-- (PR) bufPC (OP, REG) - Salva o valor no buffer do PC
-- (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo
+- ok (PR) bufBR (OP, REG) - Salva o valor no buffer do BR
+- ok (PR) bufPC (OP, REG) - Salva o valor no buffer do PC
+- {Adicionar também o endereço de retorno do SO ao MI} (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo
 - (PR) retSO (OP, RD) - Define o endereço de retorno
 - (PR) quant (OP, RD)
 - (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
@@ -118,6 +120,7 @@ Instruções para o processador:
 [Adicionar depois]
 - (ES) Novas instruções de IN e OUT que levam ao SO
 
+! - Para fazer:
 
 !!! Escrever sobre o uso do buffer do banco de registradores para acessar a o MADMP
 
