@@ -281,7 +281,7 @@ void buildSymtab(ASTNode * syntaxTree)
     st_insert("lerBuffer", 0, location++, Integer, ID_FUN, 0, 0, NULL);
 
     // lerBufferLimpa()
-    st_insert("lerBufferLimpa", 0, location++, Integer, ID_FUN, 0, 0, NULL);
+    st_insert("lerBufferLimpa", 0, location++, Void, ID_FUN, 0, 0, NULL);
 
     // lerReg([numero])
     ExpType lerRegParamTypes[1] = { Integer };
