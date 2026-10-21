@@ -14,10 +14,8 @@ FUN_BODY
       VAR: x
       FUN_CALL: lerBuffer
         VAR: lerBuffer
-    ASSIGN_EXPR
-      VAR: x
-      FUN_CALL: lerBufferLimpa
-        VAR: lerBufferLimpa
+    FUN_CALL: lerBufferLimpa
+      VAR: lerBufferLimpa
     ASSIGN_EXPR
       VAR: x
       FUN_CALL: lerReg

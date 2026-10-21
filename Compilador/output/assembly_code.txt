@@ -9,8 +9,6 @@ L0:
 	movr R1, R8
 	storedi R12, R1, 1
 	LBL
-	movr R1, R8
-	storedi R12, R1, 1
 	movr R1, R0
 	storedi R12, R1, 1
 	movi R1, 1

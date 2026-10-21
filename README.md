@@ -98,7 +98,7 @@ Instruções para o compilador:
 - saveRegs()
 - loadRegs()
 - (ES) lerBuffer() - Escreve buffer de ES {LB} em R8 e retorna R8
-- (ES) lerBufferLimpa() - {LBL} + retorno R8
+- (ES) lerBufferLimpa() - {LBL} sem retorno
 - (PR/ES) lerReg([constante]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
 - (ES) definirModoES([número]) - Utiliza um registrador para passar o valor para ES
 - (Bonus) showLCD([número]) - Envia o registrador R11 junto com um registrador com o número da mensagem
@@ -113,15 +113,17 @@ Instruções para o processador:
 - {Adicionar também o endereço de retorno do SO ao MI} (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo
 - (PR) retSO (OP, RD) - Define o endereço de retorno
 - (PR) quant (OP, RD)
-- (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
-- (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
+- ok (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
+- ok (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
 - (ES) DFMES (OP, RD) - Define o modo de ES
 - disp (OP, RS, RT) - Passa um registrador com o número da mensagem e outro com o número do programa
-[Adicionar depois]
-- (ES) Novas instruções de IN e OUT que levam ao SO
+
+- [Adicionar depois] (ES) Novas instruções de IN e OUT que levam ao SO
 
 ! - Para fazer:
 
 !!! Escrever sobre o uso do buffer do banco de registradores para acessar a o MADMP
 
 !!! Fazer com que o registrador R8 deixe de ser salvo/recuperado por save/load regs.
+
+!!! Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC

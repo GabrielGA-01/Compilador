@@ -2,7 +2,7 @@
         int x;
         x = input();
         x = lerBuffer();
-        x = lerBufferLimpa();
+        lerBufferLimpa();
         x = lerReg(0);
 
         output(1);

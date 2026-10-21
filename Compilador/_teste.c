@@ -256,6 +256,42 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(18), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // --- Teste buffer ES ---
+    Address L29 = *createLabelAddr();
+    makeNewQuadTest(OP_IN, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LB, createEmptyAddr(), createEmptyAddr(), createEmptyAddr()); // Comando (LB, -, -, -)
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(8), *createRegisterAddr(1), L29);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, L29, createEmptyAddr(), createEmptyAddr());          // Rótulo (lab, L29, -, -)
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(19), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Teste completo: LBL e LB verificando o buffer resetado para -1 ---
+    Address L30 = *createLabelAddr();
+    Address L31 = *createLabelAddr();
+
+    // 1. Bloco LBL
+    makeNewQuadTest(OP_MOVR, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr()); // ou o equivalente à sua instrução movi R7, R8
+    makeNewQuadTest(OP_MOVR, *createRegisterAddr(8), *createRegisterAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_LBL, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(8), *createRegisterAddr(7), L30);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_LABEL, L30, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(20), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // 2. Bloco LB com addi para testar o -1 -> 0
+    makeNewQuadTest(OP_LB, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(-1), createEmptyAddr());
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(8), *createRegisterAddr(7), L31);              
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_LABEL, L31, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(21), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
     Quad* before = NULL;
     Quad* current = headTest;
 
