@@ -30,11 +30,33 @@ Quad* makeNewQuadTest(QuadOp op, Address a1, Address a2, Address a3) {
     return q;
 }
 
+// Preenche com instruções HALT até atingir exatamente o número de linha desejado
+void padWithHaltsToLine(int targetLine) {
+    // Conta quantas instruções válidas (não-label) já existem na lista
+    int currentLine = 0;
+    Quad* current = headTest;
+    while (current != NULL) {
+        if (current->op != OP_LABEL) {
+            currentLine++;
+        }
+        current = current->next;
+    }
+
+    // Adiciona HALTs enquanto a linha atual for menor que o alvo
+    while (currentLine < targetLine) {
+        makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+        currentLine++;
+    }
+}
+
 void main(){
     // --- Inicialização (sem R0 e R1) ---
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(10), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(3), createNumericAddr(20), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(20), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(999), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
 
     // --- Testes com Imediatos (Addi, Subi, Muli, Divi) com verificação via Beq ---
     // 1. Addi
@@ -245,7 +267,8 @@ void main(){
 
     // --- Teste de Buffers (PC e Banco de Registradores) ---
     Address l20 = *createLabelAddr();
-    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(115), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(118), createEmptyAddr());
     makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
@@ -408,6 +431,29 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
     makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    // Teste de salto para endereço na troca de contexo - Pula para posição1 + 10 = 522
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(10), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(22), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+
+    // Completando halts até a linha 522
+    padWithHaltsToLine(522);
+
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(235), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
     Quad* before = NULL;
     Quad* current = headTest;

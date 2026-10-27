@@ -2,6 +2,8 @@
 (movi, R2, 10, -)        ; R2 = 10
 (movi, R3, 20, -)        ; R3 = 20
 (movi, R4, 20, -)        ; R4 = 20
+(movi, R1, 999, -)
+(out, R1, -, -)
 
 ; --- Testes com Imediatos (Addi, Subi, Muli, Divi) com verificação via Beq ---
 (addi, R5, R2, 5)        ; R5 = R2 + 5 (10 + 5 = 15)
@@ -204,6 +206,38 @@
 (movi, R1, 21, -)
 (out, R1, - , -)
 
-(movi, R8, 1, -)
-(movi, R7, 10, -)
+; --- Testes das mensagens LCD (0 a 12) ---
+(movi, R7, 10, -)        ; Configura o parâmetro base (ex: 10)
+
+; Exemplo para o valor 0 no R7 e 4 no R8
+(movi, R7, 0, -)
+(movi, R8, 4, -)
 (disp, R7, R8, -)
+(out, R7, -, -)
+
+; ... (continua variando R7 de 1 a 12 com valores misturados 4, 5 ou 6 em R8)
+
+(movi, R7, 12, -)
+(movi, R8, 6, -)
+(disp, R7, R8, -)
+(out, R7, -, -)
+
+; --- Teste de salto na troca de contexto (Pula para a posição 522) ---
+(movi, R2, 1, -)
+(movi, R7, 10, -)
+(bufBR, R2, -, -)
+(bufPC, R7, -, -)
+(aplBuf, -, -, -)
+
+; Preenchimento com HALT até a linha 521 (uma antes do salto)
+(halt, -, -, -)
+; ...
+(halt, -, -, -)
+
+(out, R2, -, -)
+(out, R7, -, -)
+(movi, R2, 0, -)
+(movi, R7, 235, -)
+(bufBR, R2, -, -)
+(bufPC, R7, -, -)
+(aplBuf, -, -, -)
