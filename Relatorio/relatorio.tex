@@ -2773,6 +2773,8 @@ RetornoSO & 8 & Valor do PC para retornar ao SO \\
 \hline
 R10 & 32 & Valor para ser escrito em R10 \\
 \hline
+Panic & 32 & Força o PC parar para sempre \\
+\hline
 \end{tabular}
 \vspace{-0.5em}
 \begin{center}
@@ -2824,13 +2826,13 @@ Além disso, o MADMI tem três entradas a mais, o sinal de recomeçar a execuç�
 \hline
 \textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
 \hline
-EnderecoVirtual & 8 & Endereço fornecido pelo programa \\
+EnderecoVirtual & 32 & Endereço fornecido pelo programa \\
 \hline
 R10 & 32 & Posição do programa dentro da memória \\
 \hline
 ResetSignal & 1 & Sinal para recomeçar a execução \\
 \hline
-Retorno SO & 8 & Endereço para retornar para o SO \\
+Retorno SO & 32 & Endereço para retornar para o SO \\
 \hline
 Switches & 32 & Linha do novo programa sendo escrito \\
 \hline
@@ -2839,6 +2841,8 @@ Switches & 32 & Linha do novo programa sendo escrito \\
 EnderecoReal & 32 & Endereço real na memória \\
 \hline
 NumEscrita & 32 & Número para ser escrito na MI \\
+\hline
+EnderecoEscrita & 32 & Endereço para ser escrito na MI \\
 \hline
 \end{tabular}
 \vspace{-0.5em}
@@ -2858,7 +2862,7 @@ Fonte: o Autor.
 \hline
 \textbf{Sinal} & \textbf{Nº bits} & \textbf{Descrição} \\
 \hline
-EnderecoVirtual & 8 & Endereço fornecido pelo programa \\
+EnderecoVirtual & 32 & Endereço fornecido pelo programa \\
 \hline
 R10 & 32 & Posição do programa dentro da memória \\
 \hline
