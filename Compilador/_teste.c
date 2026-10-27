@@ -292,6 +292,123 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(21), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // Teste das mensagens LCD 
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(10), createEmptyAddr());
+    
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(2), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(3), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+    
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(7), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(9), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(10), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(11), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(8), createEmptyAddr(), createEmptyAddr());
+
+    // Teste dos números dos programas
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(2), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(3), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(7), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(9), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(10), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(11), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(12), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(8), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_DISP, *createRegisterAddr(7), *createRegisterAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+
     Quad* before = NULL;
     Quad* current = headTest;
 
