@@ -116,10 +116,15 @@ Instruções para o processador:
 
 - {talvez funda com aplBuf} (PR) retSO (OP, RD) - Define o endereço de retorno
 - (PR) quant (OP, RD)
+- ok disp (OP, RS, RT) - Passa um registrador com o número do programa (1º) e outro com o número da mensagem (2º)
 - (ES) DFMES (OP, RD) - Define o modo de ES
-- {Instruções de uma linha estão sendo escritas duas vezes} disp (OP, RS, RT) - Passa um registrador com o número do programa (1º) e outro com o número da mensagem (2º)
 
 - [Adicionar depois] (ES) Novas instruções de IN e OUT que levam ao SO
+
+# Sobre os novos módulos
+MADMI:
+- Falta o caminho do retornoSO
+- {Mudar lógica para escrever arquivo via software?}
 
 ! - Para fazer:
 
@@ -128,3 +133,5 @@ Instruções para o processador:
 !!! Fazer com que o registrador R8 deixe de ser salvo/recuperado por save/load regs.
 
 !!! Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC
+
+!!! Botão de reset atualiza o modo de ES
