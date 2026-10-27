@@ -1037,7 +1037,7 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             }
             else if (strcmp(funcName, "showLCD") == 0) {
                 Address msgNumberReg = *allocate_register(current->addr1.name, tempControlHead, regVector);
-                insertQuadAfter(current, OP_DISP, msgNumberReg, *createRegisterAddr(11), createEmptyAddr());
+                insertQuadAfter(current, OP_DISP, *createRegisterAddr(11), msgNumberReg, createEmptyAddr());
             }
 
             // Case saveRegs
