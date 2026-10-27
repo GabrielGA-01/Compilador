@@ -111,12 +111,13 @@ Instruções para o processador:
 - ok (PR) bufBR (OP, REG) - Salva o valor no buffer do BR
 - ok (PR) bufPC (OP, REG) - Salva o valor no buffer do PC
 - {Adicionar também o endereço de retorno do SO ao MI} (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo
-- (PR) retSO (OP, RD) - Define o endereço de retorno
-- (PR) quant (OP, RD)
 - ok (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
 - ok (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
+
+- {talvez funda com aplBuf} (PR) retSO (OP, RD) - Define o endereço de retorno
+- (PR) quant (OP, RD)
 - (ES) DFMES (OP, RD) - Define o modo de ES
-- disp (OP, RS, RT) - Passa um registrador com o número da mensagem e outro com o número do programa
+- {Instruções de uma linha estão sendo escritas duas vezes} disp (OP, RS, RT) - Passa um registrador com o número do programa (1º) e outro com o número da mensagem (2º)
 
 - [Adicionar depois] (ES) Novas instruções de IN e OUT que levam ao SO
 
