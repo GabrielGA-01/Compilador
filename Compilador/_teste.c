@@ -439,9 +439,91 @@ void main(){
     makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
+    // Linha 235
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(22), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // --- Teste do uso do MADMP ---
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(18), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(3), createNumericAddr(128), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(2), createNumericAddr(2));
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(7), createNumericAddr(120));
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(3), createNumericAddr(203));
+    makeNewQuadTest(OP_UPDMADMP, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(3), createNumericAddr(2));
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(2), createNumericAddr(120));
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(7), createNumericAddr(207));
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    
+    //Linha 251
+    // --- Configuração inicial dos registradores ---
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(18), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(3), createNumericAddr(128), createEmptyAddr());
+
+    // --- Primeira verificação ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(26));
+    Address l32 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(1), l32);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l32, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(27), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Segunda verificação ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(120));
+    Address l33 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(2), l33);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l33, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(28), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Volta o MADMP para a posição 0 ---
+    makeNewQuadTest(OP_UPDMADMP, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // --- Terceira verificação (Endereço 2) ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(2));
+    Address l34 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(2), l34);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l34, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(29), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Quarta verificação (Endereço 120) ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(120));
+    Address l35 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(7), l35);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l35, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(30), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Quinta verificação (Endereço 203) ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(203));
+    Address l36 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(3), l36);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l36, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(31), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Sexta verificação (Endereço 207) ---
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(207));
+    Address l37 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(0), l37);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l37, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(32), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Fim do teste ---
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
     // Completando halts até a linha 522
     padWithHaltsToLine(522);
@@ -450,6 +532,52 @@ void main(){
     makeNewQuadTest(OP_OUT, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(0), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(235), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // 1. Verifica se o primeiro bloco foi gravado no endereço correto (buffer antigo)
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(2));
+    Address l41 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(3), l41);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l41, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(23), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(120));
+    Address l42 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(2), l42);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l42, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(24), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(203));
+    Address l44 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(0), l44);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l44, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(25), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // 2. Verifica se o segundo bloco foi gravado no novo endereço traduzido pós-updMADMP
+    makeNewQuadTest(OP_LOADDI, *createRegisterAddr(4), *createRegisterAddr(0), createNumericAddr(207));
+    Address l43 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(4), *createRegisterAddr(7), l43);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l43, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(26), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // --- Escreve na Memória ---
+    makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(1), createNumericAddr(26));
+
+    // --- Retorno ---
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(251), createEmptyAddr());
     makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());

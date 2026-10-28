@@ -40,7 +40,7 @@ L0:
 	loaddi R14, R0, 11
 	loaddi R15, R0, 12
 	movi R1, 6
-	disp R1, R11
+	disp R11, R1
 	movi R1, 2
 	quant R1
 	movi R1, 5

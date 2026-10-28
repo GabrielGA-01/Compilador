@@ -267,54 +267,60 @@ L31:
 	aplBuf
 	movi R1, 22
 	out R1
+	movi R2, 1
+	movi R7, 18
+	movi R3, 128
+	bufBR R2
+	storedi R0, R2, 2
+	storedi R0, R7, 120
+	storedi R0, R3, 203
+	updMADMP
+	storedi R0, R3, 2
+	storedi R0, R2, 120
+	storedi R0, R7, 207
+	bufPC R7
+	aplBuf
 	halt
+	movi R2, 1
+	movi R7, 18
+	movi R3, 128
+	loaddi R4, R0, 26
+	beq R4, R1, L32
 	halt
+L32:
+	movi R1, 27
+	out R1
+	loaddi R4, R0, 120
+	beq R4, R2, L33
 	halt
+L33:
+	movi R1, 28
+	out R1
+	updMADMP
+	loaddi R4, R0, 2
+	beq R4, R2, L34
 	halt
+L34:
+	movi R1, 29
+	out R1
+	loaddi R4, R0, 120
+	beq R4, R7, L35
 	halt
+L35:
+	movi R1, 30
+	out R1
+	loaddi R4, R0, 203
+	beq R4, R3, L36
 	halt
+L36:
+	movi R1, 31
+	out R1
+	loaddi R4, R0, 207
+	beq R4, R0, L37
 	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
-	halt
+L37:
+	movi R1, 32
+	out R1
 	halt
 	halt
 	halt
@@ -556,6 +562,38 @@ L31:
 	out R7
 	movi R2, 0
 	movi R7, 235
+	bufBR R2
+	bufPC R7
+	aplBuf
+	halt
+	halt
+	loaddi R4, R0, 2
+	beq R4, R3, L38
+	halt
+L38:
+	movi R1, 23
+	out R1
+	loaddi R4, R0, 120
+	beq R4, R2, L39
+	halt
+L39:
+	movi R1, 24
+	out R1
+	loaddi R4, R0, 203
+	beq R4, R0, L40
+	halt
+L40:
+	movi R1, 25
+	out R1
+	loaddi R4, R0, 207
+	beq R4, R7, L41
+	halt
+L41:
+	movi R1, 26
+	out R1
+	storedi R0, R1, 26
+	movi R2, 0
+	movi R7, 251
 	bufBR R2
 	bufPC R7
 	aplBuf
