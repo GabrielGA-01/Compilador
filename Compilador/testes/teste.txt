@@ -2,8 +2,10 @@
         int x;
         x = input();
         x = lerBuffer();
-        lerBufferLimpa();
         x = lerReg(0);
+        lerBufferLimpa();
+
+        atualizarMADMP();
 
         output(1);
         saveRegs();

@@ -14,13 +14,15 @@ FUN_BODY
       VAR: x
       FUN_CALL: lerBuffer
         VAR: lerBuffer
-    FUN_CALL: lerBufferLimpa
-      VAR: lerBufferLimpa
     ASSIGN_EXPR
       VAR: x
       FUN_CALL: lerReg
         VAR: lerReg
         NUM: 0
+    FUN_CALL: lerBufferLimpa
+      VAR: lerBufferLimpa
+    FUN_CALL: atualizarMADMP
+      VAR: atualizarMADMP
     FUN_CALL: output
       VAR: output
       NUM: 1

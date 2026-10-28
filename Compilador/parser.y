@@ -298,7 +298,7 @@ arg_lista: arg_lista COMMA expressao
 
 %%
 
-/*
+
 int main(int argc, char *argv[])
 {
   if (argc > 1) {
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
   
   return aux;
 }
-*/
+
 
 void yyerror(const char *msg)
 {

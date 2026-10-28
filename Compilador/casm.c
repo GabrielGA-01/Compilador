@@ -948,7 +948,7 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                 strcmp(current->next->addr2.name, "definirPosicaoDoPrograma") == 0 ||
                 strcmp(current->next->addr2.name, "definirModoES") == 0 ||
                 strcmp(current->next->addr2.name, "showLCD") == 0 || 
-                strcmp(current->next->addr2.name, "lerBufferLimpa") == 0)
+                strcmp(current->next->addr2.name, "lerBuffer") == 0)
             {
                 current->next->addr1 = current->addr1;
             }
@@ -1086,6 +1086,12 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
                 insertQuadAfter(current, OP_LB, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
                 // O parâmetro está escrito no primeiro endereço da quádrupla e não na pilha
+            }
+
+            // Case atualizarMADMP
+            else if (strcmp(funcName, "atualizarMADMP") == 0) {
+                // 1 - Atualiza o MADMP
+                insertQuadAfter(current, OP_UPDMADMP, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
             }
 
             // Case lerBufferLimpa

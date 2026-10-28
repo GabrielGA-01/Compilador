@@ -282,7 +282,10 @@ void buildSymtab(ASTNode * syntaxTree)
 
     // lerBufferLimpa()
     st_insert("lerBufferLimpa", 0, location++, Void, ID_FUN, 0, 0, NULL);
-
+    
+    // atualizarMADMP()
+    st_insert("atualizarMADMP", 0, location++, Void, ID_FUN, 0, 0, NULL);
+    
     // lerReg([numero])
     ExpType lerRegParamTypes[1] = { Integer };
     st_insert("lerReg", 0, location++, Integer, ID_FUN, 0, 1, lerRegParamTypes);
@@ -294,6 +297,7 @@ void buildSymtab(ASTNode * syntaxTree)
     // showLCD([número])
     ExpType msgNumberLCD[1] = { Integer };
     st_insert("showLCD", 0, location++, Void, ID_FUN, 0, 1, msgNumberLCD);
+
 
   traverse(syntaxTree, insertNode, checkNode);
   
