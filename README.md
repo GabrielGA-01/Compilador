@@ -83,7 +83,8 @@ Mudança do SO para o programa:
 - Escreve o número do programa em R11
 - Escreve a posição do programa no buffer do banco de registradores
 - saveRegs()
-|| R10 contendo o programa
+- Enviar sinal para atualizar posição de MADMP a partir do buffer
+|| MADMP contendo a posicao o programa 
 - loadRegs() {Não carrega R0, R10 e R11}
 - Move o conteúdo de R9 para o buffer do do PC  
 - Atualiza o endereço de retorno do Módulo de Interrupção
@@ -102,6 +103,7 @@ Instruções para o compilador:
 - (PR/ES) lerReg([constante]) - Obrigatoriamente é passada uma constante. Não pode ser variável.
 - (ES) definirModoES([número]) - Utiliza um registrador para passar o valor para ES
 - (Bonus) showLCD([número]) - Envia o registrador R11 junto com um registrador com o número da mensagem
+- (adição) atualizarMADMP() - Atualiza a posição usada por MADMP
 
 (PR) = Processos
 (ME) = Memória
@@ -118,6 +120,7 @@ Instruções para o processador:
 - (PR) quant (OP, RD)
 - ok disp (OP, RS, RT) - Passa um registrador com o número do programa (1º) e outro com o número da mensagem (2º)
 - (ES) DFMES (OP, RD) - Define o modo de ES
+- updMADMP(OP) - Aplica o valor do buffer para ser usado por MADMP (sinal novo)
 
 - [Adicionar depois] (ES) Novas instruções de IN e OUT que levam ao SO
 

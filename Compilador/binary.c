@@ -39,6 +39,7 @@ char* getOpcodeBinary(QuadOp op) {
         case OP_LBL:     return "101101";
         case OP_DFMES:   return "101110";
         case OP_DISP:    return "101111";
+        case OP_UPDMADMP: return "110000";
         default:         return "000001"; // NOP
     }
 }

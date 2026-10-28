@@ -256,6 +256,7 @@ const char* opToString(QuadOp op) {
         case OP_LBL:     return "LBL";
         case OP_DFMES:   return "DFMES";
         case OP_DISP:    return "disp";
+        case OP_UPDMADMP: return "updMADMP";
         default:         return "unknown";
     }
 }

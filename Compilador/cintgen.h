@@ -53,6 +53,7 @@ typedef enum {
     OP_LBL,
     OP_DFMES,
     OP_DISP,
+    OP_UPDMADMP,
     NONE_OP
 } QuadOp;
 
