@@ -2953,6 +2953,8 @@ Instrução & Operação\\
 \hline
 	bufBR & BR-Buffer <= RS \\
 	bufPC & PC-Buffer <= RS \\
+	quant &  MI-Quantum <= RS \\
+	retSO &  MI-RetornoSO <= RS \\
 \hline
 \multicolumn{2}{|c|}{Formato 3} \\
 \hline
@@ -2961,8 +2963,6 @@ disp & Diplay-LCD <= Mensagem[RS][RT] \\
 \multicolumn{2}{|c|}{Formato 7} \\
 \hline
 aplBuf & PC <= PC-Buffer; R10 <= BR-Buffer \\
-quant &  MI-Quantum <= RS \\
-retSO &  MI-RetornoSO <= RS \\
 LB & R8 <= ES-Buffer \\
 LBL & R8 <= ES-Buffer; ES-Buffer <= -1 \\
 DFMES & ES-Modo <= RS \\

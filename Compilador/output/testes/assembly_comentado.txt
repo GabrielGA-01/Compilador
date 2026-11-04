@@ -295,6 +295,36 @@
 (movi, R1, 32, -)
 (out, R1, -, -)
 
+(movi, R4, 8, -)
+(movi, r2, 1, -)
+(movi, R7, 58, -)
+(quant, R4, -, -)
+(bufBR, R2, -, -)
+(bufPC, R7, -, -)
+(aplBuf, -, -, -)
+(movi, R1, 33, -)
+(out, R1, -, -)
+
+(beq, R11, R5, L38)
+(halt, -, -, -)
+(lab. L38, -, -)
+(movi, R1, 34, -)
+(out, R1, -, -)
+
+(movi, R4, 10, -)
+(movi, r2, 1, -)
+(movi, R7, 88, -)
+(quant, R4, -, -)
+(bufBR, R2, -, -)
+(bufPC, R7, -, -)
+(aplBuf, -, -, -)
+
+(beq, R11, 0, L39)
+(halt, -, -, -)
+(lab. L39, -, -)
+(movi, R1, 35, -)
+(out, R1, -, -)
+
 (halt, -, -, -)
 
 ; Preenchimento com HALT até a linha 521 (uma antes do salto)
@@ -349,3 +379,20 @@
 (bufPC, R7, -, -)
 (aplBuf, -, -, -)
 (halt, -, -, -)
+
+; Preenchimento até a linha 569 (uma antes do salto)
+(halt, -, -, -)
+; ...
+(halt, -, -, -)
+
+(movi, R1, 1, -)
+(out, R1, -, -)
+(movi, R1, 2, -)
+(out, R1, -, -)
+(movi, R1, 3, -)
+(out, R1, -, -)
+(movi, R1, 4, -)
+(out, R1, -, -)
+(out, R2, -, -)
+(out, R1, -, -)
+(halt, -, -)

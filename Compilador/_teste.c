@@ -445,7 +445,7 @@ void main(){
 
     // --- Teste do uso do MADMP ---
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
-    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(18), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(19), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(3), createNumericAddr(128), createEmptyAddr());
     makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(2), createNumericAddr(2));
@@ -522,10 +522,52 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(32), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // Teste quantum
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(8), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(5), createNumericAddr(20), createEmptyAddr());
+    makeNewQuadTest(OP_MOVR, *createRegisterAddr(11), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(58), createEmptyAddr()); // 512+58 = 570
+    makeNewQuadTest(OP_QUANT, *createRegisterAddr(4), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(33), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // Verifica se R11 se manteve
+    Address l38 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(11), *createRegisterAddr(5), l38);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l38, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(34), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // Teste fim de programa
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(10), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(88), createEmptyAddr()); // Linha 512 + 88 = 600
+    makeNewQuadTest(OP_QUANT, *createRegisterAddr(4), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // Verifica se R11 foi limpo
+    Address l39 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(11), createNumericAddr(0), l39);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l39, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(35), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
     // --- Fim do teste ---
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
-    // Completando halts até a linha 522
+
+
+    // Completando halts até a linha 522 (contando do 1)
     padWithHaltsToLine(522);
 
     makeNewQuadTest(OP_OUT, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
@@ -582,6 +624,34 @@ void main(){
     makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // Completando halts até a linha 570 (contando do 1)
+    padWithHaltsToLine(570);
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(2), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(3), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr()); // Acabou o quantum
+    makeNewQuadTest(OP_IN, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // Completando halts até a linha 600
+    padWithHaltsToLine(600);
+
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(2), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(3), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(4), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr()); // Última instrução do quantum
 
     Quad* before = NULL;
     Quad* current = headTest;
