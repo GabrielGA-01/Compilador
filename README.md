@@ -112,13 +112,13 @@ Instruções para o compilador:
 Instruções para o processador:
 - ok (PR) bufBR (OP, REG) - Salva o valor no buffer do BR
 - ok (PR) bufPC (OP, REG) - Salva o valor no buffer do PC
-- {Adicionar também o endereço de retorno do SO ao MI} (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo
+- ok (PR) aplBuf (OP, -) - Aplica o buffer do PC (no módulo do PC) e do BR (no R10) ao mesmo tempo e salva o endereço de retorno SO
 - ok (ES) LB (OP, -) - Faz a leitura do buffer de ES para o registrador R8
 - ok (ES) LBL (OP, -) - Faz a leitura do buffer de ES para o registrador R8 e limpa o buffer
 - ok disp (OP, RS, RT) - Passa um registrador com o número do programa (1º) e outro com o número da mensagem (2º)
 - ok updMADMP(OP) - Aplica o valor do buffer para ser usado por MADMP (sinal novo)
+- ok (PR) quant (OP, RD)
 
-- (PR) quant (OP, RD)
 - (ES) DFMES (OP, RD) - Define o modo de ES
 
 - Removida (PR) retSO (OP, RD) - Define o endereço de retorno
@@ -139,6 +139,8 @@ MADMI:
 
 !!! Fazer com que o registrador R8 deixe de ser salvo/recuperado por save/load regs.
 
-!!! Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC
+!!! (relatório) Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC
 
 !!! Botão de reset atualiza o modo de ES
+
+Ultima coisa: retorno para o SO direto para OUT quebra

@@ -462,7 +462,7 @@ void main(){
     //Linha 251
     // --- Configuração inicial dos registradores ---
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
-    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(18), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(19), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(3), createNumericAddr(128), createEmptyAddr());
 
     // --- Primeira verificação ---
@@ -523,15 +523,17 @@ void main(){
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
     // Teste quantum
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(0), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(8), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(5), createNumericAddr(20), createEmptyAddr());
-    makeNewQuadTest(OP_MOVR, *createRegisterAddr(11), createNumericAddr(5), createEmptyAddr());
+    makeNewQuadTest(OP_MOVR, *createRegisterAddr(11), *createRegisterAddr(5), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(58), createEmptyAddr()); // 512+58 = 570
     makeNewQuadTest(OP_QUANT, *createRegisterAddr(4), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(33), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
@@ -543,7 +545,7 @@ void main(){
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(34), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
-    // Teste fim de programa
+    // Teste fim de programa (halt)
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(10), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(88), createEmptyAddr()); // Linha 512 + 88 = 600
@@ -554,13 +556,42 @@ void main(){
 
     // Verifica se R11 foi limpo
     Address l39 = *createLabelAddr();
-    makeNewQuadTest(OP_BEQ, *createRegisterAddr(11), createNumericAddr(0), l39);
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(11), *createRegisterAddr(0), l39);
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_LABEL, l39, createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(35), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
+    // Teste de ir direto para input, fazer contagem, retornar para out
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(0), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(7), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(5), createNumericAddr(20), createEmptyAddr());
+    makeNewQuadTest(OP_MOVR, *createRegisterAddr(11), *createRegisterAddr(5), createEmptyAddr()); // Escreve número do programa
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(2), createNumericAddr(1), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(7), createNumericAddr(118), createEmptyAddr()); // Linha 512 + 118 = 630
+    makeNewQuadTest(OP_QUANT, *createRegisterAddr(4), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFBR, *createRegisterAddr(2), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_BUFPC, *createRegisterAddr(7), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+
+    // Retorna em um out
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    // Verifica se a contagem está certa
+    Address l40 = *createLabelAddr();
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(4), createNumericAddr(6), createEmptyAddr());
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(1), *createRegisterAddr(4), l40);
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l40, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(36), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+
+    // Verifica se R11 manteve
+    Address l45 = *createLabelAddr();
+    makeNewQuadTest(OP_BEQ, *createRegisterAddr(11), *createRegisterAddr(5), l45);
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_LABEL, l45, createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(37), createEmptyAddr());
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
 
     // --- Fim do teste ---
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
@@ -636,7 +667,6 @@ void main(){
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(4), createEmptyAddr());
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr()); // Acabou o quantum
-    makeNewQuadTest(OP_IN, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
     // Completando halts até a linha 600
@@ -652,6 +682,17 @@ void main(){
     makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
     makeNewQuadTest(OP_MOVI, *createRegisterAddr(1), createNumericAddr(5), createEmptyAddr());
     makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr()); // Última instrução do quantum
+
+    padWithHaltsToLine(630);
+    makeNewQuadTest(OP_OUT, *createRegisterAddr(1), createEmptyAddr(), createEmptyAddr());
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1)); // Última instrução do quantum
+    makeNewQuadTest(OP_ADDI, *createRegisterAddr(1), *createRegisterAddr(1), createNumericAddr(1));
+    makeNewQuadTest(OP_HALT, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
 
     Quad* before = NULL;
     Quad* current = headTest;
