@@ -119,28 +119,19 @@ Instruções para o processador:
 - ok updMADMP(OP) - Aplica o valor do buffer para ser usado por MADMP (sinal novo)
 - ok (PR) quant (OP, RD)
 
-- (ES) DFMES (OP, RD) - Define o modo de ES
+- {removida} (PR) retSO (OP, RD) - Define o endereço de retorno
 
-- Removida (PR) retSO (OP, RD) - Define o endereço de retorno
-
-- [Adicionar depois] (ES) Novas instruções de IN e OUT que levam ao SO
+- {faltando} (ES) DFMES (OP, RD) - Define o modo de ES
+- {faltando} (ES) Novas instruções de IN e OUT que levam ao SO
 
 # Sobre os novos módulos
 MADMI:
-- Falta o caminho do retornoSO
 - {Mudar lógica para escrever arquivo via software?}
-
-# Interrupção
-- Não está funcionando bem casos de borda fim de quantum com próxima instrução halt e fim de quantum junto com halt
 
 ! - Para fazer:
 
 !!! Escrever sobre o uso do buffer do banco de registradores para acessar a o MADMP
 
-!!! Fazer com que o registrador R8 deixe de ser salvo/recuperado por save/load regs.
-
 !!! (relatório) Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC
 
 !!! Botão de reset atualiza o modo de ES
-
-Ultima coisa: retorno para o SO direto para OUT quebra
