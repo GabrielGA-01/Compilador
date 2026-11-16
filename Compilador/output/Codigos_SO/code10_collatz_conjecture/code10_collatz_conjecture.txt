@@ -1,0 +1,59 @@
+/* 
+ * Program in C- (C Minus)
+ * Objective: Read a positive integer N and compute the total number of 
+ * steps to reach 1 following the Collatz sequence:
+ * - If N is even: N = N / 2
+ * - If N is odd:  N = 3 * N + 1
+ */
+
+/* Function to calculate Collatz steps */
+int calcularPassosCollatz(int n) {
+    int passos;
+    int atual;
+    int quociente;
+    int produto;
+    int resto;
+
+    passos = 0;
+    atual = n;
+
+    while (atual > 1) {
+        /* Compute modulo 2 without % operator: resto = atual - ((atual / 2) * 2) */
+        quociente = atual / 2;
+        produto = quociente * 2;
+        resto = atual - produto;
+
+        if (resto == 0) {
+            /* Even number */
+            atual = atual / 2;
+        }
+        else {
+            /* Odd number */
+            atual = (3 * atual) + 1;
+        }
+
+        passos = passos + 1;
+    }
+
+    return passos;
+}
+
+void main(void) {
+    /* Variables declared strictly at the beginning of main */
+    int numeroInicial;
+    int totalPassos;
+    int leitorAuxiliar;
+
+    /* 1. Read starting integer and echo it */
+    numeroInicial = input();
+    output(numeroInicial);
+
+    /* 2. Call function and store return value in a variable */
+    totalPassos = calcularPassosCollatz(numeroInicial);
+
+    /* 3. Output the total step count */
+    output(totalPassos);
+
+    /* 4. Auxiliary read at the end */
+    leitorAuxiliar = input();
+}

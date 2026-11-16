@@ -1,0 +1,198 @@
+FUN_DECL
+  TYPE: INT
+  VAR: somarMaiores
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vec
+      VAR: vec
+  PARAM
+    TYPE: INT
+    VAR: tamanho
+  PARAM
+    TYPE: INT
+    VAR: limite
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: soma
+    VAR_DECL
+      TYPE: INT
+      VAR: valorAtual
+    ASSIGN_EXPR
+      VAR: soma
+      NUM: 0
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        VAR: tamanho
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: valorAtual
+          ARRAY_ACCESS: vec
+            VAR: vec
+            VAR: i
+        IF_STMT
+          OP: GT
+            VAR: valorAtual
+            VAR: limite
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: soma
+              BINARY_OP: ADD
+                VAR: soma
+                VAR: valorAtual
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    RETURN_STMT
+      VAR: soma
+FUN_DECL
+  TYPE: INT
+  VAR: contarMenoresOuIguais
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vec
+      VAR: vec
+  PARAM
+    TYPE: INT
+    VAR: tamanho
+  PARAM
+    TYPE: INT
+    VAR: limite
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: qtd
+    VAR_DECL
+      TYPE: INT
+      VAR: valorAtual
+    ASSIGN_EXPR
+      VAR: qtd
+      NUM: 0
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        VAR: tamanho
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: valorAtual
+          ARRAY_ACCESS: vec
+            VAR: vec
+            VAR: i
+        IF_STMT
+          OP: LET
+            VAR: valorAtual
+            VAR: limite
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: qtd
+              BINARY_OP: ADD
+                VAR: qtd
+                NUM: 1
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    RETURN_STMT
+      VAR: qtd
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: limite
+    VAR_DECL
+      TYPE: INT
+      ARRAY_DECL: numeros[10]
+        VAR: numeros
+        NUM: 10
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: somaMaiores
+    VAR_DECL
+      TYPE: INT
+      VAR: qtdMenoresIguais
+    VAR_DECL
+      TYPE: INT
+      VAR: leitorAuxiliar
+    ASSIGN_EXPR
+      VAR: limite
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: limite
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        NUM: 10
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          ARRAY_ACCESS: numeros
+            VAR: numeros
+            VAR: i
+          FUN_CALL: input
+            VAR: input
+        FUN_CALL: output
+          VAR: output
+          ARRAY_ACCESS: numeros
+            VAR: numeros
+            VAR: i
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    ASSIGN_EXPR
+      VAR: leitorAuxiliar
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: somaMaiores
+      FUN_CALL: somarMaiores
+        VAR: somarMaiores
+        VAR: numeros
+        NUM: 10
+        VAR: limite
+    ASSIGN_EXPR
+      VAR: qtdMenoresIguais
+      FUN_CALL: contarMenoresOuIguais
+        VAR: contarMenoresOuIguais
+        VAR: numeros
+        NUM: 10
+        VAR: limite
+    FUN_CALL: output
+      VAR: output
+      VAR: somaMaiores
+    ASSIGN_EXPR
+      VAR: leitorAuxiliar
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: qtdMenoresIguais

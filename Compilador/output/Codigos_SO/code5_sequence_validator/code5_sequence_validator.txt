@@ -1,0 +1,85 @@
+/* 
+ * Programa em C- (C Minus)
+ * Objetivo: Ler uma sequência de 10 números e determinar o tipo de ordenação.
+ * 
+ * Códigos de Saída (Resultado):
+ *  1 = Estritamente Crescente (ex: 1, 2, 3...)
+ *  2 = Não-Decrescente (cresce ou repete, ex: 1, 2, 2, 3...)
+ *  3 = Não-Crescente (decresce ou repete, ex: 5, 4, 4, 2...)
+ *  4 = Estritamente Decrescente (ex: 5, 4, 3...)
+ *  0 = Nenhum dos padrões acima (oscila, ex: 1, 5, 2...)
+ */
+ 
+void main(void) {
+    int i;
+    int atual;
+    int anterior;
+    int aux;
+    int ehCrescente;
+    int ehNaoDecrescente;
+    int ehNaoCrescente;
+    int ehDecrescente;
+    int resultado;
+
+    /* Inicialização das flags com 1 (verdadeiro) */
+    ehCrescente = 1;
+    ehNaoDecrescente = 1;
+    ehNaoCrescente = 1;
+    ehDecrescente = 1;
+
+    /* Leitura do primeiro valor */
+    anterior = input();
+    output(anterior);
+
+    /* Leitura dos 9 números restantes e verificação das relações */
+    i = 1;
+    while (i < 10) {
+        atual = input();
+        output(atual);
+
+        if (atual <= anterior) {
+            ehCrescente = 0;
+        }
+        if (atual < anterior) {
+            ehNaoDecrescente = 0;
+        }
+        if (atual >= anterior) {
+            ehDecrescente = 0;
+        }
+        if (atual > anterior) {
+            ehNaoCrescente = 0;
+        }
+
+        anterior = atual;
+        i = i + 1;
+    }
+
+    /* Leitura obrigatória para variável auxiliar após a sequência */
+    aux = input();
+
+    /* Determinação do resultado conforme a classificação mais restrita */
+    if (ehCrescente == 1) {
+        resultado = 1;
+    }
+    else {
+        if (ehDecrescente == 1) {
+            resultado = 4;
+        }
+        else {
+            if (ehNaoDecrescente == 1) {
+                resultado = 2;
+            }
+            else {
+                if (ehNaoCrescente == 1) {
+                    resultado = 3;
+                }
+                else {
+                    resultado = 0;
+                }
+            }
+        }
+    }
+
+    /* Exibição da classificação final */
+    output(resultado);
+}

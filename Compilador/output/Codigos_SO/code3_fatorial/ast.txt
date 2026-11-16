@@ -1,0 +1,53 @@
+FUN_DECL
+  TYPE: INT
+  VAR: fatorial
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: n
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: aux
+    IF_STMT
+      OP: LET
+        VAR: n
+        NUM: 1
+      COMPOUND_STMT
+        RETURN_STMT
+          NUM: 1
+    COMPOUND_STMT
+      ASSIGN_EXPR
+        VAR: aux
+        FUN_CALL: fatorial
+          VAR: fatorial
+          BINARY_OP: SUB
+            VAR: n
+            NUM: 1
+      RETURN_STMT
+        BINARY_OP: MUL
+          VAR: n
+          VAR: aux
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: x
+    VAR_DECL
+      TYPE: INT
+      VAR: resultado
+    ASSIGN_EXPR
+      VAR: x
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: resultado
+      FUN_CALL: fatorial
+        VAR: fatorial
+        VAR: x
+    FUN_CALL: output
+      VAR: output
+      VAR: resultado

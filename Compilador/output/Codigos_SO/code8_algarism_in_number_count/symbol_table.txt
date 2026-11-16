@@ -1,0 +1,15 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+24              main            Void            Func            Global            37 
+71              digito          Integer         Var             main              39   45   46   56 
+77              input           Integer         Func            Global             0   45   49   53 
+109             numero          Integer         Var             main              40   49   50   56 
+109             numero          Integer         Var             contarDigito       8   14 
+117             output          Void            Func            Global             0   46   50   59 
+137             contador        Integer         Var             contarDigito       9   13   19   28   28   34 
+143             leitorAuxiliar  Integer         Var             main              42   53 
+149             digitoAlvo      Integer         Var             contarDigito       8   18   27 
+175             ocorrencias     Integer         Var             main              41   56   59 
+176             digitoAtual     Integer         Var             contarDigito      10   25   27 
+182             numTemp         Integer         Var             contarDigito      11   14   17   24   25   25   31   31 
+208             contarDigito    Integer         Func            Global             8   56 

@@ -1,0 +1,60 @@
+/* 
+ * Program in C- (C Minus)
+ * Objective: Read a target digit (0-9) and a positive integer number,
+ * then count how many times the target digit appears in the number.
+ */
+
+/* Function to count digit occurrences using integer division and modulo */
+int contarDigito(int numero, int digitoAlvo) {
+    int contador;
+    int digitoAtual;
+    int numTemp;
+
+    contador = 0;
+    numTemp = numero;
+
+    /* Handle the edge case where the input number itself is 0 */
+    if (numTemp == 0) {
+        if (digitoAlvo == 0) {
+            contador = 1;
+        }
+    }
+
+    /* Process the number digit by digit from right to left */
+    while (numTemp > 0) {
+        digitoAtual = numTemp - ((numTemp / 10) * 10); /* Equivalent to numTemp % 10 */
+
+        if (digitoAtual == digitoAlvo) {
+            contador = contador + 1;
+        }
+
+        numTemp = numTemp / 10;
+    }
+
+    return contador;
+}
+
+void main(void) {
+    /* Variables declared strictly at the beginning of main */
+    int digito;
+    int numero;
+    int ocorrencias;
+    int leitorAuxiliar;
+
+    /* 1. Read target digit and echo it */
+    digito = input();
+    output(digito);
+
+    /* 2. Read main number to analyze and echo it */
+    numero = input();
+    output(numero);
+
+    /* 3. Auxiliary read at the end */
+    leitorAuxiliar = input();
+
+    /* 4. Call function and assign return value to a variable */
+    ocorrencias = contarDigito(numero, digito);
+
+    /* 5. Output the result */
+    output(ocorrencias);
+}

@@ -1,0 +1,152 @@
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: atual
+    VAR_DECL
+      TYPE: INT
+      VAR: anterior
+    VAR_DECL
+      TYPE: INT
+      VAR: aux
+    VAR_DECL
+      TYPE: INT
+      VAR: ehCrescente
+    VAR_DECL
+      TYPE: INT
+      VAR: ehNaoDecrescente
+    VAR_DECL
+      TYPE: INT
+      VAR: ehNaoCrescente
+    VAR_DECL
+      TYPE: INT
+      VAR: ehDecrescente
+    VAR_DECL
+      TYPE: INT
+      VAR: resultado
+    ASSIGN_EXPR
+      VAR: ehCrescente
+      NUM: 1
+    ASSIGN_EXPR
+      VAR: ehNaoDecrescente
+      NUM: 1
+    ASSIGN_EXPR
+      VAR: ehNaoCrescente
+      NUM: 1
+    ASSIGN_EXPR
+      VAR: ehDecrescente
+      NUM: 1
+    ASSIGN_EXPR
+      VAR: anterior
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: anterior
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 1
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        NUM: 10
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: atual
+          FUN_CALL: input
+            VAR: input
+        FUN_CALL: output
+          VAR: output
+          VAR: atual
+        IF_STMT
+          OP: LET
+            VAR: atual
+            VAR: anterior
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: ehCrescente
+              NUM: 0
+        IF_STMT
+          OP: LT
+            VAR: atual
+            VAR: anterior
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: ehNaoDecrescente
+              NUM: 0
+        IF_STMT
+          OP: GET
+            VAR: atual
+            VAR: anterior
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: ehDecrescente
+              NUM: 0
+        IF_STMT
+          OP: GT
+            VAR: atual
+            VAR: anterior
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: ehNaoCrescente
+              NUM: 0
+        ASSIGN_EXPR
+          VAR: anterior
+          VAR: atual
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    ASSIGN_EXPR
+      VAR: aux
+      FUN_CALL: input
+        VAR: input
+    IF_STMT
+      OP: EQ
+        VAR: ehCrescente
+        NUM: 1
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: resultado
+          NUM: 1
+    COMPOUND_STMT
+      IF_STMT
+        OP: EQ
+          VAR: ehDecrescente
+          NUM: 1
+        COMPOUND_STMT
+          ASSIGN_EXPR
+            VAR: resultado
+            NUM: 4
+      COMPOUND_STMT
+        IF_STMT
+          OP: EQ
+            VAR: ehNaoDecrescente
+            NUM: 1
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: resultado
+              NUM: 2
+        COMPOUND_STMT
+          IF_STMT
+            OP: EQ
+              VAR: ehNaoCrescente
+              NUM: 1
+            COMPOUND_STMT
+              ASSIGN_EXPR
+                VAR: resultado
+                NUM: 3
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: resultado
+              NUM: 0
+    FUN_CALL: output
+      VAR: output
+      VAR: resultado

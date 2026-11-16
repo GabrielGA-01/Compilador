@@ -1,0 +1,114 @@
+FUN_DECL
+  TYPE: INT
+  VAR: contarDigito
+FUN_BODY
+  PARAM
+    TYPE: INT
+    VAR: numero
+  PARAM
+    TYPE: INT
+    VAR: digitoAlvo
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: contador
+    VAR_DECL
+      TYPE: INT
+      VAR: digitoAtual
+    VAR_DECL
+      TYPE: INT
+      VAR: numTemp
+    ASSIGN_EXPR
+      VAR: contador
+      NUM: 0
+    ASSIGN_EXPR
+      VAR: numTemp
+      VAR: numero
+    IF_STMT
+      OP: EQ
+        VAR: numTemp
+        NUM: 0
+      COMPOUND_STMT
+        IF_STMT
+          OP: EQ
+            VAR: digitoAlvo
+            NUM: 0
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: contador
+              NUM: 1
+    WHILE_STMT
+      OP: GT
+        VAR: numTemp
+        NUM: 0
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          VAR: digitoAtual
+          BINARY_OP: SUB
+            VAR: numTemp
+            BINARY_OP: MUL
+              BINARY_OP: DIV
+                VAR: numTemp
+                NUM: 10
+              NUM: 10
+        IF_STMT
+          OP: EQ
+            VAR: digitoAtual
+            VAR: digitoAlvo
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: contador
+              BINARY_OP: ADD
+                VAR: contador
+                NUM: 1
+        ASSIGN_EXPR
+          VAR: numTemp
+          BINARY_OP: DIV
+            VAR: numTemp
+            NUM: 10
+    RETURN_STMT
+      VAR: contador
+FUN_DECL
+  TYPE: VOID
+  VAR: main
+FUN_BODY
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: digito
+    VAR_DECL
+      TYPE: INT
+      VAR: numero
+    VAR_DECL
+      TYPE: INT
+      VAR: ocorrencias
+    VAR_DECL
+      TYPE: INT
+      VAR: leitorAuxiliar
+    ASSIGN_EXPR
+      VAR: digito
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: digito
+    ASSIGN_EXPR
+      VAR: numero
+      FUN_CALL: input
+        VAR: input
+    FUN_CALL: output
+      VAR: output
+      VAR: numero
+    ASSIGN_EXPR
+      VAR: leitorAuxiliar
+      FUN_CALL: input
+        VAR: input
+    ASSIGN_EXPR
+      VAR: ocorrencias
+      FUN_CALL: contarDigito
+        VAR: contarDigito
+        VAR: numero
+        VAR: digito
+    FUN_CALL: output
+      VAR: output
+      VAR: ocorrencias

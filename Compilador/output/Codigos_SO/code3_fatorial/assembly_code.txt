@@ -1,0 +1,58 @@
+	movi R13, 127
+	movr R12, R13
+	jmp L3
+L0:
+	subi R12, R12, 1
+	loaddi R1, R12, 3
+	movi R2, 1
+	bgt R1, R2, L1
+	movi R1, 1
+	loaddi R2, R12, 2
+	addi R12, R12, 2
+	storedi R12, R1, 1
+	jr R2
+	jmp L2
+L1:
+	loaddi R1, R12, 3
+	subi R2, R1, 1
+	subi R12, R12, 1
+	storedi R12, R2, 1
+	movi R2, L4
+	subi R12, R12, 1
+	storedi R12, R2, 1
+	jmp L0
+L4:
+	loaddi R1, R12, 1
+	addi R12, R12, 1
+	storedi R12, R1, 1
+	loaddi R1, R12, 3
+	loaddi R2, R12, 1
+	mulr R3, R1, R2
+	loaddi R1, R12, 2
+	addi R12, R12, 2
+	storedi R12, R3, 1
+	jr R1
+L2:
+	loaddi R1, R12, 2
+	addi R12, R12, 3
+	jr R1
+L3:
+	subi R12, R12, 1
+	subi R12, R12, 1
+	in R1
+	storedi R12, R1, 2
+	loaddi R1, R12, 2
+	subi R12, R12, 1
+	storedi R12, R1, 1
+	movi R2, L6
+	subi R12, R12, 1
+	storedi R12, R2, 1
+	jmp L0
+L6:
+	loaddi R1, R12, 1
+	addi R12, R12, 1
+	storedi R12, R1, 1
+	loaddi R1, R12, 1
+	out R1
+	addi R12, R12, 2
+	halt

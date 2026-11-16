@@ -1,0 +1,10 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+24              main            Void            Func            Global            11 
+77              input           Integer         Func            Global             0   13   13 
+117             u               Integer         Var             gcd                4    6    7    7 
+117             output          Void            Func            Global             0   14 
+118             v               Integer         Var             gcd                4    6    7    7    7 
+120             x               Integer         Var             main              12   13   14 
+121             y               Integer         Var             main              12   13   14 
+200             gcd             Integer         Func            Global             4    7   14 
