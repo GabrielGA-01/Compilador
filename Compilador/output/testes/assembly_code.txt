@@ -412,17 +412,17 @@ L41:
 	bufPC R7
 	aplBuf
 	out R9
+	bufBR R2
+	movr R7, R9
+	bufPC R7
+	aplBuf
+	out R9
 	movi R4, 3
 	quant R4
 	bufBR R2
 	movr R7, R9
 	bufPC R7
 	aplBuf
-	halt
-	halt
-	halt
-	halt
-	halt
 	halt
 	halt
 	halt
