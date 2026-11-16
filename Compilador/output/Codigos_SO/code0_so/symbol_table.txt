@@ -1,17 +1,26 @@
 Hash            Name            Type            Kind            Scope           Line Numbers   
 ----            ----            ----            ----            -----           ------------   
-21              definirPosicaoDoPrograma Void            Func            Global             0 
+21              definirPosicaoDoPrograma Void            Func            Global             0   50 
 24              main            Void            Func            Global             1 
-37              definirQuantum  Void            Func            Global             0 
+37              definirQuantum  Void            Func            Global             0   44 
 43              lerBuffer       Integer         Func            Global             0 
-58              trocarDeContexto Void            Func            Global             0 
-77              input           Integer         Func            Global             0 
+58              trocarDeContexto Void            Func            Global             0   54 
+77              input           Integer         Func            Global             0   26   30   78 
 85              definirModoES   Void            Func            Global             0 
-117             output          Void            Func            Global             0 
-124             saveRegs        Void            Func            Global             0 
-137             definirNumeroDoPrograma Void            Func            Global             0 
+93              numeroPrograma  Integer         Var             main               6   30   36   42   46 
+100             iPrograma       Integer         Var             main               7   34   37   43   47 
+103             proxPosicao     Integer         Var             main              10   47   50 
+105             i               Integer         Var             main              14   17   18   19   19   20   20   21   21   33   35   36   37   39   39 
+107             proxPrograma    Integer         Var             main               9   46 
+113             comando         Integer         Var             main               5   26   28   78 
+117             output          Void            Func            Global             0   64   68   74 
+119             estadoPrograma  Integer         Var             main              12   61   62 
+124             saveRegs        Void            Func            Global             0   51   57 
+137             definirNumeroDoPrograma Void            Func            Global             0   42 
+138             posicoes        Integer         Var             main               3   20   47 
 152             lerBufferLimpa  Void            Func            Global             0 
-177             lerReg          Integer         Func            Global             0 
-178             atualizarMADMP  Void            Func            Global             0 
-187             loadRegs        Void            Func            Global             0 
-193             showLCD         Void            Func            Global             0 
+168             programas       Integer         Var             main               2   19   36 
+177             lerReg          Integer         Func            Global             0   61 
+178             atualizarMADMP  Void            Func            Global             0   52   58 
+187             loadRegs        Void            Func            Global             0   53   59 
+193             showLCD         Void            Func            Global             0   25   29   45   63   67   73 

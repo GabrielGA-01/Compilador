@@ -3,3 +3,189 @@ FUN_DECL
   VAR: main
 FUN_BODY
   COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      ARRAY_DECL: programas[10]
+        VAR: programas
+        NUM: 10
+    VAR_DECL
+      TYPE: INT
+      ARRAY_DECL: posicoes[10]
+        VAR: posicoes
+        NUM: 10
+    VAR_DECL
+      TYPE: INT
+      VAR: comando
+    VAR_DECL
+      TYPE: INT
+      VAR: numeroPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: iPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: proxPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: proxPosicao
+    VAR_DECL
+      TYPE: INT
+      VAR: estadoPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        NUM: 10
+      COMPOUND_STMT
+        ASSIGN_EXPR
+          ARRAY_ACCESS: programas
+            VAR: programas
+            VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+        ASSIGN_EXPR
+          ARRAY_ACCESS: posicoes
+            VAR: posicoes
+            VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    WHILE_STMT
+      OP: EQ
+        NUM: 1
+        NUM: 1
+      COMPOUND_STMT
+        FUN_CALL: showLCD
+          VAR: showLCD
+          NUM: 0
+        ASSIGN_EXPR
+          VAR: comando
+          FUN_CALL: input
+            VAR: input
+        IF_STMT
+          OP: EQ
+            VAR: comando
+            NUM: 0
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 1
+            ASSIGN_EXPR
+              VAR: numeroPrograma
+              FUN_CALL: input
+                VAR: input
+            ASSIGN_EXPR
+              VAR: i
+              NUM: 0
+            ASSIGN_EXPR
+              VAR: iPrograma
+              BINARY_OP: SUB
+                NUM: 0
+                NUM: 1
+            WHILE_STMT
+              OP: LT
+                VAR: i
+                NUM: 10
+              COMPOUND_STMT
+                IF_STMT
+                  OP: EQ
+                    ARRAY_ACCESS: programas
+                      VAR: programas
+                      VAR: i
+                    VAR: numeroPrograma
+                  COMPOUND_STMT
+                    ASSIGN_EXPR
+                      VAR: iPrograma
+                      VAR: i
+                ASSIGN_EXPR
+                  VAR: i
+                  BINARY_OP: ADD
+                    VAR: i
+                    NUM: 1
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: numeroPrograma
+            IF_STMT
+              OP: DIF
+                VAR: iPrograma
+                BINARY_OP: SUB
+                  NUM: 0
+                  NUM: 1
+              COMPOUND_STMT
+                FUN_CALL: definirQuantum
+                  VAR: definirQuantum
+                  NUM: 0
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 4
+                ASSIGN_EXPR
+                  VAR: proxPrograma
+                  VAR: numeroPrograma
+                ASSIGN_EXPR
+                  VAR: proxPosicao
+                  ARRAY_ACCESS: posicoes
+                    VAR: posicoes
+                    VAR: iPrograma
+                FUN_CALL: definirPosicaoDoPrograma
+                  VAR: definirPosicaoDoPrograma
+                  VAR: proxPosicao
+                FUN_CALL: saveRegs
+                  VAR: saveRegs
+                FUN_CALL: atualizarMADMP
+                  VAR: atualizarMADMP
+                FUN_CALL: loadRegs
+                  VAR: loadRegs
+                FUN_CALL: trocarDeContexto
+                  VAR: trocarDeContexto
+                FUN_CALL: saveRegs
+                  VAR: saveRegs
+                FUN_CALL: atualizarMADMP
+                  VAR: atualizarMADMP
+                FUN_CALL: loadRegs
+                  VAR: loadRegs
+                ASSIGN_EXPR
+                  VAR: estadoPrograma
+                  FUN_CALL: lerReg
+                    VAR: lerReg
+                    NUM: 11
+                IF_STMT
+                  OP: EQ
+                    VAR: estadoPrograma
+                    NUM: 0
+                  COMPOUND_STMT
+                    FUN_CALL: showLCD
+                      VAR: showLCD
+                      NUM: 11
+                    FUN_CALL: output
+                      VAR: output
+                      NUM: 0
+                COMPOUND_STMT
+                  FUN_CALL: showLCD
+                    VAR: showLCD
+                    NUM: 12
+                  FUN_CALL: output
+                    VAR: output
+                    NUM: 0
+            COMPOUND_STMT
+              FUN_CALL: showLCD
+                VAR: showLCD
+                NUM: 8
+              FUN_CALL: output
+                VAR: output
+                NUM: 0
+        COMPOUND_STMT
+          ASSIGN_EXPR
+            VAR: comando
+            FUN_CALL: input
+              VAR: input

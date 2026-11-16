@@ -20,6 +20,11 @@ WORK_DIR="$(mktemp -d)"
 trap 'rm -rf -- "$WORK_DIR"' EXIT
 
 shopt -s nullglob
+code_dirs=("$SOURCE_ROOT"/code[0-9]*_*)
+if ((${#code_dirs[@]} > 0)); then
+    mapfile -t code_dirs < <(printf '%s\n' "${code_dirs[@]}" | sort -V)
+fi
+
 compiled_count=0
 generated_files=(
     ast.txt
@@ -30,7 +35,7 @@ generated_files=(
     binary.txt
 )
 
-for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
+for source_dir in "${code_dirs[@]}"; do
     [[ -d "$source_dir" ]] || continue
 
     code_name="$(basename -- "$source_dir")"
@@ -76,7 +81,7 @@ combined_file="$WORK_DIR/all_codes_binary.txt"
 : > "$combined_file"
 combined_count=0
 
-for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
+for source_dir in "${code_dirs[@]}"; do
     [[ -d "$source_dir" ]] || continue
 
     code_name="$(basename -- "$source_dir")"
@@ -91,8 +96,8 @@ for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
             exit 1
         fi
 
-        if (( instruction_count >= 512 )); then
-            printf 'Erro: %s excede o limite de 512 instruções\n' "$code_name" >&2
+        if (( instruction_count >= 360 )); then
+            printf 'Erro: %s excede o limite de 360 instruções\n' "$code_name" >&2
             exit 1
         fi
 
@@ -121,5 +126,5 @@ for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
 done
 
 cp -- "$combined_file" "$SOURCE_ROOT/all_codes_binary.txt"
-printf 'Arquivo combinado gerado: %s/all_codes_binary.txt (%d códigos, 512 instruções cada).\n' \
+printf 'Arquivo combinado gerado: %s/all_codes_binary.txt (%d códigos, 360 instruções cada).\n' \
     "$SOURCE_ROOT" "$combined_count"
