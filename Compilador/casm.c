@@ -909,7 +909,10 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
                 // GABIARRA FORTE para ler imediato passado para a função lerReg diretamente - Parte 1
                 // Para evitar uma instrução sem papel em lerReg
-                if(current->next != NULL && current->next->next != NULL && strcmp(current->next->next->addr2.name, "lerReg") == 0){
+                if(current->next != NULL && current->next->next != NULL &&
+                   current->next->next->addr2.kind == STRING_VAR &&
+                   current->next->next->addr2.name != NULL &&
+                   strcmp(current->next->next->addr2.name, "lerReg") == 0){
                     current->addr2.val = current->addr2.val + 10; // Gambiarra para saber que de fato foi passado um número
                     current->next->next->addr3 = current->addr2; 
                     if(current->addr1.kind == TEMP_VAR) current->addr1 = *allocate_register(current->addr1.name, tempControlHead, regVector);
@@ -941,20 +944,27 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             // Caso a próxima instrução for um call de uma função sem retono
             // CUIDADO: a função deve receber EXATAMENTE um parâmetro e sem retorno.
             // Apenas adiciona o registrador a ser escrito nela
-            if(current->next != NULL && current->next->op == OP_CALL &&
-                strcmp(current->next->addr2.name, "output") == 0 ||
+            if(current->next != NULL &&
+               current->next->op == OP_CALL &&
+               current->next->addr2.kind == STRING_VAR &&
+               current->next->addr2.name != NULL &&
+               (strcmp(current->next->addr2.name, "output") == 0 ||
                 strcmp(current->next->addr2.name, "definirQuantum") == 0 ||
                 strcmp(current->next->addr2.name, "definirNumeroDoPrograma") == 0 ||
                 strcmp(current->next->addr2.name, "definirPosicaoDoPrograma") == 0 ||
                 strcmp(current->next->addr2.name, "definirModoES") == 0 ||
-                strcmp(current->next->addr2.name, "showLCD") == 0 || 
-                strcmp(current->next->addr2.name, "lerBuffer") == 0)
+                strcmp(current->next->addr2.name, "showLCD") == 0 ||
+                strcmp(current->next->addr2.name, "lerBuffer") == 0))
             {
                 current->next->addr1 = current->addr1;
             }
             // GABIARRA FORTE para ler imediato passado para a função lerReg diretamente - Parte 2
             // Apenas queima o registrador, não será necessário usá-lo
-            else if(current->next != NULL && strcmp(current->next->addr2.name, "lerReg") == 0){
+            else if(current->next != NULL &&
+                    current->next->op == OP_CALL &&
+                    current->next->addr2.kind == STRING_VAR &&
+                    current->next->addr2.name != NULL &&
+                    strcmp(current->next->addr2.name, "lerReg") == 0){
                 allocate_register(current->addr1.name, tempControlHead, regVector);
             }
             // Caso geral de parâmetro
