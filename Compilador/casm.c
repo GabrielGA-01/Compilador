@@ -1015,16 +1015,9 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case trocarDeContexto
             else if (strcmp(funcName, "trocarDeContexto") == 0) {
-                Address retSOAddr = *createLabelAddr();
 
-                // 4 - Criar a label de retorno
-                insertQuadAfter(current, OP_LABEL, retSOAddr, createEmptyAddr(), createEmptyAddr());
-
-                // 3 - Aplicar a mudança de contexto
+                // 2 - Aplicar a mudança de contexto
                 insertQuadAfter(current, OP_APLBUF, createEmptyAddr(), createEmptyAddr(), createEmptyAddr());
-
-                // 2 - Atualizar endereço de retorno para o SO no MI
-                insertQuadAfter(current, OP_RETSO, retSOAddr, createEmptyAddr(), createEmptyAddr());
 
                 // 1 - Mover R9 para o buffer do PC
                 insertQuadAfter(current, OP_BUFPC, *createRegisterAddr(9), createEmptyAddr(), createEmptyAddr());
@@ -1043,12 +1036,11 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
             // Case saveRegs
             else if (strcmp(funcName, "saveRegs") == 0) {
                 // Ordem inversa para aparecer na ordem no código final
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(15), createNumericAddr(12));
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(14), createNumericAddr(11));
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(13), createNumericAddr(10));
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(12), createNumericAddr(9));
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(9), createNumericAddr(8));
-                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(8), createNumericAddr(7));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(15), createNumericAddr(11));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(14), createNumericAddr(10));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(13), createNumericAddr(9));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(12), createNumericAddr(8));
+                insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(9), createNumericAddr(7));
                 insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(7), createNumericAddr(6));
                 insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(6), createNumericAddr(5));
                 insertQuadAfter(current, OP_STOREDI, *createRegisterAddr(0), *createRegisterAddr(5), createNumericAddr(4));
@@ -1060,12 +1052,11 @@ Quad* generateAssembly(Quad* quadHead, FuncLabel* funHead, tempControl *tempCont
 
             // Case loadRegs
             else if (strcmp(funcName, "loadRegs") == 0) {
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(15), *createRegisterAddr(0), createNumericAddr(12));
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(14), *createRegisterAddr(0), createNumericAddr(11));
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(13), *createRegisterAddr(0), createNumericAddr(10));
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(12), *createRegisterAddr(0), createNumericAddr(9));
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(9), *createRegisterAddr(0), createNumericAddr(8));
-                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(8), *createRegisterAddr(0), createNumericAddr(7));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(15), *createRegisterAddr(0), createNumericAddr(11));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(14), *createRegisterAddr(0), createNumericAddr(10));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(13), *createRegisterAddr(0), createNumericAddr(9));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(12), *createRegisterAddr(0), createNumericAddr(8));
+                insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(9), *createRegisterAddr(0), createNumericAddr(7));
                 insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(7), *createRegisterAddr(0), createNumericAddr(6));
                 insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(6), *createRegisterAddr(0), createNumericAddr(5));
                 insertQuadAfter(current, OP_LOADDI, *createRegisterAddr(5), *createRegisterAddr(0), createNumericAddr(4));

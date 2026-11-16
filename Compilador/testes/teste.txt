@@ -1,19 +1,20 @@
-    void main(){
-        int x;
-        x = input();
-        x = lerBuffer();
-        x = lerReg(0);
-        lerBufferLimpa();
+void main(){
+    int x;
+    x = input();
+    x = lerBuffer();
+    x = lerReg(2);
+    lerBufferLimpa();
 
-        atualizarMADMP();
+    atualizarMADMP();
 
-        output(1);
-        saveRegs();
-        loadRegs();
-        showLCD(6);
-        definirQuantum(2);
-        definirModoES(5);
-        definirNumeroDoPrograma(3);
-        definirPosicaoDoPrograma(4);
-        trocarDeContexto();
-    }
+    output(1);
+    saveRegs();
+    loadRegs();
+    showLCD(x);
+    showLCD(4);
+    definirQuantum(x);
+    definirModoES(x);
+    definirNumeroDoPrograma(x);
+    definirPosicaoDoPrograma(x);
+    trocarDeContexto();
+}
