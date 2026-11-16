@@ -71,3 +71,55 @@ if (( compiled_count == 0 )); then
 fi
 
 printf 'Concluído: %d código(s) compilado(s).\n' "$compiled_count"
+
+combined_file="$WORK_DIR/all_codes_binary.txt"
+: > "$combined_file"
+combined_count=0
+
+for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
+    [[ -d "$source_dir" ]] || continue
+
+    code_name="$(basename -- "$source_dir")"
+    binary_file="$source_dir/binary.txt"
+    padded_file="$WORK_DIR/padded_binary.txt"
+    instruction_count=0
+    : > "$padded_file"
+
+    while IFS= read -r instruction || [[ -n "$instruction" ]]; do
+        if [[ ! "$instruction" =~ ^[01]{32}$ ]]; then
+            printf 'Erro: instrução binária inválida em %s\n' "$binary_file" >&2
+            exit 1
+        fi
+
+        if (( instruction_count >= 512 )); then
+            printf 'Erro: %s excede o limite de 512 instruções\n' "$code_name" >&2
+            exit 1
+        fi
+
+        if (( instruction_count > 0 )); then
+            printf '\n' >> "$padded_file"
+        fi
+        printf '%s' "$instruction" >> "$padded_file"
+        ((instruction_count += 1))
+    done < "$binary_file"
+
+    if (( instruction_count == 0 )); then
+        printf 'Erro: arquivo binário vazio: %s\n' "$binary_file" >&2
+        exit 1
+    fi
+
+    while (( instruction_count < 360 )); do
+        printf '\n%032d' 0 >> "$padded_file"
+        ((instruction_count += 1))
+    done
+
+    if (( combined_count > 0 )); then
+        printf '\n' >> "$combined_file"
+    fi
+    cat -- "$padded_file" >> "$combined_file"
+    ((combined_count += 1))
+done
+
+cp -- "$combined_file" "$SOURCE_ROOT/all_codes_binary.txt"
+printf 'Arquivo combinado gerado: %s/all_codes_binary.txt (%d códigos, 512 instruções cada).\n' \
+    "$SOURCE_ROOT" "$combined_count"

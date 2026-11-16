@@ -1,0 +1,6 @@
+	movi R13, 127
+	movr R12, R13
+	jmp L0
+L0:
+	addi R12, R12, -1
+	halt

@@ -1,0 +1,3 @@
+(lab, L0, -, -)
+(fun, void, main, -)
+(end, main, -, -)

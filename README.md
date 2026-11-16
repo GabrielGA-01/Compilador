@@ -19,8 +19,9 @@ Finalmente, execute o compilador:
 gdb -q --args ./compilador ./testes/sort.txt
 ```
 
-Para recompilar todos os códigos de `output/Codigos_SO` e salvar cada binário
-como `binary.txt` na pasta do respectivo código:
+Para recompilar todos os códigos de `output/Codigos_SO`, salvar cada binário
+como `binary.txt` na pasta correspondente e gerar `all_codes_binary.txt` com
+512 instruções por código:
 ```bash
 ./compilar_codigos_so.sh
 ```

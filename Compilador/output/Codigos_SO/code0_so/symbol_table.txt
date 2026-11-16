@@ -1,0 +1,17 @@
+Hash            Name            Type            Kind            Scope           Line Numbers   
+----            ----            ----            ----            -----           ------------   
+21              definirPosicaoDoPrograma Void            Func            Global             0 
+24              main            Void            Func            Global             1 
+37              definirQuantum  Void            Func            Global             0 
+43              lerBuffer       Integer         Func            Global             0 
+58              trocarDeContexto Void            Func            Global             0 
+77              input           Integer         Func            Global             0 
+85              definirModoES   Void            Func            Global             0 
+117             output          Void            Func            Global             0 
+124             saveRegs        Void            Func            Global             0 
+137             definirNumeroDoPrograma Void            Func            Global             0 
+152             lerBufferLimpa  Void            Func            Global             0 
+177             lerReg          Integer         Func            Global             0 
+178             atualizarMADMP  Void            Func            Global             0 
+187             loadRegs        Void            Func            Global             0 
+193             showLCD         Void            Func            Global             0 
