@@ -2,10 +2,15 @@ Hash            Name            Type            Kind            Scope           
 ----            ----            ----            ----            -----           ------------   
 3               low             Integer         Var             sort              21   23 
 3               low             Integer         Var             minloc             6    8    9   10 
+21              definirPosicaoDoPrograma Void            Func            Global             0 
 24              main            Void            Func            Global            34 
+37              definirQuantum  Void            Func            Global             0 
+43              lerBuffer       Integer         Func            Global             0 
+58              trocarDeContexto Void            Func            Global             0 
 60              sort            Void            Func            Global            21   44 
 77              input           Integer         Func            Global             0   40   47 
 79              vet             Integer         Var             Global             4   40   41   44   48 
+85              definirModoES   Void            Func            Global             0 
 88              minloc          Integer         Func            Global             6   26 
 97              a               Integer         Var             sort              21   26   27   28   28   29 
 97              a               Integer         Var             minloc             6    9   12   13 
@@ -20,3 +25,10 @@ Hash            Name            Type            Kind            Scope           
 120             x               Integer         Var             minloc             7    9   12   13 
 122             high            Integer         Var             sort              21   24   26 
 122             high            Integer         Var             minloc             6   11 
+124             saveRegs        Void            Func            Global             0 
+137             definirNumeroDoPrograma Void            Func            Global             0 
+152             lerBufferLimpa  Void            Func            Global             0 
+177             lerReg          Integer         Func            Global             0 
+178             atualizarMADMP  Void            Func            Global             0 
+187             loadRegs        Void            Func            Global             0 
+193             showLCD         Void            Func            Global             0 

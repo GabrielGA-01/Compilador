@@ -76,6 +76,7 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
     Quad* current = quadHead;
 
     int lineNumber = 0;
+    int firstInstruction = 1;
     while (current != NULL) {
         if (current->op != OP_LABEL) {
             char* opCode = getOpcodeBinary(current->op);
@@ -120,12 +121,13 @@ void generateBinary(Quad* quadHead, labelControl* labelHead) {
                 immed = intToBinaryString(val, 26);
             }
 
+            if (!firstInstruction) fprintf(file, "\n");
             fprintf(file, "%s", opCode);
             if (op1)   fprintf(file, "%s", op1);
             if (op2)   fprintf(file, "%s", op2);
             if (op3)   fprintf(file, "%s", op3);
             if (immed) fprintf(file, "%s", immed);
-            fprintf(file, "\n");
+            firstInstruction = 0;
 
             // Liberação
             free(op1); free(op2); free(op3); free(immed);

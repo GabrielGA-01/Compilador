@@ -21,13 +21,20 @@ trap 'rm -rf -- "$WORK_DIR"' EXIT
 
 shopt -s nullglob
 compiled_count=0
+generated_files=(
+    ast.txt
+    symbol_table.txt
+    intermediate_code.txt
+    assembly_code.txt
+    quadruples_assembly_code.txt
+    binary.txt
+)
 
 for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
     [[ -d "$source_dir" ]] || continue
 
     code_name="$(basename -- "$source_dir")"
     source_file="$source_dir/$code_name.txt"
-    destination="$source_dir/binary.txt"
 
     if [[ ! -f "$source_file" ]]; then
         printf 'Erro: código-fonte não encontrado: %s\n' "$source_file" >&2
@@ -35,18 +42,26 @@ for source_dir in "$SOURCE_ROOT"/code[0-9]*_*; do
     fi
 
     printf 'Compilando %s...\n' "$code_name"
-    rm -f -- "$WORK_DIR/output/binary.txt"
+    for generated_file in "${generated_files[@]}"; do
+        rm -f -- "$WORK_DIR/output/$generated_file"
+    done
+
     if ! (cd -- "$WORK_DIR" && "$COMPILER" "$source_file"); then
         printf 'Erro ao compilar %s\n' "$source_file" >&2
         exit 1
     fi
 
-    if [[ ! -f "$WORK_DIR/output/binary.txt" ]]; then
-        printf 'Erro: compilação de %s não gerou output/binary.txt\n' "$code_name" >&2
-        exit 1
-    fi
+    for generated_file in "${generated_files[@]}"; do
+        generated_path="$WORK_DIR/output/$generated_file"
+        if [[ ! -f "$generated_path" ]]; then
+            printf 'Erro: compilação de %s não gerou output/%s\n' \
+                "$code_name" "$generated_file" >&2
+            exit 1
+        fi
 
-    cp -- "$WORK_DIR/output/binary.txt" "$destination"
+        cp -- "$generated_path" "$source_dir/$generated_file"
+    done
+
     ((compiled_count += 1))
 done
 
