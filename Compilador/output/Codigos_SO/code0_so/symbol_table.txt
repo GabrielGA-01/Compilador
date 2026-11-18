@@ -1,55 +1,58 @@
 Hash            Name            Type            Kind            Scope           Line Numbers   
 ----            ----            ----            ----            -----           ------------   
-5               encontrarIndice Integer         Func            Global             1   36   51 
-9               executarProgramas Void            Func            Global            59  164  174 
-21              definirPosicaoDoPrograma Void            Func            Global             0   85 
-24              main            Void            Func            Global           127 
-27              aux             Integer         Var             executarProgramas   71  104 
-37              definirQuantum  Void            Func            Global             0  163  173 
+5               encontrarIndice Integer         Func            Global             1   36   51  182  191  200  233  243 
+9               executarProgramas Void            Func            Global            59  166  176 
+21              definirPosicaoDoPrograma Void            Func            Global             0   83 
+24              main            Void            Func            Global           125 
+27              erro            Integer         Var             main             136  198  199  210  213 
+37              definirQuantum  Void            Func            Global             0  165  175 
 43              lerBuffer       Integer         Func            Global             0 
 46              valorBuscado    Integer         Var             encontrarIndice    1   10 
-50              programasAtivos Integer         Var             executarProgramas   68   74   78  116  120  120 
-51              vetorProgramasParaExecutar Integer         Var             executarProgramas   59   76  102  114  119 
+50              programasAtivos Integer         Var             executarProgramas   68   72   76  114  118  118 
+51              vetorProgramasParaExecutar Integer         Var             executarProgramas   59   74  100  112  117 
 51              vetorProgramasParaExecutar Integer         Var             definirProgramasParaExecutar   19   54 
-55              vetorPosicoes   Integer         Var             executarProgramas   59   81 
-58              trocarDeContexto Void            Func            Global             0   92 
-77              input           Integer         Func            Global             0   34   49  104  158  168 
-80              numeroDeProgramas Integer         Var             main             135  168  169  170  172 
+55              vetorPosicoes   Integer         Var             executarProgramas   59   79 
+58              trocarDeContexto Void            Func            Global             0   90 
+77              input           Integer         Func            Global             0   34   49  160  170  180  190  195  215  231  242 
+80              numeroDeProgramas Integer         Var             main             133  170  171  172  174 
+82              numeroProgramaAntigo Integer         Var             main             142  180  182  190  191  221 
 85              definirModoES   Void            Func            Global             0 
 88              indiceFinal     Integer         Var             encontrarIndice    3    6   11   16 
 93              numeroPrograma  Integer         Var             definirProgramasParaExecutar   20   34   35   36   49   50   51 
-95              programasParaExecutar Integer         Var             main             130  152  161  164  172  174 
-97              indiceAtual     Integer         Var             executarProgramas   66   73   76  102  109  109  110  111  114 
-100             iPrograma       Integer         Var             main             136 
-100             iPrograma       Integer         Var             executarProgramas   65   76   79   80   81  114 
+95              programasParaExecutar Integer         Var             main             128  154  163  166  174  176 
+97              indiceAtual     Integer         Var             executarProgramas   66   71   74  100  107  107  108  109  112 
+99              numeroDoPrograma Integer         Var             main             141  231  233  237  242  243  249 
+100             iPrograma       Integer         Var             main             134  182  185  191  219  233  236  243  246  247 
+100             iPrograma       Integer         Var             executarProgramas   65   74   77   78   79  112 
 100             iPrograma       Integer         Var             definirProgramasParaExecutar   21   36   38   51   54 
 103             proxPosicao     Integer         Var             main             139 
-103             proxPosicao     Integer         Var             executarProgramas   61   81   85 
-105             i               Integer         Var             main             143  148  149  150  150  151  151  152  153  153 
-105             i               Integer         Var             executarProgramas   69  117  118  119  122  122 
+103             proxPosicao     Integer         Var             executarProgramas   61   79   83 
+105             i               Integer         Var             main             145  150  151  152  152  153  153  154  155  155 
+105             i               Integer         Var             executarProgramas   69  115  116  117  120  120 
 105             i               Integer         Var             encontrarIndice    2    5    9   10   11   13   13 
-106             vetorProgramas  Integer         Var             executarProgramas   59   80 
+106             vetorProgramas  Integer         Var             executarProgramas   59   78 
 106             vetorProgramas  Integer         Var             definirProgramasParaExecutar   19   36   51 
 107             proxPrograma    Integer         Var             main             138 
-107             proxPrograma    Integer         Var             executarProgramas   60   80   83  101 
+107             proxPrograma    Integer         Var             executarProgramas   60   78   81   99 
 110             indice          Integer         Var             definirProgramasParaExecutar   22   24   26   54   55   55 
-110             definirProgramasParaExecutar Void            Func            Global            19  161  172 
-113             comando         Integer         Var             main             133  158  160  166 
-117             output          Void            Func            Global             0   40 
-119             estadoPrograma  Integer         Var             main             141 
-119             estadoPrograma  Integer         Var             executarProgramas   63   99  100 
-124             saveRegs        Void            Func            Global             0   89   95 
+110             definirProgramasParaExecutar Void            Func            Global            19  163  174 
+113             comando         Integer         Var             main             131  160  162  168  178  229 
+117             output          Void            Func            Global             0   40  102  187  203  207  223  227  239  251 
+119             estadoPrograma  Integer         Var             executarProgramas   63   97   98 
+124             saveRegs        Void            Func            Global             0   87   93 
 130             quantidade      Integer         Var             definirProgramasParaExecutar   19   26   27   30   42   45 
-137             definirNumeroDoPrograma Void            Func            Global             0   35   50   83  101  105 
-138             posicoes        Integer         Var             main             129  151  164  174 
+137             definirNumeroDoPrograma Void            Func            Global             0   35   50   81   99  103  221  225  237  249 
+138             posicoes        Integer         Var             main             127  153  166  176  247 
+142             novoIPrograma   Integer         Var             main             135  200  205 
 152             lerBufferLimpa  Void            Func            Global             0 
-168             programas       Integer         Var             main             128  150  161  164  172  174 
+154             novoNumeroPrograma Integer         Var             main             143  195  200  201  215  219  225 
+168             programas       Integer         Var             main             126  152  163  166  174  176  182  191  200  219  233  243  246 
 170             vetor           Integer         Var             encontrarIndice    1   10 
-177             lerReg          Integer         Func            Global             0   99 
-178             atualizarMADMP  Void            Func            Global             0   90   96 
-187             loadRegs        Void            Func            Global             0   91   97 
-190             tamanho         Integer         Var             main             131  145  161  164  172  174 
-190             tamanho         Integer         Var             executarProgramas   59  118 
+177             lerReg          Integer         Func            Global             0   97 
+178             atualizarMADMP  Void            Func            Global             0   88   94 
+187             loadRegs        Void            Func            Global             0   89   95 
+190             tamanho         Integer         Var             main             129  147  163  166  174  176  182  191  200  233  243 
+190             tamanho         Integer         Var             executarProgramas   59  116 
 190             tamanho         Integer         Var             definirProgramasParaExecutar   19   36   51 
 190             tamanho         Integer         Var             encontrarIndice    1    9 
-193             showLCD         Void            Func            Global             0   28   31   39   43   46   84  103  157  167 
+193             showLCD         Void            Func            Global             0   28   31   39   43   46   82  101  159  169  179  186  189  194  202  206  214  222  226  230  238  241  250 

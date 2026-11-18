@@ -68,8 +68,6 @@ void executarProgramas(int vetorProgramasParaExecutar[], int vetorProgramas[], i
     int programasAtivos;
     int i;
 
-    int aux;
-
     indiceAtual = 0;
     programasAtivos = 1; /* Apenas para executar o laco ao menos uma vez */
 
@@ -101,7 +99,7 @@ void executarProgramas(int vetorProgramasParaExecutar[], int vetorProgramas[], i
                 definirNumeroDoPrograma(proxPrograma);              /* Escreve em R11 */
                 vetorProgramasParaExecutar[indiceAtual] = 0 - 1;    /* Programa terminou */
                 showLCD(11);                                        /* P[] chegou ao fim */
-                aux = input();                                      /* Delay */
+                output(0);                                      /* Delay */
                 definirNumeroDoPrograma(0);
             }
         }
@@ -134,11 +132,15 @@ void main(void){
 
     int numeroDeProgramas;
     int iPrograma;
+    int novoIPrograma;
+    int erro;
 
     int proxPrograma;
     int proxPosicao;
 
-    int estadoPrograma;
+    int numeroDoPrograma;
+    int numeroProgramaAntigo;
+    int novoNumeroPrograma;
 
     int i;
 
@@ -172,6 +174,81 @@ void main(void){
             definirProgramasParaExecutar(programasParaExecutar, programas, tamanho, numeroDeProgramas);
             definirQuantum(50);
             executarProgramas(programasParaExecutar, programas, posicoes, tamanho);
+        }
+        else if(comando == 2){
+            showLCD(15); /* Digite o numero do programa que deseja alterar */
+            numeroProgramaAntigo = input();
+            
+            iPrograma = encontrarIndice(programas, tamanho, numeroProgramaAntigo);
+
+            /* Valida se o programa realmente existe */
+            while(iPrograma == 0 - 1){
+                showLCD(8); /* P[] nao encontrado */
+                output(0);
+
+                showLCD(15);
+                numeroProgramaAntigo = input();
+                iPrograma = encontrarIndice(programas, tamanho, numeroProgramaAntigo);
+            }
+            
+            showLCD(16); /* Digite o novo numero para o programa */
+            novoNumeroPrograma = input();
+
+            /* Verifica se o nome e valido */
+            erro = 1;
+            while(erro == 1){
+                novoIPrograma = encontrarIndice(programas, tamanho, novoNumeroPrograma);
+                if(novoNumeroPrograma < 1){
+                    showLCD(20);
+                    output(0);
+                }
+                else if(novoIPrograma != 0 - 1){
+                    showLCD(21);
+                    output(0);
+                }
+                else{
+                    erro = 0;
+                }
+
+                if(erro == 1){
+                    showLCD(16);
+                    novoNumeroPrograma = input();
+                }
+            }
+            
+            programas[iPrograma] = novoNumeroPrograma;
+            
+            definirNumeroDoPrograma(numeroProgramaAntigo);
+            showLCD(17); /* Programa alterado */
+            output(0);
+
+            definirNumeroDoPrograma(novoNumeroPrograma);
+            showLCD(18);
+            output(0);
+        }
+        else if(comando == 3){
+            showLCD(13); /* Digite o numero do programa que deseja remover */
+            numeroDoPrograma = input();
+
+            iPrograma = encontrarIndice(programas, tamanho, numeroDoPrograma);
+
+            /* Valida se o programa realmente existe */
+            while(iPrograma == 0 - 1){
+                definirNumeroDoPrograma(numeroDoPrograma);
+                showLCD(8); /* P[] nao encontrado */
+                output(0);
+
+                showLCD(13);
+                numeroDoPrograma = input();
+                iPrograma = encontrarIndice(programas, tamanho, numeroDoPrograma);
+            }
+
+            programas[iPrograma] = 0 - 1;
+            posicoes[iPrograma] = 0 - 1;
+            
+            definirNumeroDoPrograma(numeroDoPrograma);
+            showLCD(14); /* Opcional: Feedback visual de removido com sucesso */
+            output(0);
         }
     }
 }

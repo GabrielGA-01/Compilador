@@ -209,9 +209,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: i
-    VAR_DECL
-      TYPE: INT
-      VAR: aux
     ASSIGN_EXPR
       VAR: indiceAtual
       NUM: 0
@@ -291,10 +288,9 @@ FUN_BODY
                 FUN_CALL: showLCD
                   VAR: showLCD
                   NUM: 11
-                ASSIGN_EXPR
-                  VAR: aux
-                  FUN_CALL: input
-                    VAR: input
+                FUN_CALL: output
+                  VAR: output
+                  NUM: 0
                 FUN_CALL: definirNumeroDoPrograma
                   VAR: definirNumeroDoPrograma
                   NUM: 0
@@ -380,13 +376,25 @@ FUN_BODY
       VAR: iPrograma
     VAR_DECL
       TYPE: INT
+      VAR: novoIPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: erro
+    VAR_DECL
+      TYPE: INT
       VAR: proxPrograma
     VAR_DECL
       TYPE: INT
       VAR: proxPosicao
     VAR_DECL
       TYPE: INT
-      VAR: estadoPrograma
+      VAR: numeroDoPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: numeroProgramaAntigo
+    VAR_DECL
+      TYPE: INT
+      VAR: novoNumeroPrograma
     VAR_DECL
       TYPE: INT
       VAR: i
@@ -494,3 +502,206 @@ FUN_BODY
               VAR: programas
               VAR: posicoes
               VAR: tamanho
+        IF_STMT
+          OP: EQ
+            VAR: comando
+            NUM: 2
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 15
+            ASSIGN_EXPR
+              VAR: numeroProgramaAntigo
+              FUN_CALL: input
+                VAR: input
+            ASSIGN_EXPR
+              VAR: iPrograma
+              FUN_CALL: encontrarIndice
+                VAR: encontrarIndice
+                VAR: programas
+                VAR: tamanho
+                VAR: numeroProgramaAntigo
+            WHILE_STMT
+              OP: EQ
+                VAR: iPrograma
+                BINARY_OP: SUB
+                  NUM: 0
+                  NUM: 1
+              COMPOUND_STMT
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 8
+                FUN_CALL: output
+                  VAR: output
+                  NUM: 0
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 15
+                ASSIGN_EXPR
+                  VAR: numeroProgramaAntigo
+                  FUN_CALL: input
+                    VAR: input
+                ASSIGN_EXPR
+                  VAR: iPrograma
+                  FUN_CALL: encontrarIndice
+                    VAR: encontrarIndice
+                    VAR: programas
+                    VAR: tamanho
+                    VAR: numeroProgramaAntigo
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 16
+            ASSIGN_EXPR
+              VAR: novoNumeroPrograma
+              FUN_CALL: input
+                VAR: input
+            ASSIGN_EXPR
+              VAR: erro
+              NUM: 1
+            WHILE_STMT
+              OP: EQ
+                VAR: erro
+                NUM: 1
+              COMPOUND_STMT
+                ASSIGN_EXPR
+                  VAR: novoIPrograma
+                  FUN_CALL: encontrarIndice
+                    VAR: encontrarIndice
+                    VAR: programas
+                    VAR: tamanho
+                    VAR: novoNumeroPrograma
+                IF_STMT
+                  OP: LT
+                    VAR: novoNumeroPrograma
+                    NUM: 1
+                  COMPOUND_STMT
+                    FUN_CALL: showLCD
+                      VAR: showLCD
+                      NUM: 20
+                    FUN_CALL: output
+                      VAR: output
+                      NUM: 0
+                IF_STMT
+                  OP: DIF
+                    VAR: novoIPrograma
+                    BINARY_OP: SUB
+                      NUM: 0
+                      NUM: 1
+                  COMPOUND_STMT
+                    FUN_CALL: showLCD
+                      VAR: showLCD
+                      NUM: 21
+                    FUN_CALL: output
+                      VAR: output
+                      NUM: 0
+                COMPOUND_STMT
+                  ASSIGN_EXPR
+                    VAR: erro
+                    NUM: 0
+                IF_STMT
+                  OP: EQ
+                    VAR: erro
+                    NUM: 1
+                  COMPOUND_STMT
+                    FUN_CALL: showLCD
+                      VAR: showLCD
+                      NUM: 16
+                    ASSIGN_EXPR
+                      VAR: novoNumeroPrograma
+                      FUN_CALL: input
+                        VAR: input
+            ASSIGN_EXPR
+              ARRAY_ACCESS: programas
+                VAR: programas
+                VAR: iPrograma
+              VAR: novoNumeroPrograma
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: numeroProgramaAntigo
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 17
+            FUN_CALL: output
+              VAR: output
+              NUM: 0
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: novoNumeroPrograma
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 18
+            FUN_CALL: output
+              VAR: output
+              NUM: 0
+        IF_STMT
+          OP: EQ
+            VAR: comando
+            NUM: 3
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 13
+            ASSIGN_EXPR
+              VAR: numeroDoPrograma
+              FUN_CALL: input
+                VAR: input
+            ASSIGN_EXPR
+              VAR: iPrograma
+              FUN_CALL: encontrarIndice
+                VAR: encontrarIndice
+                VAR: programas
+                VAR: tamanho
+                VAR: numeroDoPrograma
+            WHILE_STMT
+              OP: EQ
+                VAR: iPrograma
+                BINARY_OP: SUB
+                  NUM: 0
+                  NUM: 1
+              COMPOUND_STMT
+                FUN_CALL: definirNumeroDoPrograma
+                  VAR: definirNumeroDoPrograma
+                  VAR: numeroDoPrograma
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 8
+                FUN_CALL: output
+                  VAR: output
+                  NUM: 0
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 13
+                ASSIGN_EXPR
+                  VAR: numeroDoPrograma
+                  FUN_CALL: input
+                    VAR: input
+                ASSIGN_EXPR
+                  VAR: iPrograma
+                  FUN_CALL: encontrarIndice
+                    VAR: encontrarIndice
+                    VAR: programas
+                    VAR: tamanho
+                    VAR: numeroDoPrograma
+            ASSIGN_EXPR
+              ARRAY_ACCESS: programas
+                VAR: programas
+                VAR: iPrograma
+              BINARY_OP: SUB
+                NUM: 0
+                NUM: 1
+            ASSIGN_EXPR
+              ARRAY_ACCESS: posicoes
+                VAR: posicoes
+                VAR: iPrograma
+              BINARY_OP: SUB
+                NUM: 0
+                NUM: 1
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: numeroDoPrograma
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 14
+            FUN_CALL: output
+              VAR: output
+              NUM: 0

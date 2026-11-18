@@ -152,6 +152,11 @@ FUN_BODY
             VAR: i
           FUN_CALL: input
             VAR: input
+        FUN_CALL: output
+          VAR: output
+          ARRAY_ACCESS: vet
+            VAR: vet
+            VAR: i
         ASSIGN_EXPR
           VAR: i
           BINARY_OP: ADD

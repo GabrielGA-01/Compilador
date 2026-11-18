@@ -142,3 +142,12 @@ MADMI:
 !!! (relatório) Adicionar novo caminho de dados para salvar o endereço de retorno do SO a partir do novo valor do PC
 
 !!! Botão de reset atualiza o modo de ES
+
+# Novas mensagens
+11 - P[número] chegou ao fim
+12 - erro fatal do processador
+13 - numero do programa para ser deletado
+14 - P[numero] deletado
+15 - numero do programa para ser renomeado
+16 - O nome antigo era P[numero]
+17 - O novo nome é P[numero] 
