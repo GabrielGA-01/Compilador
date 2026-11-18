@@ -134,9 +134,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: qtdMenoresIguais
-    VAR_DECL
-      TYPE: INT
-      VAR: leitorAuxiliar
     ASSIGN_EXPR
       VAR: limite
       FUN_CALL: input
@@ -169,10 +166,6 @@ FUN_BODY
             VAR: i
             NUM: 1
     ASSIGN_EXPR
-      VAR: leitorAuxiliar
-      FUN_CALL: input
-        VAR: input
-    ASSIGN_EXPR
       VAR: somaMaiores
       FUN_CALL: somarMaiores
         VAR: somarMaiores
@@ -189,10 +182,6 @@ FUN_BODY
     FUN_CALL: output
       VAR: output
       VAR: somaMaiores
-    ASSIGN_EXPR
-      VAR: leitorAuxiliar
-      FUN_CALL: input
-        VAR: input
     FUN_CALL: output
       VAR: output
       VAR: qtdMenoresIguais

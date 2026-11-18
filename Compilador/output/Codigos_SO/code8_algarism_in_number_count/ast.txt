@@ -82,9 +82,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: ocorrencias
-    VAR_DECL
-      TYPE: INT
-      VAR: leitorAuxiliar
     ASSIGN_EXPR
       VAR: digito
       FUN_CALL: input
@@ -99,10 +96,6 @@ FUN_BODY
     FUN_CALL: output
       VAR: output
       VAR: numero
-    ASSIGN_EXPR
-      VAR: leitorAuxiliar
-      FUN_CALL: input
-        VAR: input
     ASSIGN_EXPR
       VAR: ocorrencias
       FUN_CALL: contarDigito

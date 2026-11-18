@@ -43,18 +43,14 @@ void main(void) {
     /* Variables declared strictly at the beginning of main */
     int numero;
     int statusPrimo;
-    int leitorAuxiliar;
 
     /* 1. Read input number N and echo it */
     numero = input();
     output(numero);
 
-    /* 2. Auxiliary read at the end */
-    leitorAuxiliar = input();
-
-    /* 3. Call function and store return value in a variable */
+    /* 2. Call function and store return value in a variable */
     statusPrimo = ehPrimo(numero);
 
-    /* 4. Output the result (1 = Prime, 0 = Not Prime) */
+    /* 3. Output the result (1 = Prime, 0 = Not Prime) */
     output(statusPrimo);
 }

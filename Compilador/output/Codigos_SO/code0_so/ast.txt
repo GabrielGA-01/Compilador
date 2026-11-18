@@ -1,4 +1,352 @@
 FUN_DECL
+  TYPE: INT
+  VAR: encontrarIndice
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetor
+      VAR: vetor
+  PARAM
+    TYPE: INT
+    VAR: tamanho
+  PARAM
+    TYPE: INT
+    VAR: valorBuscado
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: indiceFinal
+    ASSIGN_EXPR
+      VAR: i
+      NUM: 0
+    ASSIGN_EXPR
+      VAR: indiceFinal
+      BINARY_OP: SUB
+        NUM: 0
+        NUM: 1
+    WHILE_STMT
+      OP: LT
+        VAR: i
+        VAR: tamanho
+      COMPOUND_STMT
+        IF_STMT
+          OP: EQ
+            ARRAY_ACCESS: vetor
+              VAR: vetor
+              VAR: i
+            VAR: valorBuscado
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: indiceFinal
+              VAR: i
+        ASSIGN_EXPR
+          VAR: i
+          BINARY_OP: ADD
+            VAR: i
+            NUM: 1
+    RETURN_STMT
+      VAR: indiceFinal
+FUN_DECL
+  TYPE: VOID
+  VAR: definirProgramasParaExecutar
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetorProgramasParaExecutar
+      VAR: vetorProgramasParaExecutar
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetorProgramas
+      VAR: vetorProgramas
+  PARAM
+    TYPE: INT
+    VAR: tamanho
+  PARAM
+    TYPE: INT
+    VAR: quantidade
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: numeroPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: iPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: indice
+    ASSIGN_EXPR
+      VAR: indice
+      NUM: 0
+    WHILE_STMT
+      OP: LT
+        VAR: indice
+        VAR: quantidade
+      COMPOUND_STMT
+        IF_STMT
+          OP: EQ
+            VAR: quantidade
+            NUM: 1
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 1
+        IF_STMT
+          OP: GT
+            VAR: quantidade
+            NUM: 1
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 3
+        ASSIGN_EXPR
+          VAR: numeroPrograma
+          FUN_CALL: input
+            VAR: input
+        FUN_CALL: definirNumeroDoPrograma
+          VAR: definirNumeroDoPrograma
+          VAR: numeroPrograma
+        ASSIGN_EXPR
+          VAR: iPrograma
+          FUN_CALL: encontrarIndice
+            VAR: encontrarIndice
+            VAR: vetorProgramas
+            VAR: tamanho
+            VAR: numeroPrograma
+        WHILE_STMT
+          OP: EQ
+            VAR: iPrograma
+            BINARY_OP: SUB
+              NUM: 0
+              NUM: 1
+          COMPOUND_STMT
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 8
+            FUN_CALL: output
+              VAR: output
+              NUM: 0
+            IF_STMT
+              OP: EQ
+                VAR: quantidade
+                NUM: 1
+              COMPOUND_STMT
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 1
+            IF_STMT
+              OP: GT
+                VAR: quantidade
+                NUM: 1
+              COMPOUND_STMT
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 3
+            ASSIGN_EXPR
+              VAR: numeroPrograma
+              FUN_CALL: input
+                VAR: input
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: numeroPrograma
+            ASSIGN_EXPR
+              VAR: iPrograma
+              FUN_CALL: encontrarIndice
+                VAR: encontrarIndice
+                VAR: vetorProgramas
+                VAR: tamanho
+                VAR: numeroPrograma
+        ASSIGN_EXPR
+          ARRAY_ACCESS: vetorProgramasParaExecutar
+            VAR: vetorProgramasParaExecutar
+            VAR: indice
+          VAR: iPrograma
+        ASSIGN_EXPR
+          VAR: indice
+          BINARY_OP: ADD
+            VAR: indice
+            NUM: 1
+FUN_DECL
+  TYPE: VOID
+  VAR: executarProgramas
+FUN_BODY
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetorProgramasParaExecutar
+      VAR: vetorProgramasParaExecutar
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetorProgramas
+      VAR: vetorProgramas
+  PARAM
+    TYPE: INT
+    ARRAY_DECL: vetorPosicoes
+      VAR: vetorPosicoes
+  PARAM
+    TYPE: INT
+    VAR: tamanho
+  COMPOUND_STMT
+    VAR_DECL
+      TYPE: INT
+      VAR: proxPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: proxPosicao
+    VAR_DECL
+      TYPE: INT
+      VAR: estadoPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: iPrograma
+    VAR_DECL
+      TYPE: INT
+      VAR: indiceAtual
+    VAR_DECL
+      TYPE: INT
+      VAR: programasAtivos
+    VAR_DECL
+      TYPE: INT
+      VAR: i
+    VAR_DECL
+      TYPE: INT
+      VAR: aux
+    ASSIGN_EXPR
+      VAR: indiceAtual
+      NUM: 0
+    ASSIGN_EXPR
+      VAR: programasAtivos
+      NUM: 1
+    ASSIGN_EXPR
+      VAR: iPrograma
+      ARRAY_ACCESS: vetorProgramasParaExecutar
+        VAR: vetorProgramasParaExecutar
+        VAR: indiceAtual
+    WHILE_STMT
+      OP: DIF
+        VAR: programasAtivos
+        NUM: 0
+      COMPOUND_STMT
+        IF_STMT
+          OP: DIF
+            VAR: iPrograma
+            BINARY_OP: SUB
+              NUM: 0
+              NUM: 1
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: proxPrograma
+              ARRAY_ACCESS: vetorProgramas
+                VAR: vetorProgramas
+                VAR: iPrograma
+            ASSIGN_EXPR
+              VAR: proxPosicao
+              ARRAY_ACCESS: vetorPosicoes
+                VAR: vetorPosicoes
+                VAR: iPrograma
+            FUN_CALL: definirNumeroDoPrograma
+              VAR: definirNumeroDoPrograma
+              VAR: proxPrograma
+            FUN_CALL: showLCD
+              VAR: showLCD
+              NUM: 4
+            FUN_CALL: definirPosicaoDoPrograma
+              VAR: definirPosicaoDoPrograma
+              VAR: proxPosicao
+            FUN_CALL: saveRegs
+              VAR: saveRegs
+            FUN_CALL: atualizarMADMP
+              VAR: atualizarMADMP
+            FUN_CALL: loadRegs
+              VAR: loadRegs
+            FUN_CALL: trocarDeContexto
+              VAR: trocarDeContexto
+            FUN_CALL: saveRegs
+              VAR: saveRegs
+            FUN_CALL: atualizarMADMP
+              VAR: atualizarMADMP
+            FUN_CALL: loadRegs
+              VAR: loadRegs
+            ASSIGN_EXPR
+              VAR: estadoPrograma
+              FUN_CALL: lerReg
+                VAR: lerReg
+                NUM: 11
+            IF_STMT
+              OP: EQ
+                VAR: estadoPrograma
+                NUM: 0
+              COMPOUND_STMT
+                FUN_CALL: definirNumeroDoPrograma
+                  VAR: definirNumeroDoPrograma
+                  VAR: proxPrograma
+                ASSIGN_EXPR
+                  ARRAY_ACCESS: vetorProgramasParaExecutar
+                    VAR: vetorProgramasParaExecutar
+                    VAR: indiceAtual
+                  BINARY_OP: SUB
+                    NUM: 0
+                    NUM: 1
+                FUN_CALL: showLCD
+                  VAR: showLCD
+                  NUM: 11
+                ASSIGN_EXPR
+                  VAR: aux
+                  FUN_CALL: input
+                    VAR: input
+                FUN_CALL: definirNumeroDoPrograma
+                  VAR: definirNumeroDoPrograma
+                  NUM: 0
+        ASSIGN_EXPR
+          VAR: indiceAtual
+          BINARY_OP: ADD
+            VAR: indiceAtual
+            NUM: 1
+        IF_STMT
+          OP: GT
+            VAR: indiceAtual
+            NUM: 9
+          COMPOUND_STMT
+            ASSIGN_EXPR
+              VAR: indiceAtual
+              NUM: 0
+        ASSIGN_EXPR
+          VAR: iPrograma
+          ARRAY_ACCESS: vetorProgramasParaExecutar
+            VAR: vetorProgramasParaExecutar
+            VAR: indiceAtual
+        ASSIGN_EXPR
+          VAR: programasAtivos
+          NUM: 0
+        ASSIGN_EXPR
+          VAR: i
+          NUM: 0
+        WHILE_STMT
+          OP: LT
+            VAR: i
+            VAR: tamanho
+          COMPOUND_STMT
+            IF_STMT
+              OP: DIF
+                ARRAY_ACCESS: vetorProgramasParaExecutar
+                  VAR: vetorProgramasParaExecutar
+                  VAR: i
+                BINARY_OP: SUB
+                  NUM: 0
+                  NUM: 1
+              COMPOUND_STMT
+                ASSIGN_EXPR
+                  VAR: programasAtivos
+                  BINARY_OP: ADD
+                    VAR: programasAtivos
+                    NUM: 1
+            ASSIGN_EXPR
+              VAR: i
+              BINARY_OP: ADD
+                VAR: i
+                NUM: 1
+FUN_DECL
   TYPE: VOID
   VAR: main
 FUN_BODY
@@ -15,10 +363,18 @@ FUN_BODY
         NUM: 10
     VAR_DECL
       TYPE: INT
+      ARRAY_DECL: programasParaExecutar[10]
+        VAR: programasParaExecutar
+        NUM: 10
+    VAR_DECL
+      TYPE: INT
+      VAR: tamanho
+    VAR_DECL
+      TYPE: INT
       VAR: comando
     VAR_DECL
       TYPE: INT
-      VAR: numeroPrograma
+      VAR: numeroDeProgramas
     VAR_DECL
       TYPE: INT
       VAR: iPrograma
@@ -34,6 +390,9 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: i
+    ASSIGN_EXPR
+      VAR: tamanho
+      NUM: 10
     ASSIGN_EXPR
       VAR: i
       NUM: 0
@@ -57,6 +416,13 @@ FUN_BODY
             VAR: i
             NUM: 1
         ASSIGN_EXPR
+          ARRAY_ACCESS: programasParaExecutar
+            VAR: programasParaExecutar
+            VAR: i
+          BINARY_OP: SUB
+            NUM: 0
+            NUM: 1
+        ASSIGN_EXPR
           VAR: i
           BINARY_OP: ADD
             VAR: i
@@ -78,114 +444,53 @@ FUN_BODY
             VAR: comando
             NUM: 0
           COMPOUND_STMT
+            FUN_CALL: definirProgramasParaExecutar
+              VAR: definirProgramasParaExecutar
+              VAR: programasParaExecutar
+              VAR: programas
+              VAR: tamanho
+              NUM: 1
+            FUN_CALL: definirQuantum
+              VAR: definirQuantum
+              NUM: 0
+            FUN_CALL: executarProgramas
+              VAR: executarProgramas
+              VAR: programasParaExecutar
+              VAR: programas
+              VAR: posicoes
+              VAR: tamanho
+        IF_STMT
+          OP: EQ
+            VAR: comando
+            NUM: 1
+          COMPOUND_STMT
             FUN_CALL: showLCD
               VAR: showLCD
-              NUM: 1
+              NUM: 2
             ASSIGN_EXPR
-              VAR: numeroPrograma
+              VAR: numeroDeProgramas
               FUN_CALL: input
                 VAR: input
-            ASSIGN_EXPR
-              VAR: i
-              NUM: 0
-            ASSIGN_EXPR
-              VAR: iPrograma
-              BINARY_OP: SUB
-                NUM: 0
-                NUM: 1
-            WHILE_STMT
-              OP: LT
-                VAR: i
+            IF_STMT
+              OP: GT
+                VAR: numeroDeProgramas
                 NUM: 10
               COMPOUND_STMT
-                IF_STMT
-                  OP: EQ
-                    ARRAY_ACCESS: programas
-                      VAR: programas
-                      VAR: i
-                    VAR: numeroPrograma
-                  COMPOUND_STMT
-                    ASSIGN_EXPR
-                      VAR: iPrograma
-                      VAR: i
                 ASSIGN_EXPR
-                  VAR: i
-                  BINARY_OP: ADD
-                    VAR: i
-                    NUM: 1
-            FUN_CALL: definirNumeroDoPrograma
-              VAR: definirNumeroDoPrograma
-              VAR: numeroPrograma
-            IF_STMT
-              OP: DIF
-                VAR: iPrograma
-                BINARY_OP: SUB
-                  NUM: 0
-                  NUM: 1
-              COMPOUND_STMT
-                FUN_CALL: definirQuantum
-                  VAR: definirQuantum
-                  NUM: 0
-                FUN_CALL: showLCD
-                  VAR: showLCD
-                  NUM: 4
-                ASSIGN_EXPR
-                  VAR: proxPrograma
-                  VAR: numeroPrograma
-                ASSIGN_EXPR
-                  VAR: proxPosicao
-                  ARRAY_ACCESS: posicoes
-                    VAR: posicoes
-                    VAR: iPrograma
-                FUN_CALL: definirPosicaoDoPrograma
-                  VAR: definirPosicaoDoPrograma
-                  VAR: proxPosicao
-                FUN_CALL: saveRegs
-                  VAR: saveRegs
-                FUN_CALL: atualizarMADMP
-                  VAR: atualizarMADMP
-                FUN_CALL: loadRegs
-                  VAR: loadRegs
-                FUN_CALL: trocarDeContexto
-                  VAR: trocarDeContexto
-                FUN_CALL: saveRegs
-                  VAR: saveRegs
-                FUN_CALL: atualizarMADMP
-                  VAR: atualizarMADMP
-                FUN_CALL: loadRegs
-                  VAR: loadRegs
-                ASSIGN_EXPR
-                  VAR: estadoPrograma
-                  FUN_CALL: lerReg
-                    VAR: lerReg
-                    NUM: 11
-                IF_STMT
-                  OP: EQ
-                    VAR: estadoPrograma
-                    NUM: 0
-                  COMPOUND_STMT
-                    FUN_CALL: showLCD
-                      VAR: showLCD
-                      NUM: 11
-                    FUN_CALL: output
-                      VAR: output
-                      NUM: 0
-                COMPOUND_STMT
-                  FUN_CALL: showLCD
-                    VAR: showLCD
-                    NUM: 12
-                  FUN_CALL: output
-                    VAR: output
-                    NUM: 0
-            COMPOUND_STMT
-              FUN_CALL: showLCD
-                VAR: showLCD
-                NUM: 8
-              FUN_CALL: output
-                VAR: output
-                NUM: 0
-        COMPOUND_STMT
-          ASSIGN_EXPR
-            VAR: comando
-            FUN_CALL: input
-              VAR: input
+                  VAR: numeroDeProgramas
+                  NUM: 10
+            FUN_CALL: definirProgramasParaExecutar
+              VAR: definirProgramasParaExecutar
+              VAR: programasParaExecutar
+              VAR: programas
+              VAR: tamanho
+              VAR: numeroDeProgramas
+            FUN_CALL: definirQuantum
+              VAR: definirQuantum
+              NUM: 50
+            FUN_CALL: executarProgramas
+              VAR: executarProgramas
+              VAR: programasParaExecutar
+              VAR: programas
+              VAR: posicoes
+              VAR: tamanho

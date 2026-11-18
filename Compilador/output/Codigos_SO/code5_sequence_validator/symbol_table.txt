@@ -1,26 +1,25 @@
 Hash            Name            Type            Kind            Scope           Line Numbers   
 ----            ----            ----            ----            -----           ------------   
-10              resultado       Integer         Var             main              22   62   66   70   74   77   84 
+10              resultado       Integer         Var             main              21   58   62   66   70   73   80 
 21              definirPosicaoDoPrograma Void            Func            Global             0 
 24              main            Void            Func            Global            13 
-27              aux             Integer         Var             main              17   58 
 37              definirQuantum  Void            Func            Global             0 
 43              lerBuffer       Integer         Func            Global             0 
-48              ehNaoCrescente  Integer         Var             main              20   27   50   73 
+48              ehNaoCrescente  Integer         Var             main              19   26   49   69 
 58              trocarDeContexto Void            Func            Global             0 
-67              anterior        Integer         Var             main              16   31   32   40   43   46   49   53 
-74              ehNaoDecrescente Integer         Var             main              19   26   44   69 
-77              input           Integer         Func            Global             0   31   37   58 
+67              anterior        Integer         Var             main              16   30   31   39   42   45   48   52 
+74              ehNaoDecrescente Integer         Var             main              18   25   43   65 
+77              input           Integer         Func            Global             0   30   36 
 85              definirModoES   Void            Func            Global             0 
-105             i               Integer         Var             main              14   35   36   54   54 
-117             output          Void            Func            Global             0   32   38   84 
-121             atual           Integer         Var             main              15   37   38   40   43   46   49   53 
+105             i               Integer         Var             main              14   34   35   53   53 
+117             output          Void            Func            Global             0   31   37   80 
+121             atual           Integer         Var             main              15   36   37   39   42   45   48   52 
 124             saveRegs        Void            Func            Global             0 
 137             definirNumeroDoPrograma Void            Func            Global             0 
 152             lerBufferLimpa  Void            Func            Global             0 
 177             lerReg          Integer         Func            Global             0 
 178             atualizarMADMP  Void            Func            Global             0 
-187             ehCrescente     Integer         Var             main              18   25   41   61 
+187             ehCrescente     Integer         Var             main              17   24   40   57 
 187             loadRegs        Void            Func            Global             0 
 193             showLCD         Void            Func            Global             0 
-210             ehDecrescente   Integer         Var             main              21   28   47   65 
+210             ehDecrescente   Integer         Var             main              20   27   46   61 

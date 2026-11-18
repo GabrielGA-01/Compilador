@@ -33,7 +33,6 @@ void main(void) {
     int numeros[10];
     int i;
     int totalEncontrado;
-    int leitorAuxiliar;
 
     /* 1. Read the target value first and print it */
     valorBusca = input();
@@ -46,9 +45,6 @@ void main(void) {
         output(numeros[i]);
         i = i + 1;
     }
-
-    /* Auxiliary read step after vector reading */
-    leitorAuxiliar = input();
 
     /* 3. Call the function and assign return value to a variable */
     totalEncontrado = contarOcorrencias(numeros, 10, valorBusca);

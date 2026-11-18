@@ -87,6 +87,13 @@ for source_dir in "${code_dirs[@]}"; do
     code_name="$(basename -- "$source_dir")"
     binary_file="$source_dir/binary.txt"
     padded_file="$WORK_DIR/padded_binary.txt"
+    program_number="${code_name#code}"
+    program_number="${program_number%%_*}"
+    if [[ "$program_number" == "0" ]]; then
+        block_size=1024
+    else
+        block_size=256
+    fi
     instruction_count=0
     : > "$padded_file"
 
@@ -96,8 +103,9 @@ for source_dir in "${code_dirs[@]}"; do
             exit 1
         fi
 
-        if (( instruction_count >= 360 )); then
-            printf 'Erro: %s excede o limite de 360 instruções\n' "$code_name" >&2
+        if (( instruction_count >= block_size )); then
+            printf 'Erro: %s excede o limite de %d instruções\n' \
+                "$code_name" "$block_size" >&2
             exit 1
         fi
 
@@ -113,7 +121,7 @@ for source_dir in "${code_dirs[@]}"; do
         exit 1
     fi
 
-    while (( instruction_count < 360 )); do
+    while (( instruction_count < block_size )); do
         printf '\n%032d' 0 >> "$padded_file"
         ((instruction_count += 1))
     done
@@ -126,5 +134,5 @@ for source_dir in "${code_dirs[@]}"; do
 done
 
 cp -- "$combined_file" "$SOURCE_ROOT/all_codes_binary.txt"
-printf 'Arquivo combinado gerado: %s/all_codes_binary.txt (%d códigos, 360 instruções cada).\n' \
+printf 'Arquivo combinado gerado: %s/all_codes_binary.txt (%d códigos; code0_so: 1024 instruções, demais: 256 cada).\n' \
     "$SOURCE_ROOT" "$combined_count"

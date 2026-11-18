@@ -74,9 +74,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: totalEncontrado
-    VAR_DECL
-      TYPE: INT
-      VAR: leitorAuxiliar
     ASSIGN_EXPR
       VAR: valorBusca
       FUN_CALL: input
@@ -108,10 +105,6 @@ FUN_BODY
           BINARY_OP: ADD
             VAR: i
             NUM: 1
-    ASSIGN_EXPR
-      VAR: leitorAuxiliar
-      FUN_CALL: input
-        VAR: input
     ASSIGN_EXPR
       VAR: totalEncontrado
       FUN_CALL: contarOcorrencias

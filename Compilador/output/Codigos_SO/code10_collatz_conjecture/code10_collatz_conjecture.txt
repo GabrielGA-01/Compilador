@@ -42,7 +42,6 @@ void main(void) {
     /* Variables declared strictly at the beginning of main */
     int numeroInicial;
     int totalPassos;
-    int leitorAuxiliar;
 
     /* 1. Read starting integer and echo it */
     numeroInicial = input();
@@ -54,6 +53,4 @@ void main(void) {
     /* 3. Output the total step count */
     output(totalPassos);
 
-    /* 4. Auxiliary read at the end */
-    leitorAuxiliar = input();
 }

@@ -34,7 +34,6 @@ void main(void) {
     int num1;
     int num2;
     int resultado;
-    int aux;
 
     /* Leitura da opção e dos dois números */
     opcao = input();
@@ -43,7 +42,6 @@ void main(void) {
     output(num1);
     num2 = input();
     output(num2);
-    aux = input();
 
     /* Chamada da função atribuindo o retorno a uma variável */
     resultado = calcular(opcao, num1, num2);

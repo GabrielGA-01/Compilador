@@ -138,9 +138,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: i
-    VAR_DECL
-      TYPE: INT
-      VAR: b
     ASSIGN_EXPR
       VAR: i
       NUM: 0
@@ -155,11 +152,6 @@ FUN_BODY
             VAR: i
           FUN_CALL: input
             VAR: input
-        FUN_CALL: output
-          VAR: output
-          ARRAY_ACCESS: vet
-            VAR: vet
-            VAR: i
         ASSIGN_EXPR
           VAR: i
           BINARY_OP: ADD
@@ -178,10 +170,6 @@ FUN_BODY
         VAR: i
         NUM: 10
       COMPOUND_STMT
-        ASSIGN_EXPR
-          VAR: b
-          FUN_CALL: input
-            VAR: input
         FUN_CALL: output
           VAR: output
           ARRAY_ACCESS: vet

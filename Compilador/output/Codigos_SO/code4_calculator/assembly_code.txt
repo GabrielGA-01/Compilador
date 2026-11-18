@@ -64,11 +64,6 @@ L11:
 	subi R12, R12, 1
 	subi R12, R12, 1
 	subi R12, R12, 1
-	subi R12, R12, 1
-	in R1
-	storedi R12, R1, 5
-	loaddi R1, R12, 5
-	out R1
 	in R1
 	storedi R12, R1, 4
 	loaddi R1, R12, 4
@@ -78,25 +73,27 @@ L11:
 	loaddi R1, R12, 3
 	out R1
 	in R1
-	storedi R12, R1, 1
-	loaddi R1, R12, 5
-	subi R12, R12, 1
-	storedi R12, R1, 1
-	loaddi R1, R12, 5
-	subi R12, R12, 1
-	storedi R12, R1, 1
-	loaddi R1, R12, 5
-	subi R12, R12, 1
-	storedi R12, R1, 1
-	movi R2, L19
-	subi R12, R12, 1
-	storedi R12, R2, 1
-	jmp L0
-L19:
-	loaddi R1, R12, 1
-	addi R12, R12, 1
 	storedi R12, R1, 2
 	loaddi R1, R12, 2
 	out R1
-	addi R12, R12, 5
+	loaddi R1, R12, 4
+	subi R12, R12, 1
+	storedi R12, R1, 1
+	loaddi R1, R12, 4
+	subi R12, R12, 1
+	storedi R12, R1, 1
+	loaddi R1, R12, 4
+	subi R12, R12, 1
+	storedi R12, R1, 1
+	movi R2, L18
+	subi R12, R12, 1
+	storedi R12, R2, 1
+	jmp L0
+L18:
+	loaddi R1, R12, 1
+	addi R12, R12, 1
+	storedi R12, R1, 1
+	loaddi R1, R12, 1
+	out R1
+	addi R12, R12, 4
 	halt

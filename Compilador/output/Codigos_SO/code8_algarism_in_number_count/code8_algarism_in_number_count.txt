@@ -39,7 +39,6 @@ void main(void) {
     int digito;
     int numero;
     int ocorrencias;
-    int leitorAuxiliar;
 
     /* 1. Read target digit and echo it */
     digito = input();
@@ -49,12 +48,9 @@ void main(void) {
     numero = input();
     output(numero);
 
-    /* 3. Auxiliary read at the end */
-    leitorAuxiliar = input();
-
-    /* 4. Call function and assign return value to a variable */
+    /* 3. Call function and assign return value to a variable */
     ocorrencias = contarDigito(numero, digito);
 
-    /* 5. Output the result */
+    /* 4. Output the result */
     output(ocorrencias);
 }

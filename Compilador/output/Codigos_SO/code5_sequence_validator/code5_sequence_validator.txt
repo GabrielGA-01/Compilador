@@ -14,7 +14,6 @@ void main(void) {
     int i;
     int atual;
     int anterior;
-    int aux;
     int ehCrescente;
     int ehNaoDecrescente;
     int ehNaoCrescente;
@@ -53,9 +52,6 @@ void main(void) {
         anterior = atual;
         i = i + 1;
     }
-
-    /* Leitura obrigatória para variável auxiliar após a sequência */
-    aux = input();
 
     /* Determinação do resultado conforme a classificação mais restrita */
     if (ehCrescente == 1) {

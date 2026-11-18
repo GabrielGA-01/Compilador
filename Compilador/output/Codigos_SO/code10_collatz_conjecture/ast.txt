@@ -83,9 +83,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: totalPassos
-    VAR_DECL
-      TYPE: INT
-      VAR: leitorAuxiliar
     ASSIGN_EXPR
       VAR: numeroInicial
       FUN_CALL: input
@@ -101,7 +98,3 @@ FUN_BODY
     FUN_CALL: output
       VAR: output
       VAR: totalPassos
-    ASSIGN_EXPR
-      VAR: leitorAuxiliar
-      FUN_CALL: input
-        VAR: input

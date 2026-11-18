@@ -6,23 +6,22 @@ Hash            Name            Type            Kind            Scope           
 43              lerBuffer       Integer         Func            Global             0 
 58              trocarDeContexto Void            Func            Global             0 
 62              vec             Integer         Var             contarOcorrencias    8   18 
-77              input           Integer         Func            Global             0   39   45   51 
+77              input           Integer         Func            Global             0   38   44 
 85              definirModoES   Void            Func            Global             0 
 90              target          Integer         Var             contarOcorrencias    8   20 
 102             elementoAtual   Integer         Var             contarOcorrencias   12   18   20 
-105             i               Integer         Var             main              34   43   44   45   46   47   47 
+105             i               Integer         Var             main              34   42   43   44   45   46   46 
 105             i               Integer         Var             contarOcorrencias   10   15   17   18   24   24 
-117             output          Void            Func            Global             0   40   46   57 
+117             output          Void            Func            Global             0   39   45   53 
 124             saveRegs        Void            Func            Global             0 
 137             contador        Integer         Var             contarOcorrencias   11   14   21   21   27 
 137             definirNumeroDoPrograma Void            Func            Global             0 
-143             leitorAuxiliar  Integer         Var             main              36   51 
 152             lerBufferLimpa  Void            Func            Global             0 
-168             contarOcorrencias Integer         Func            Global             8   54 
-171             numeros         Integer         Var             main              33   45   46   54 
-174             valorBusca      Integer         Var             main              32   39   40   54 
+168             contarOcorrencias Integer         Func            Global             8   50 
+171             numeros         Integer         Var             main              33   44   45   50 
+174             valorBusca      Integer         Var             main              32   38   39   50 
 177             lerReg          Integer         Func            Global             0 
-178             totalEncontrado Integer         Var             main              35   54   57 
+178             totalEncontrado Integer         Var             main              35   50   53 
 178             atualizarMADMP  Void            Func            Global             0 
 187             loadRegs        Void            Func            Global             0 
 190             tamanho         Integer         Var             contarOcorrencias    8   17 

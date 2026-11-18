@@ -1,11 +1,140 @@
-void main(void){
-    int programas[10];
-    int posicoes[10];
+int encontrarIndice(int vetor[], int tamanho, int valorBuscado){
+    int i;
+    int indiceFinal;
 
-    int comando;
+    i = 0;
+    indiceFinal = 0 - 1;
+
+    /* Busca pelo vetor */
+    while(i < tamanho){
+        if(vetor[i] == valorBuscado){
+            indiceFinal = i;
+        } 
+        i = i + 1;
+    }
+
+    return(indiceFinal);
+}
+
+void definirProgramasParaExecutar(int vetorProgramasParaExecutar[], int vetorProgramas[], int tamanho, int quantidade){
     int numeroPrograma;
     int iPrograma;
-    
+    int indice;
+
+    indice = 0;
+
+    while(indice < quantidade){
+        if(quantidade == 1){
+            showLCD(1); /* Digite o numero do programa */
+        }
+        else if(quantidade > 1){
+            showLCD(3); /* Digite os numeros dos programas */
+        }
+
+        numeroPrograma = input();
+        definirNumeroDoPrograma(numeroPrograma);
+        iPrograma = encontrarIndice(vetorProgramas, tamanho, numeroPrograma);
+
+        while(iPrograma == 0 - 1){
+            showLCD(8); /* P[] nao encontrado */
+            output(0);
+
+            if(quantidade == 1){
+                showLCD(1); /* Digite o numero do programa */
+            }
+            else if(quantidade > 1){
+                showLCD(3); /* Digite os numeros dos programas */
+            }
+
+            numeroPrograma = input();
+            definirNumeroDoPrograma(numeroPrograma);
+            iPrograma = encontrarIndice(vetorProgramas, tamanho, numeroPrograma);
+        }
+
+        vetorProgramasParaExecutar[indice] = iPrograma;
+        indice = indice + 1;
+    }
+}
+
+void executarProgramas(int vetorProgramasParaExecutar[], int vetorProgramas[], int vetorPosicoes[], int tamanho){
+    int proxPrograma;
+    int proxPosicao;
+
+    int estadoPrograma;
+
+    int iPrograma;
+    int indiceAtual;
+
+    int programasAtivos;
+    int i;
+
+    int aux;
+
+    indiceAtual = 0;
+    programasAtivos = 1; /* Apenas para executar o laco ao menos uma vez */
+
+    iPrograma = vetorProgramasParaExecutar[indiceAtual];
+
+    while(programasAtivos != 0){
+        if(iPrograma != 0 - 1){
+            proxPrograma = vetorProgramas[iPrograma];
+            proxPosicao = vetorPosicoes[iPrograma];
+
+            definirNumeroDoPrograma(proxPrograma);      /* Escreve em R11 */
+            showLCD(4);                                 /* Executando P[] */
+            definirPosicaoDoPrograma(proxPosicao);      /* Prepara o buffer do BR */
+
+            /* Troca de contexto */
+            /* Ida para o programa */
+            saveRegs();
+            atualizarMADMP();
+            loadRegs();
+            trocarDeContexto();
+
+            /* Retorno do programa */
+            saveRegs();
+            atualizarMADMP();
+            loadRegs();
+
+            estadoPrograma = lerReg(11);
+            if(estadoPrograma == 0){
+                definirNumeroDoPrograma(proxPrograma);              /* Escreve em R11 */
+                vetorProgramasParaExecutar[indiceAtual] = 0 - 1;    /* Programa terminou */
+                showLCD(11);                                        /* P[] chegou ao fim */
+                aux = input();                                      /* Delay */
+                definirNumeroDoPrograma(0);
+            }
+        }
+
+        indiceAtual = indiceAtual + 1;
+        if(indiceAtual > 9){
+            indiceAtual = 0;
+        }
+
+        iPrograma = vetorProgramasParaExecutar[indiceAtual];
+
+        programasAtivos = 0;
+        i = 0;
+        while(i < tamanho){
+            if(vetorProgramasParaExecutar[i] != 0 - 1){
+                programasAtivos = programasAtivos + 1;
+            }
+            i = i + 1;
+        }
+    }
+}
+
+void main(void){
+    int programas[10];             /* Numero dos programas */
+    int posicoes[10];              /* Posicoes dos programas */
+    int programasParaExecutar[10]; /* Contem os indices que devem ser executados */
+    int tamanho;
+
+    int comando;                   /* O que o usuario quer fazer */
+
+    int numeroDeProgramas;
+    int iPrograma;
+
     int proxPrograma;
     int proxPosicao;
 
@@ -13,11 +142,14 @@ void main(void){
 
     int i;
 
+    tamanho = 10;
+
     /* inicializando os valores */
     i = 0;
     while(i < 10){
         programas[i] = i + 1;
         posicoes[i] = i + 1;
+        programasParaExecutar[i] = 0 - 1;
         i = i + 1;
     }
 
@@ -26,56 +158,20 @@ void main(void){
         comando = input();
 
         if(comando == 0){
-            showLCD(1);
-            numeroPrograma = input();
+            definirProgramasParaExecutar(programasParaExecutar, programas, tamanho, 1);
             
-            /* Busca pelo programa */
-            i = 0;
-            iPrograma = 0 - 1;
-            while(i < 10){
-                if(programas[i] == numeroPrograma){
-                    iPrograma = i;
-                } 
-                i = i + 1;
-            }
-
-            definirNumeroDoPrograma(numeroPrograma);
-            if(iPrograma != 0 - 1){
-                definirQuantum(0); /* Quantum infinito */
-                showLCD(4); /* Executando P[] */
-                proxPrograma = numeroPrograma;
-                proxPosicao = posicoes[iPrograma];
-
-                /* Troca de contexto */
-                definirPosicaoDoPrograma(proxPosicao);
-                saveRegs();
-                atualizarMADMP();
-                loadRegs();
-                trocarDeContexto();
-
-                /* Retorno do programa */
-                saveRegs();
-                atualizarMADMP();
-                loadRegs();
-                
-                estadoPrograma = lerReg(11);
-                if(estadoPrograma == 0){
-                    showLCD(11); /* P[] chegou ao fim */
-                    output(0);
-                }
-                else{
-                    showLCD(12); /* Erro fatal - Nao deve ocorrer */
-                    output(0);
-                }
-            }
-            /* Caso nao encontre */
-            else{
-                showLCD(8); /* P[] nao encontrado */
-                output(0);
-            }
+            definirQuantum(0); /* Quantum infinito */
+            executarProgramas(programasParaExecutar, programas, posicoes, tamanho);
         }
-        else{
-            comando = input();
+        else if(comando == 1){
+            showLCD(2); /* Digite quantos programas */
+            numeroDeProgramas = input();
+            if(numeroDeProgramas > 10){
+                numeroDeProgramas = 10;
+            }
+            definirProgramasParaExecutar(programasParaExecutar, programas, tamanho, numeroDeProgramas);
+            definirQuantum(50);
+            executarProgramas(programasParaExecutar, programas, posicoes, tamanho);
         }
     }
 }

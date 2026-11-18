@@ -85,9 +85,6 @@ FUN_BODY
     VAR_DECL
       TYPE: INT
       VAR: resultado
-    VAR_DECL
-      TYPE: INT
-      VAR: aux
     ASSIGN_EXPR
       VAR: opcao
       FUN_CALL: input
@@ -109,10 +106,6 @@ FUN_BODY
     FUN_CALL: output
       VAR: output
       VAR: num2
-    ASSIGN_EXPR
-      VAR: aux
-      FUN_CALL: input
-        VAR: input
     ASSIGN_EXPR
       VAR: resultado
       FUN_CALL: calcular
